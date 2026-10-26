@@ -511,6 +511,7 @@ export class Tooltip implements TooltipGroupMember {
       const side = sideOf(change.connectionPair);
       this.resolvedSide.set(side);
       this.overlayRef?.overlayElement.setAttribute('data-side', side);
+      this.snapToPixels();
     });
     this.positionStrategy = strategy;
     this.overlayRef = createOverlayRef(this.injector, {
@@ -528,6 +529,26 @@ export class Tooltip implements TooltipGroupMember {
     if (this.appliedPaneClass.length) this.overlayRef.removePanelClass(this.appliedPaneClass);
     if (next.length) this.overlayRef.addPanelClass(next);
     this.appliedPaneClass = next;
+  }
+
+  /** Lands the bubble where Floating UI puts React's.
+   *  - CDK writes a right-anchored pane's `right` from the root's clientWidth,
+   *    which under `html { scrollbar-gutter: stable }` includes the gutter the
+   *    pane's bounding box stops short of: side="left" lands one gutter too
+   *    far left. The difference moves it back.
+   *  - Floating UI rounds its translate to device pixels; the CDK pane keeps
+   *    fractions (a centered pane). Shifting by the remainder lands the bubble
+   *    on the same whole pixels, so its text renders as crisp as React's. */
+  private snapToPixels() {
+    const outer = this.outer;
+    const pane = this.overlayRef?.overlayElement;
+    if (!outer || !pane) return;
+    const box = pane.parentElement;
+    const gutter = pane.style.right && box ? this.document.documentElement.clientWidth - box.clientWidth : 0;
+    const { x, y } = pane.getBoundingClientRect();
+    const dpr = this.document.defaultView?.devicePixelRatio || 1;
+    const remainder = (v: number) => Math.round(v * dpr) / dpr - v;
+    outer.style.translate = `${gutter + remainder(x + gutter)}px ${remainder(y)}px`;
   }
 
   private setFollowOffset(offset: number) {
@@ -588,11 +609,11 @@ export class Tooltip implements TooltipGroupMember {
     this.exiting = true;
     const box = this.box;
     if (box) {
-      const slide = getSlideOffset(this.side());
       this.animation?.stop();
-      // Both targets name x and y, so the exit is one animation whose end
-      // releases the unmount below.
-      const animation = this.animate(box, { opacity: 0, x: slide.x, y: slide.y }, exitTransition(spring.fast));
+      // The exit only fades (the docs' Radix flavour animates to x/y 0, so a
+      // finished entrance stays put); both targets still name x and y, so the
+      // exit is one animation whose end releases the unmount below.
+      const animation = this.animate(box, { opacity: 0, x: 0, y: 0 }, exitTransition(spring.fast));
       this.animation = animation;
       animation.finished.then(() => {
         if (this.exiting && this.animation === animation) this.detach();

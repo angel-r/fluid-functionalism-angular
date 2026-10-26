@@ -35,6 +35,8 @@ import {
   pixelToValue,
   toStyleMap,
   toValueArray,
+  radixRangeInsets,
+  radixThumbLeft,
   valueToPixel,
   type HoverPreview,
   type SliderStyle,
@@ -71,8 +73,8 @@ const optionalBoolean = (v: unknown) => booleanAttribute(v);
           ffSliderValueDisplay
           [values]="values()"
           [editingIndex]="editingIndex()"
-          [min]="min()"
-          [max]="max()"
+          [min]="minValue()"
+          [max]="maxValue()"
           [step]="step()"
           [stepValues]="stepValues()"
           [formatValue]="formatValue()"
@@ -119,14 +121,23 @@ const optionalBoolean = (v: unknown) => booleanAttribute(v);
       <!-- Invisible ARIA slider. With a steps list it runs on indices
            (0..n-1, step 1), so arrow keys walk the list; aria-valuenow is then
            an index, so each thumb also announces the formatted value. -->
-      <div
+      <span
+        dir="ltr"
+        data-orientation="horizontal"
         class="absolute inset-0 opacity-0 pointer-events-none"
+        style="--radix-slider-thumb-transform: translateX(-50%)"
         [style.height.px]="thumbSize"
+        [attr.aria-disabled]="disabled()"
         [attr.data-disabled]="disabled() ? '' : null"
       >
-        <div class="w-full h-full relative">
-          <div class="w-full h-full"><div></div></div>
-          @for (i of thumbIndexes(); track i) {
+        <span data-orientation="horizontal" class="w-full h-full">
+          <span data-orientation="horizontal" [style.left]="ariaRange().left" [style.right]="ariaRange().right"></span>
+        </span>
+        @for (i of thumbIndexes(); track i) {
+          <span
+            style="transform: var(--radix-slider-thumb-transform); position: absolute"
+            [style.left]="ariaThumbLeft(i)"
+          >
             <span
               ffSliderThumb
               class="block outline-none"
@@ -144,9 +155,9 @@ const optionalBoolean = (v: unknown) => booleanAttribute(v);
               (valueCommit)="onThumbCommit(i, $event)"
               (focusVisibleChange)="onThumbFocus(i, $event)"
             ></span>
-          }
-        </div>
-      </div>
+          </span>
+        }
+      </span>
 
       <!-- Visual track with pointer handlers. py-2 adds 8px above and below
            the 20px thumb row, so the press target is 36px tall. -->
@@ -323,6 +334,11 @@ export class SliderCompact {
   });
   protected readonly ariaMin = computed(() => (this.stepValues() ? 0 : this.minValue()));
   protected readonly ariaMax = computed(() => (this.stepValues() ? this.stepValues()!.length - 1 : this.maxValue()));
+  /** The hidden range span and thumb wrappers, placed as Radix Slider places them. */
+  protected readonly ariaRange = computed(() => radixRangeInsets(this.ariaValues(), this.ariaMin(), this.ariaMax()));
+  protected ariaThumbLeft(i: number): string {
+    return radixThumbLeft(this.ariaValues()[i], this.ariaMin(), this.ariaMax(), this.thumbSize);
+  }
   protected readonly ariaStep = computed(() => (this.stepValues() ? 1 : this.step()));
 
   // --- State ---

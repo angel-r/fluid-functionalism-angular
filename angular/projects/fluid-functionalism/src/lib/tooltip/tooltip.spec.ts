@@ -10,6 +10,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, vi } from 'vitest';
 import { ShapeProvider } from '../core/shape';
+import { ReducedMotion } from '../core/environment';
 import { Tooltip, TooltipProvider, type TooltipSide } from './tooltip';
 
 @Component({
@@ -120,6 +121,51 @@ describe('Tooltip: forced open (ported from tests/omit.test.tsx)', () => {
     expect(trigger.textContent).toContain('Share');
     expect(document.body.textContent).toContain('Copy link');
     expect(popup()).not.toBeNull();
+  });
+});
+
+describe('Tooltip: position', () => {
+  it('lands on whole device pixels, as Floating UI rounds its translate', () => {
+    const original = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      if (this.classList.contains('cdk-overlay-pane')) {
+        return { x: 772.836, y: 400.3, left: 772.836, top: 400.3, width: 124, height: 25, right: 896.836, bottom: 425.3, toJSON() {} } as DOMRect;
+      }
+      return original.call(this);
+    };
+    try {
+      const { popup } = setup((h) => h.forceOpen.set(true));
+      const [dx, dy] = popup()!.style.translate.split(' ').map((v) => parseFloat(v));
+      expect(dx).toBeCloseTo(0.164, 3);
+      expect(dy).toBeCloseTo(-0.3, 3);
+    } finally {
+      Element.prototype.getBoundingClientRect = original;
+    }
+  });
+});
+
+describe('Tooltip: position under a scrollbar gutter', () => {
+  it('shifts a right-anchored pane (side="left") back by the gutter CDK counts as viewport', () => {
+    // html { scrollbar-gutter: stable }: the root reports the full width while
+    // the pane's bounding box stops at the gutter, so CDK's `right` is off by it.
+    const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth')!;
+    Object.defineProperty(Element.prototype, 'clientWidth', {
+      configurable: true,
+      get(this: Element) {
+        return this.classList.contains('cdk-overlay-connected-position-bounding-box') ? 1014 : descriptor.get!.call(this);
+      },
+    });
+    try {
+      const { popup } = setup((h) => {
+        h.side.set('left');
+        h.forceOpen.set(true);
+      });
+      expect(popup()!.parentElement!.style.right).not.toBe('');
+      const [dx] = popup()!.style.translate.split(' ').map((v) => parseFloat(v));
+      expect(dx).toBeCloseTo(10, 3);
+    } finally {
+      Object.defineProperty(Element.prototype, 'clientWidth', descriptor);
+    }
   });
 });
 
@@ -272,6 +318,23 @@ describe('Tooltip: forceOpen and openChange', () => {
     expect(popup()).not.toBeNull();
     flush(EXIT_FALLBACK_MS);
     expect(popup()).toBeNull();
+  });
+
+  it('the exit only fades: it does not slide back (the docs Radix flavour)', async () => {
+    // Reduced motion makes the slide part of an animation jump synchronously,
+    // so its target is observable; the fade still runs.
+    TestBed.configureTestingModule({
+      providers: [{ provide: ReducedMotion, useValue: { value: signal(true).asReadonly() } }],
+    });
+    const { host, flush, box } = setup((h) => {
+      h.side.set('left');
+      h.forceOpen.set(true);
+    });
+    const b = box()!;
+    host.forceOpen.set(false);
+    flush();
+    await new Promise((r) => requestAnimationFrame(() => r(null)));
+    expect(b.style.transform === '' || b.style.transform === 'none').toBe(true);
   });
 });
 

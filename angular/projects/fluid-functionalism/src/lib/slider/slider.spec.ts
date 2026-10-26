@@ -142,6 +142,51 @@ describe('Slider: engine routing (tests/omit.test.tsx)', () => {
   });
 });
 
+describe('Slider: hidden primitive mirrors Radix Slider boxes', () => {
+  const parts = (root: HTMLElement) => {
+    const thumb = root.querySelector<HTMLElement>('[role="slider"]')!;
+    const wrapper = thumb.parentElement!;
+    const primitive = wrapper.parentElement!;
+    const range = primitive.firstElementChild!.firstElementChild as HTMLElement;
+    return { thumb, wrapper, primitive, range };
+  };
+
+  it('compact: span root > span track > span range, thumb in a wrapper offset to stay in bounds', () => {
+    const { root } = setup((h) => {
+      h.size.set('compact');
+      h.value.set(25);
+    });
+    const { thumb, wrapper, primitive, range } = parts(root());
+    expect(primitive.tagName).toBe('SPAN');
+    expect(primitive.classList.contains('opacity-0')).toBe(true);
+    expect(primitive.style.getPropertyValue('--radix-slider-thumb-transform')).toBe('translateX(-50%)');
+    expect(primitive.firstElementChild!.tagName).toBe('SPAN');
+    expect(range.style.left).toBe('0%');
+    expect(range.style.right).toBe('75%');
+    expect(wrapper.tagName).toBe('SPAN');
+    expect(wrapper.style.position).toBe('absolute');
+    expect(wrapper.style.transform).toBe('var(--radix-slider-thumb-transform)');
+    expect(wrapper.style.left).toBe('calc(25% + 5px)');
+    expect(thumb.style.position).toBe('');
+  });
+
+  it('range: the range span runs between the two thumbs', () => {
+    const { root } = setup((h) => h.value.set([20, 60]));
+    const { range } = parts(root());
+    expect(range.style.left).toBe('20%');
+    expect(range.style.right).toBe('40%');
+  });
+
+  it('comfortable: a block host and an unsized thumb with no in-bounds offset', () => {
+    const { root } = setup((h) => h.value.set(50));
+    const host = root().querySelector<HTMLElement>('ff-slider-comfortable')!;
+    expect(getComputedStyle(host).display).toBe('block');
+    const { wrapper, primitive } = parts(root());
+    expect(primitive.tagName).toBe('SPAN');
+    expect(wrapper.style.left).toBe('calc(50% + 0px)');
+  });
+});
+
 describe('Slider (compact): the ARIA slider pattern', () => {
   it('exposes role, value range, orientation and the label', () => {
     const { thumbs } = setup((h) => {
@@ -262,6 +307,17 @@ describe('Slider (compact): discrete steps', () => {
     expect(host.value()).toBe(0.1);
     // One dot per list entry.
     expect(root().querySelectorAll('[data-slot="slider-step-dot"]')).toHaveLength(5);
+  });
+
+  it('the value ghost reserves the width of the list maximum, not the max prop', () => {
+    const { root } = setup((h) => {
+      h.value.set(0.7);
+      h.steps.set(RATINGS);
+      h.label.set('Rating');
+      h.formatValue.set((v) => `${v} A`);
+    });
+    const ghost = root().querySelector('.invisible.whitespace-nowrap');
+    expect(ghost?.textContent?.trim()).toBe('Rating: 1.3 A');
   });
 
   it('draws one dot per grid step with showSteps', () => {

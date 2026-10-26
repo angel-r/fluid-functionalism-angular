@@ -116,6 +116,11 @@ describe('ScrollArea: desktop structure', () => {
     expect(sizer.querySelector('[data-testid="row"]')).not.toBeNull();
   });
 
+  it('is a block box like the React root div, so its height classes apply in any parent', () => {
+    const { root } = setup();
+    expect(root.classList).toContain('block');
+  });
+
   it('keeps the popup viewport sizing classes', () => {
     const { viewport } = setup((h) => h.viewportClass.set(popupViewportClass));
     expect(viewport().className).toContain('max-h-[inherit]');

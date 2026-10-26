@@ -1,4 +1,4 @@
-import { Directive, ElementRef, booleanAttribute, computed, inject, input, numberAttribute, output } from '@angular/core';
+import { Directive, ElementRef, booleanAttribute, inject, input, numberAttribute, output } from '@angular/core';
 import { keyboardTarget } from './slider-math';
 
 /**
@@ -18,7 +18,6 @@ import { keyboardTarget } from './slider-math';
   selector: '[ffSliderThumb]',
   host: {
     role: 'slider',
-    style: 'position: absolute; top: 0; translate: -50% 0',
     'aria-orientation': 'horizontal',
     'data-orientation': 'horizontal',
     '[attr.tabindex]': 'disabled() ? null : 0',
@@ -29,7 +28,6 @@ import { keyboardTarget } from './slider-math';
     '[attr.aria-label]': 'label() ?? null',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.data-disabled]': 'disabled() ? "" : null',
-    '[style.left.%]': 'percent()',
     '(keydown)': 'onKeydown($event)',
     '(focus)': 'onFocus()',
     '(blur)': 'focusVisibleChange.emit(false)',
@@ -52,12 +50,6 @@ export class SliderThumb {
   readonly focusVisibleChange = output<boolean>();
 
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-
-  /** Where the invisible thumb sits, so focus scrolling lands on the value. */
-  protected readonly percent = computed(() => {
-    const span = this.max() - this.min();
-    return span === 0 ? 0 : ((this.value() - this.min()) / span) * 100;
-  });
 
   protected onKeydown(event: KeyboardEvent) {
     if (this.disabled()) return;

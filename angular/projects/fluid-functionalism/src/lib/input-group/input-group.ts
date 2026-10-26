@@ -74,16 +74,12 @@ let nextId = 0;
 
     <div data-slot="input-container" [class]="containerClass()" (mousedown)="onContainerMousedown($event)">
       <!-- The icon wakes with the field: muted → foreground and stroke
-           1.5 → 2 over 80ms. The wrapper carries both, so the svg itself stays
-           mounted and the CSS transition runs. -->
-      @if (icon()) {
-        <span data-slot="input-icon" [class]="iconClass()">
-          @if (iconName(); as name) {
-            <ff-icon [name]="name" [size]="sizeClasses().icon" [strokeWidth]="1.5" class="shrink-0 transition-[color,stroke-width] duration-80" />
-          } @else {
-            <ff-icon [icon]="iconDefinition()" [size]="sizeClasses().icon" [strokeWidth]="1.5" class="shrink-0 transition-[color,stroke-width] duration-80" />
-          }
-        </span>
+           1.5 → 2 over 80ms. ff-icon updates the same <svg> in place, so the
+           CSS transition runs. -->
+      @if (iconName(); as name) {
+        <ff-icon [name]="name" [size]="sizeClasses().icon" [strokeWidth]="iconStroke()" [class]="iconClass()" />
+      } @else if (icon()) {
+        <ff-icon [icon]="iconDefinition()" [size]="sizeClasses().icon" [strokeWidth]="iconStroke()" [class]="iconClass()" />
       }
       <input
         #control
@@ -234,10 +230,11 @@ export class InputField {
     );
   });
 
+  protected readonly iconStroke = computed(() => (this.labelActive() ? 2 : 1.5));
   protected readonly iconClass = computed(() =>
     cn(
-      'flex shrink-0',
-      this.labelActive() ? 'text-foreground [&_svg]:[stroke-width:2]' : 'text-muted-foreground [&_svg]:[stroke-width:1.5]',
+      'shrink-0 transition-[color,stroke-width] duration-80',
+      this.labelActive() ? 'text-foreground' : 'text-muted-foreground',
     ),
   );
 
