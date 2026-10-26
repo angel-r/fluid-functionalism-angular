@@ -1,2 +1,10 @@
-// Placeholder: the accordion port lands here.
-export {};
+export {
+  Accordion,
+  AccordionContent,
+  AccordionGroup,
+  AccordionItem,
+  AccordionRoot,
+  AccordionTrigger,
+  type AccordionHighlight,
+  type AccordionType,
+} from './accordion';

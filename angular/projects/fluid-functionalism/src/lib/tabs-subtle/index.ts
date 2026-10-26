@@ -1,2 +1,1 @@
-// Placeholder: the tabs subtle port lands here.
-export {};
+export { TabsSubtle, TabsSubtleItem, TabsSubtlePanel } from './tabs-subtle';
