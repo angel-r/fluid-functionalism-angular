@@ -91,7 +91,7 @@ export default class AccordionDemo {
     {
       value: 'item-3',
       title: 'Accessibility',
-      body: 'Disclosure buttons with WAI-ARIA attributes, keyboard navigation between triggers, and focus management.',
+      body: 'Built on Radix UI or Base UI Accordion (your pick) with WAI-ARIA attributes, keyboard navigation, and focus management.',
     },
     {
       value: 'item-4',

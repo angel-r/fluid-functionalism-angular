@@ -233,7 +233,8 @@ describe('Accordion: height animation and exit', () => {
     // jsdom has no layout: give the panel bodies a measurable height.
     vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(40);
     const { fixture, triggers, panels, settle } = await render(GroupHost);
-    const motion = (i: number) => panels()[i].firstElementChild as HTMLElement;
+    // As in React, the region itself is the clipping motion element.
+    const motion = (i: number) => panels()[i];
     expect(motion(1).style.height).toBe('0px');
     expect(motion(0).style.height).toBe('40px');
     expect(motion(1).classList.contains('overflow-hidden')).toBe(true);
@@ -295,7 +296,7 @@ describe('Accordion: trigger label', () => {
     await settle();
     expect(triggers()[0].classList.contains('py-1')).toBe(true);
     expect(triggers()[0].classList.contains('px-2.5')).toBe(true);
-    const measure = panels()[0].firstElementChild!.firstElementChild as HTMLElement;
+    const measure = panels()[0].firstElementChild as HTMLElement;
     expect(measure.classList.contains('pb-2.5')).toBe(true);
   });
 
@@ -304,7 +305,7 @@ describe('Accordion: trigger label', () => {
     expect(triggers()[0].classList.contains('px-6')).toBe(true);
     expect(triggers()[0].classList.contains('px-3')).toBe(false);
     expect(triggers()[0].className).toContain('focus-visible:ring-1');
-    expect((panels()[0].firstElementChild as HTMLElement).classList.contains('text-red-500')).toBe(true);
+    expect(panels()[0].classList.contains('text-red-500')).toBe(true);
   });
 });
 

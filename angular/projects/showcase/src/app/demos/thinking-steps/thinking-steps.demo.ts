@@ -88,6 +88,10 @@ abstract class SequencedDemo {
     });
 
     afterNextRender(() => {
+      // The host is display: contents; the stage it sits in plays the docs'
+      // preview frame: it anchors the control and is what must be in view.
+      const stage = host.parentElement ?? host;
+      stage.style.position = 'relative';
       if (typeof IntersectionObserver === 'undefined') return;
       const observer = new IntersectionObserver(
         ([entry]) => {
@@ -100,7 +104,7 @@ abstract class SequencedDemo {
         },
         { threshold: [0.1, 0.5] },
       );
-      observer.observe(host);
+      observer.observe(stage);
       destroyRef.onDestroy(() => observer.disconnect());
     });
   }
@@ -129,18 +133,25 @@ abstract class SequencedDemo {
   }
 }
 
+// The docs keep this control in the preview header, outside the stage: here
+// it is pinned to the stage's corner so the steps lay out as in the docs.
 const CONTROL = `
-  <div class="flex w-full justify-end">
-    <button ffButton variant="tertiary" size="compact" [leadingIcon]="controlIcon()" (click)="togglePlayback()">
-      {{ controlLabel() }}
-    </button>
-  </div>
+  <button
+    ffButton
+    variant="tertiary"
+    size="compact"
+    class="absolute right-3 top-3"
+    [leadingIcon]="controlIcon()"
+    (click)="togglePlayback()"
+  >
+    {{ controlLabel() }}
+  </button>
 `;
 
 @Component({
   selector: 'app-thinking-steps-streaming',
   imports: [...CORE, ThinkingStepSources, ThinkingStepSource, Button],
-  host: { class: 'flex w-full flex-col items-center gap-4' },
+  host: { style: 'display: contents' },
   template: `
     ${CONTROL}
     @for (k of [runKey()]; track k) {
@@ -219,7 +230,7 @@ class StreamingDescription {
 @Component({
   selector: 'app-thinking-steps-streaming-text',
   imports: [...CORE, Button, StreamingDescription],
-  host: { class: 'flex w-full flex-col items-center gap-4' },
+  host: { style: 'display: contents' },
   template: `
     ${CONTROL}
     @for (k of [runKey()]; track k) {
@@ -258,7 +269,7 @@ class StreamingTextDemo extends SequencedDemo {
 @Component({
   selector: 'app-thinking-steps-images',
   imports: [...CORE, ThinkingStepImage, Button],
-  host: { class: 'flex w-full flex-col items-center gap-4' },
+  host: { style: 'display: contents' },
   template: `
     ${CONTROL}
     @for (k of [runKey()]; track k) {
@@ -292,7 +303,7 @@ class WithImagesDemo extends SequencedDemo {
 @Component({
   selector: 'app-thinking-steps-full',
   imports: [...CORE, ThinkingStepSources, ThinkingStepSource, ThinkingStepImage, ThinkingStepDetails, Button],
-  host: { class: 'flex w-full flex-col items-center gap-4' },
+  host: { style: 'display: contents' },
   template: `
     ${CONTROL}
     @for (k of [runKey()]; track k) {

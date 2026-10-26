@@ -126,6 +126,26 @@ describe('Tabs: selection', () => {
     expect(host.indexChanges).toEqual([2]);
   });
 
+  it('a main-button press selects at once, before the click (as Radix and Base UI do)', async () => {
+    const { tabs, selected, host, settle } = await setup();
+    tabs()[2].dispatchEvent(new MouseEvent('mousedown', { button: 0, bubbles: true, cancelable: true }));
+    await settle();
+    expect(selected()).toEqual([false, false, true, false]);
+    expect(host.valueChanges).toEqual(['favorites']);
+    // The click that ends the press does not report the value again.
+    tabs()[2].click();
+    await settle();
+    expect(host.valueChanges).toEqual(['favorites']);
+  });
+
+  it('a secondary or ctrl press does not select', async () => {
+    const { tabs, selected, settle } = await setup();
+    tabs()[2].dispatchEvent(new MouseEvent('mousedown', { button: 2, bubbles: true, cancelable: true }));
+    tabs()[3].dispatchEvent(new MouseEvent('mousedown', { button: 0, ctrlKey: true, bubbles: true, cancelable: true }));
+    await settle();
+    expect(selected()).toEqual([true, false, false, false]);
+  });
+
   it('controlled by value: follows the parent, two-way', async () => {
     const { tabs, selected, host, settle } = await setup((h) => h.value.set('recents'));
     expect(selected()).toEqual([false, true, false, false]);
