@@ -1,2 +1,1 @@
-// Placeholder: the input group port lands here.
-export {};
+export { InputGroup, InputField } from './input-group';
