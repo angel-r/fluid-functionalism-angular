@@ -34,6 +34,7 @@ import {
 import { TemplatePortal } from '@angular/cdk/portal';
 import { animate } from 'motion';
 import { cn } from '../core/utils';
+import { fitToOverlayBox } from '../core/overlay';
 import { Icon } from '../core/icon';
 import { shapeMap } from '../core/shape';
 import { injectSize } from '../core/size';
@@ -197,11 +198,13 @@ export class ComboboxContent {
 
   private ensureOverlay(anchor: HTMLElement): OverlayRef {
     if (this.overlayRef) return this.overlayRef;
-    const strategy = createFlexibleConnectedPositionStrategy(this.injector, anchor)
-      .withPositions(untracked(() => this.positions()))
-      .withFlexibleDimensions(false)
-      .withPush(true)
-      .withViewportMargin(VIEWPORT_MARGIN);
+    const strategy = fitToOverlayBox(
+      createFlexibleConnectedPositionStrategy(this.injector, anchor)
+        .withPositions(untracked(() => this.positions()))
+        .withFlexibleDimensions(false)
+        .withPush(true)
+        .withViewportMargin(VIEWPORT_MARGIN),
+    );
     strategy.positionChanges.subscribe((change) => {
       this.resolvedSide = sideOf(change.connectionPair);
       this.overlayRef?.overlayElement.setAttribute('data-side', this.resolvedSide);
@@ -616,7 +619,7 @@ export class ComboboxItem {
   // the ScrollArea can inherit it.
   host: { style: 'display: contents; max-height: inherit' },
   template: `
-    <ff-scroll-area [class]="scrollAreaClass" [viewportClass]="viewportClass">
+    <ff-scroll-area [class]="scrollAreaClass" [viewportClass]="viewportClass" thumbSizing="track">
       <div
         #list
         role="listbox"

@@ -7,6 +7,7 @@ import {
   createRepositionScrollStrategy,
 } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { fitToOverlayBox } from '../core/overlay';
 import { exitFallbackMs } from '../core/springs';
 import { type FluidAnimation, type SpringTier, enterTransition, exitTransition, type injectAnimateFluid } from '../core/motion';
 
@@ -68,14 +69,16 @@ export class PopupOverlay {
     if (this.overlayRef) return this.overlayRef;
     const { injector, sideOffset } = this.options;
     const container = this.options.portalContainer();
-    const strategy = createFlexibleConnectedPositionStrategy(injector, this.options.origin())
-      .withPositions([
-        { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: sideOffset },
-        { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -sideOffset },
-      ])
-      .withFlexibleDimensions(false)
-      .withPush(true)
-      .withViewportMargin(8);
+    const strategy = fitToOverlayBox(
+      createFlexibleConnectedPositionStrategy(injector, this.options.origin())
+        .withPositions([
+          { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: sideOffset },
+          { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -sideOffset },
+        ])
+        .withFlexibleDimensions(false)
+        .withPush(true)
+        .withViewportMargin(8),
+    );
     if (container) strategy.withPopoverLocation({ type: 'parent', element: container });
     strategy.positionChanges.subscribe((change) => {
       const side = change.connectionPair.originY === 'top' ? 'top' : 'bottom';

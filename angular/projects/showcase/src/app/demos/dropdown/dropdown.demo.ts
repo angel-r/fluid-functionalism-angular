@@ -173,6 +173,25 @@ const toggled = <T,>(list: readonly T[], item: T) =>
         </ff-dropdown-menu>
       </app-demo-section>
 
+      <app-demo-section title="Alignment">
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost">Align end</button>
+          <ff-dropdown-content align="end">
+            @for (item of items; track item.label; let i = $index) {
+              <ff-menu-item [index]="i" [icon]="item.icon" [label]="item.label" />
+            }
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost">Side left</button>
+          <ff-dropdown-content side="left">
+            @for (item of items; track item.label; let i = $index) {
+              <ff-menu-item [index]="i" [icon]="item.icon" [label]="item.label" />
+            }
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
+      </app-demo-section>
+
       <app-demo-section title="Submenus">
         <ff-dropdown-menu>
           <button ffButton ffDropdownTrigger variant="ghost">Q3 report.pdf</button>

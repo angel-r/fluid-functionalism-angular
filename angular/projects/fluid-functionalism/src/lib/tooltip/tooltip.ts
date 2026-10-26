@@ -32,6 +32,7 @@ import {
 } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { cn } from '../core/utils';
+import { fitToOverlayBox } from '../core/overlay';
 import { exitFallbackMs, spring } from '../core/springs';
 import { fontWeights } from '../core/font-weight';
 import { injectShape } from '../core/shape';
@@ -501,11 +502,13 @@ export class Tooltip implements TooltipGroupMember {
     if (this.overlayRef) return this.overlayRef;
     const origin = this.trigger() ?? this.host;
     const container = this.portalContainer?.() ?? null;
-    const strategy = createFlexibleConnectedPositionStrategy(this.injector, origin)
-      .withPositions([this.side(), OPPOSITE[this.side()]].map((s) => connectedPosition(s, this.sideOffset())))
-      .withFlexibleDimensions(false)
-      .withPush(true)
-      .withViewportMargin(VIEWPORT_MARGIN);
+    const strategy = fitToOverlayBox(
+      createFlexibleConnectedPositionStrategy(this.injector, origin)
+        .withPositions([this.side(), OPPOSITE[this.side()]].map((s) => connectedPosition(s, this.sideOffset())))
+        .withFlexibleDimensions(false)
+        .withPush(true)
+        .withViewportMargin(VIEWPORT_MARGIN),
+    );
     if (container) strategy.withPopoverLocation({ type: 'parent', element: container });
     strategy.positionChanges.subscribe((change) => {
       const side = sideOf(change.connectionPair);
@@ -531,24 +534,19 @@ export class Tooltip implements TooltipGroupMember {
     this.appliedPaneClass = next;
   }
 
-  /** Lands the bubble where Floating UI puts React's.
-   *  - CDK writes a right-anchored pane's `right` from the root's clientWidth,
-   *    which under `html { scrollbar-gutter: stable }` includes the gutter the
-   *    pane's bounding box stops short of: side="left" lands one gutter too
-   *    far left. The difference moves it back.
-   *  - Floating UI rounds its translate to device pixels; the CDK pane keeps
-   *    fractions (a centered pane). Shifting by the remainder lands the bubble
-   *    on the same whole pixels, so its text renders as crisp as React's. */
+  /** Lands the bubble where Floating UI puts React's: Floating UI rounds its
+   *  translate to device pixels; the CDK pane keeps fractions (a centered
+   *  pane). Shifting by the remainder lands the bubble on the same whole
+   *  pixels, so its text renders as crisp as React's. (The scrollbar-gutter
+   *  offset of right-anchored panes is fixed by `fitToOverlayBox`.) */
   private snapToPixels() {
     const outer = this.outer;
     const pane = this.overlayRef?.overlayElement;
     if (!outer || !pane) return;
-    const box = pane.parentElement;
-    const gutter = pane.style.right && box ? this.document.documentElement.clientWidth - box.clientWidth : 0;
     const { x, y } = pane.getBoundingClientRect();
     const dpr = this.document.defaultView?.devicePixelRatio || 1;
     const remainder = (v: number) => Math.round(v * dpr) / dpr - v;
-    outer.style.translate = `${gutter + remainder(x + gutter)}px ${remainder(y)}px`;
+    outer.style.translate = `${remainder(x)}px ${remainder(y)}px`;
   }
 
   private setFollowOffset(offset: number) {

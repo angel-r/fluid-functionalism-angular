@@ -9,6 +9,7 @@ import {
   createRepositionScrollStrategy,
 } from '@angular/cdk/overlay';
 import { DomPortal } from '@angular/cdk/portal';
+import { fitToOverlayBox } from '../core/overlay';
 import { spring, exitFallbackMs } from '../core/springs';
 import { enterTransition, exitTransition, injectAnimateFluid, type FluidAnimation } from '../core/motion';
 
@@ -247,11 +248,13 @@ export function createPopupOverlay(options: PopupOverlayOptions) {
     if (overlayRef) return overlayRef;
     const anchor = options.anchor();
     if (!anchor) return null;
-    strategy = createFlexibleConnectedPositionStrategy(injector, anchor)
-      .withPositions(positionsFor(options.placement().side))
-      .withFlexibleDimensions(false)
-      .withPush(true)
-      .withViewportMargin(COLLISION_PADDING);
+    strategy = fitToOverlayBox(
+      createFlexibleConnectedPositionStrategy(injector, anchor)
+        .withPositions(positionsFor(options.placement().side))
+        .withFlexibleDimensions(false)
+        .withPush(true)
+        .withViewportMargin(COLLISION_PADDING),
+    );
     strategy.positionChanges.subscribe((change) => setSide(sideOfPair(change.connectionPair, rtl())));
     overlayRef = createOverlayRef(injector, {
       positionStrategy: strategy,
