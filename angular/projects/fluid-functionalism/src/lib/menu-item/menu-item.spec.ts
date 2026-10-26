@@ -234,6 +234,27 @@ describe('menu item: check mark', () => {
     expect(check(row('C'))).toBeNull();
   });
 
+  // React's motion.path renders a drawn check as pathLength 1 (attribute
+  // pathLength="1", dash "1 1"); the exit animates that stroke down to 0,
+  // so it needs the drawn length to start from.
+  it('a check present at mount is a fully drawn, normalised stroke', () => {
+    const { row } = setup([{ label: 'A', checked: true }]);
+    const path = check(row('A'))!;
+    expect(path.getAttribute('pathLength')).toBe('1');
+    expect(path.getAttribute('stroke-dasharray')).toBe('1 1');
+  });
+
+  // A check that draws in starts undrawn in the very render that mounts it,
+  // never one painted frame at full length before the draw begins.
+  it('a newly checked row mounts its check undrawn', () => {
+    const { fixture, row, detect } = setup([{ label: 'A', checked: false }]);
+    fixture.componentInstance.rows.set([{ label: 'A', checked: true }]);
+    detect();
+    const path = check(row('A'))!;
+    expect(path.getAttribute('pathLength')).toBe('1');
+    expect(path.getAttribute('stroke-dasharray')).toBe('0 1');
+  });
+
   it('draws the check in when the row becomes checked and removes it after unchecking', async () => {
     const { fixture, row, detect } = setup([{ label: 'A', checked: false }]);
     fixture.componentInstance.rows.set([{ label: 'A', checked: true }]);

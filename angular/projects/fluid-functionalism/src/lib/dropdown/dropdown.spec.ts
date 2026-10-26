@@ -266,4 +266,15 @@ describe('dropdown label and separator', () => {
     expect(separator.getAttribute('role')).toBe('separator');
     for (const cls of ['my-1', '-mx-1', 'h-px', 'shrink-0', 'bg-border/60']) expect(separator.classList).toContain(cls);
   });
+
+  // React renders both as divs: the hosts display as blocks through a host
+  // style, so their class lists stay React's exactly.
+  it('displays label and separator as blocks without a block class', () => {
+    const { el } = setup();
+    for (const part of ['ff-dropdown-label', 'ff-dropdown-separator']) {
+      const host = el.querySelector<HTMLElement>(part)!;
+      expect(host.style.display).toBe('block');
+      expect(host.classList.contains('block')).toBe(false);
+    }
+  });
 });

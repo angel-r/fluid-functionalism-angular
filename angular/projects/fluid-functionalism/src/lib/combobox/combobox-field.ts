@@ -267,37 +267,42 @@ abstract class ComboboxFieldBase {
 @Component({
   selector: 'ff-combobox-input',
   imports: [Icon, ComboboxFieldInput, ComboboxFieldControls],
+  // The consumer's class styles the field, so the host draws no box (a
+  // class it also carries never applies twice): the column below is the
+  // layout element, React's plain wrapper div.
   host: {
-    class: 'flex flex-col gap-1',
+    style: 'display: contents',
     // aria-label is forwarded to the input; the wrapper carries no name.
     '[attr.aria-label]': 'null',
   },
   template: `
-    <div
-      #group
-      data-slot="combobox-field"
-      [class]="groupClass()"
-      [attr.data-disabled]="root.disabled() ? '' : null"
-      [attr.data-popup-open]="root.open() ? '' : null"
-      (mousedown)="onGroupMousedown($event)"
-      (focusout)="root.onFieldFocusout($event)"
-    >
-      @if (iconInputs(); as ic) {
-        <ff-icon [name]="ic.name" [icon]="ic.icon" [size]="sizeClasses().icon" [strokeWidth]="1.5" [class]="leadingIconClass" />
+    <div class="flex flex-col gap-1">
+      <div
+        #group
+        data-slot="combobox-field"
+        [class]="groupClass()"
+        [attr.data-disabled]="root.disabled() ? '' : null"
+        [attr.data-popup-open]="root.open() ? '' : null"
+        (mousedown)="onGroupMousedown($event)"
+        (focusout)="root.onFieldFocusout($event)"
+      >
+        @if (iconInputs(); as ic) {
+          <ff-icon [name]="ic.name" [icon]="ic.icon" [size]="sizeClasses().icon" [strokeWidth]="1.5" [class]="leadingIconClass" />
+        }
+        <input
+          ffComboboxFieldInput
+          [invalid]="!!error()"
+          [attr.placeholder]="placeholder()"
+          [attr.aria-label]="ariaLabel() ?? null"
+          [attr.id]="inputId() ?? null"
+          [class]="inputClass()"
+        />
+        <ff-combobox-field-controls [clearable]="clearable()" [compact]="compact()" [iconSize]="sizeClasses().icon" />
+      </div>
+      @if (error()) {
+        <span [class]="errorClass">{{ error() }}</span>
       }
-      <input
-        ffComboboxFieldInput
-        [invalid]="!!error()"
-        [attr.placeholder]="placeholder()"
-        [attr.aria-label]="ariaLabel() ?? null"
-        [attr.id]="inputId() ?? null"
-        [class]="inputClass()"
-      />
-      <ff-combobox-field-controls [clearable]="clearable()" [compact]="compact()" [iconSize]="sizeClasses().icon" />
     </div>
-    @if (error()) {
-      <span [class]="errorClass">{{ error() }}</span>
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -345,83 +350,89 @@ interface ChipEntry {
 @Component({
   selector: 'ff-combobox-chips',
   imports: [Icon, ComboboxFieldInput, ComboboxFieldControls],
+  // The consumer's class styles the field, so the host draws no box (a
+  // class it also carries never applies twice): the column below is the
+  // layout element, React's plain wrapper div.
   host: {
-    class: 'flex flex-col gap-1',
+    style: 'display: contents',
+    // aria-label is forwarded to the input; the wrapper carries no name.
     '[attr.aria-label]': 'null',
   },
   template: `
-    <div
-      #group
-      data-slot="combobox-field"
-      [class]="groupClass()"
-      [attr.data-disabled]="root.disabled() ? '' : null"
-      [attr.data-popup-open]="root.open() ? '' : null"
-      (mousedown)="onGroupMousedown($event)"
-      (focusout)="root.onFieldFocusout($event)"
-    >
-      @if (iconInputs(); as ic) {
-        <!-- A row-height box keeps the icon centered on the first line. -->
-        <span [class]="compact() ? 'flex shrink-0 items-center h-5' : 'flex shrink-0 items-center h-6'">
-          <ff-icon [name]="ic.name" [icon]="ic.icon" [size]="sizeClasses().icon" [strokeWidth]="1.5" [class]="leadingIconClass" />
-        </span>
-      }
-      <div #rows role="toolbar" aria-label="Selected" [class]="rowsClass()">
-        @for (chip of chips(); track chip.value) {
-          <!-- Chips pop in and out on the fast tier and slide into their new
-               slots; an exiting chip is lifted out of the flow at once and is
-               inert while it fades. They grow from the left edge, where the
-               typed text just was. -->
-          <span
-            class="inline-flex max-w-full shrink-0"
-            style="transform-origin: 0% 50%"
-            [attr.data-chip-value]="chip.value"
-            [attr.data-exiting]="chip.exiting ? '' : null"
-            [attr.inert]="chip.exiting ? '' : null"
-            [style.pointer-events]="chip.exiting ? 'none' : null"
-          >
-            <div
-              data-slot="combobox-chip"
-              tabindex="-1"
-              [attr.aria-label]="chip.label"
-              [class]="chipClass()"
-              (keydown)="onChipKeydown($event, chip.value)"
-            >
-              <span class="truncate">{{ chip.label }}</span>
-              <button
-                type="button"
-                tabindex="-1"
-                [attr.aria-label]="'Remove ' + chip.label"
-                [class]="chipRemoveClass()"
-                [disabled]="root.disabled()"
-                (mousedown)="$event.preventDefault()"
-                (click)="root.remove(chip.value)"
-              >
-                <ff-icon name="x" [size]="compact() ? 10 : 12" [strokeWidth]="2" />
-              </button>
-            </div>
+    <div class="flex flex-col gap-1">
+      <div
+        #group
+        data-slot="combobox-field"
+        [class]="groupClass()"
+        [attr.data-disabled]="root.disabled() ? '' : null"
+        [attr.data-popup-open]="root.open() ? '' : null"
+        (mousedown)="onGroupMousedown($event)"
+        (focusout)="root.onFieldFocusout($event)"
+      >
+        @if (iconInputs(); as ic) {
+          <!-- A row-height box keeps the icon centered on the first line. -->
+          <span [class]="compact() ? 'flex shrink-0 items-center h-5' : 'flex shrink-0 items-center h-6'">
+            <ff-icon [name]="ic.name" [icon]="ic.icon" [size]="sizeClasses().icon" [strokeWidth]="1.5" [class]="leadingIconClass" />
           </span>
         }
-        <!-- The field sizes to what is typed (size is the intrinsic width;
-             flex-auto grows it across the rest of its row) so it stays beside
-             the chips while it fits. It never animates: chips slide, the
-             field snaps. -->
-        <span class="flex min-w-6 flex-auto">
-          <input
-            ffComboboxFieldInput
-            [invalid]="!!error()"
-            [attr.size]="inputSize()"
-            [attr.placeholder]="root.values().length ? null : placeholder()"
-            [attr.aria-label]="ariaLabel() ?? null"
-            [attr.id]="inputId() ?? null"
-            [class]="inputClass()"
-          />
-        </span>
+        <div #rows role="toolbar" aria-label="Selected" [class]="rowsClass()">
+          @for (chip of chips(); track chip.value) {
+            <!-- Chips pop in and out on the fast tier and slide into their new
+                 slots; an exiting chip is lifted out of the flow at once and is
+                 inert while it fades. They grow from the left edge, where the
+                 typed text just was. -->
+            <span
+              class="inline-flex max-w-full shrink-0"
+              style="transform-origin: 0% 50%"
+              [attr.data-chip-value]="chip.value"
+              [attr.data-exiting]="chip.exiting ? '' : null"
+              [attr.inert]="chip.exiting ? '' : null"
+              [style.pointer-events]="chip.exiting ? 'none' : null"
+            >
+              <div
+                data-slot="combobox-chip"
+                tabindex="-1"
+                [attr.aria-label]="chip.label"
+                [class]="chipClass()"
+                (keydown)="onChipKeydown($event, chip.value)"
+              >
+                <span class="truncate">{{ chip.label }}</span>
+                <button
+                  type="button"
+                  tabindex="-1"
+                  [attr.aria-label]="'Remove ' + chip.label"
+                  [class]="chipRemoveClass()"
+                  [disabled]="root.disabled()"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="root.remove(chip.value)"
+                >
+                  <ff-icon name="x" [size]="compact() ? 10 : 12" [strokeWidth]="2" />
+                </button>
+              </div>
+            </span>
+          }
+          <!-- The field sizes to what is typed (size is the intrinsic width;
+               flex-auto grows it across the rest of its row) so it stays beside
+               the chips while it fits. It never animates: chips slide, the
+               field snaps. -->
+          <span class="flex min-w-6 flex-auto">
+            <input
+              ffComboboxFieldInput
+              [invalid]="!!error()"
+              [attr.size]="inputSize()"
+              [attr.placeholder]="root.values().length ? null : placeholder()"
+              [attr.aria-label]="ariaLabel() ?? null"
+              [attr.id]="inputId() ?? null"
+              [class]="inputClass()"
+            />
+          </span>
+        </div>
+        <ff-combobox-field-controls [clearable]="clearable()" [compact]="compact()" [iconSize]="sizeClasses().icon" />
       </div>
-      <ff-combobox-field-controls [clearable]="clearable()" [compact]="compact()" [iconSize]="sizeClasses().icon" />
+      @if (error()) {
+        <span [class]="errorClass">{{ error() }}</span>
+      }
     </div>
-    @if (error()) {
-      <span [class]="errorClass">{{ error() }}</span>
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

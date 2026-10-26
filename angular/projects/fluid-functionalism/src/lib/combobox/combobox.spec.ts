@@ -217,6 +217,19 @@ describe('Combobox: field', () => {
     expect(group.classList.contains('rounded-lg')).toBe(true);
   });
 
+  // React: a plain "flex flex-col gap-1" wrapper around the field, the
+  // className on the field only. The host draws no box, so a consumer class
+  // it also carries never applies twice.
+  it('wraps the field in a plain column and draws no host box', () => {
+    const { el } = setupSingle();
+    const host = el.querySelector<HTMLElement>('ff-combobox-input')!;
+    expect(host.style.display).toBe('contents');
+    const wrapper = host.firstElementChild as HTMLElement;
+    expect(wrapper.tagName).toBe('DIV');
+    expect(wrapper.className).toBe('flex flex-col gap-1');
+    expect(wrapper.firstElementChild!.getAttribute('data-slot')).toBe('combobox-field');
+  });
+
   it('switches to the borderless ladder', () => {
     const { el } = setupSingle((h) => h.variant.set('borderless'));
     const group = el.querySelector<HTMLElement>('[data-slot="combobox-field"]')!;
@@ -331,21 +344,20 @@ describe('Combobox: filtering', () => {
 });
 
 describe('Combobox: keyboard highlight', () => {
-  it('moves with the arrows, clears past either end (the input is the stop), then wraps', () => {
-    const { key, highlighted, options, openByClick, input } = setupSingle();
+  // React's autoHighlight="always" turns off Base UI's allowEscape: the
+  // highlight wraps straight from one end to the other, never onto the input.
+  it('moves with the arrows and wraps straight past either end', () => {
+    const { key, highlighted, options, openByClick } = setupSingle();
     openByClick();
     key('ArrowDown');
     expect(highlighted()).toBe(options()[1]);
     key('ArrowUp');
     key('ArrowUp');
-    expect(input().hasAttribute('aria-activedescendant')).toBe(false);
-    key('ArrowUp');
     expect(highlighted()).toBe(options()[4]);
-    key('ArrowDown');
-    expect(input().hasAttribute('aria-activedescendant')).toBe(false);
     key('ArrowDown');
     expect(highlighted()).toBe(options()[0]);
   });
+
 
   it('drives the fluid hover highlight from the keyboard', () => {
     const { key, options, openByClick } = setupSingle();
@@ -532,6 +544,19 @@ describe('Combobox: states', () => {
     expect(hidden.value).toBe('astro');
     expect(hidden.required).toBe(true);
   });
+
+  // Base UI always renders an unnamed input clipped to 1px at the viewport's
+  // top-left corner, carrying a single combobox's value.
+  it('always renders the clipped 1px input with the single value', () => {
+    const { el } = setupSingle((h) => h.value.set('astro'));
+    const clipped = el.querySelector<HTMLInputElement>('input[aria-hidden="true"]')!;
+    expect(clipped).not.toBeNull();
+    expect(clipped.hasAttribute('name')).toBe(false);
+    expect(clipped.value).toBe('astro');
+    expect(clipped.tabIndex).toBe(-1);
+    expect(clipped.style.position).toBe('fixed');
+    expect(clipped.style.clipPath).toBe('inset(50%)');
+  });
 });
 
 describe('Combobox: multiple', () => {
@@ -633,9 +658,24 @@ describe('Combobox: multiple', () => {
     expect(host.value()).toEqual(['next', 'astro', 'qwik']);
   });
 
+  it('wraps the chips field in a plain column and draws no host box', () => {
+    const { el } = setupMultiple();
+    const host = el.querySelector<HTMLElement>('ff-combobox-chips')!;
+    expect(host.style.display).toBe('contents');
+    const wrapper = host.firstElementChild as HTMLElement;
+    expect(wrapper.className).toBe('flex flex-col gap-1');
+    expect(wrapper.firstElementChild!.getAttribute('data-slot')).toBe('combobox-field');
+  });
+
   it('a name renders one hidden input per pick', () => {
     const { el } = setupMultiple();
     const hidden = Array.from(el.querySelectorAll<HTMLInputElement>('input[type="hidden"][name="frameworks"]'));
     expect(hidden.map((i) => i.value)).toEqual(['next', 'astro']);
+  });
+
+  it('the clipped 1px input of a multiple combobox stays empty', () => {
+    const { el } = setupMultiple();
+    const clipped = el.querySelector<HTMLInputElement>('input[aria-hidden="true"]')!;
+    expect(clipped.value).toBe('');
   });
 });

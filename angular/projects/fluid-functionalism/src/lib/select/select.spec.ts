@@ -252,15 +252,47 @@ describe('select popup', () => {
     expect(shownListbox()).not.toBeNull();
   });
 
-  it('focuses the selected option on open, else the first enabled one', async () => {
+  it('focuses the selected option on open, whatever opened it', async () => {
     const selected = setup((h) => h.defaultValue.set('cherry'));
     selected.trigger().click(); TestBed.tick();
     await frames(3);
     expect(document.activeElement).toBe(option('Cherry'));
-    selected.fixture.destroy();
+  });
+
+  // Base UI: a pointer open with nothing selected focuses the popup itself,
+  // so no row lights up until the pointer or the arrows pick one.
+  it('a pointer open with nothing selected focuses the listbox and lights no row', async () => {
+    const { trigger } = setup();
+    trigger().dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    trigger().click(); TestBed.tick();
+    await frames(3);
+    TestBed.tick();
+    expect(document.activeElement).toBe(shownListbox());
+    expect(shownListbox()!.hasAttribute('data-fluid-hover-active-index')).toBe(false);
+    expect(option('Apple').classList.contains('text-muted-foreground')).toBe(true);
+  });
+
+  it('from the focused listbox, ArrowDown reaches the first option and ArrowUp the last', async () => {
+    const { trigger, fixture } = setup();
+    trigger().dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    trigger().click(); TestBed.tick();
+    await frames(3);
+    key(shownListbox()!, 'ArrowDown');
+    expect(document.activeElement).toBe(option('Apple'));
+    fixture.destroy();
     document.querySelectorAll('.cdk-overlay-container').forEach((c) => (c.innerHTML = ''));
-    const none = setup((h) => h.disabledValue.set('apple'));
-    none.trigger().click(); TestBed.tick();
+    const up = setup();
+    up.trigger().dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    up.trigger().click(); TestBed.tick();
+    await frames(3);
+    key(shownListbox()!, 'ArrowUp');
+    expect(document.activeElement).toBe(option('Grape'));
+  });
+
+  it('a keyboard open with nothing selected focuses the first enabled option', async () => {
+    const { trigger } = setup((h) => h.disabledValue.set('apple'));
+    key(trigger(), 'Enter');
+    trigger().click(); TestBed.tick();
     await frames(3);
     expect(document.activeElement).toBe(option('Banana'));
   });
@@ -299,6 +331,20 @@ describe('select popup', () => {
     expect(option('Apple').querySelector('svg')).toBeNull();
     // The check slot is always there, so a selection never resizes the row.
     expect(option('Apple').querySelector('[aria-hidden="true"].w-4.h-4')).not.toBeNull();
+  });
+
+  // React's motion.path: a check present at mount is a drawn, normalised
+  // stroke the exit can animate from; a check that draws in mounts undrawn.
+  it('mounts a present check drawn and a newly picked one undrawn', () => {
+    const { trigger } = setup((h) => h.defaultValue.set('banana'));
+    trigger().click(); TestBed.tick();
+    const drawn = option('Banana').querySelector('svg path')!;
+    expect(drawn.getAttribute('pathLength')).toBe('1');
+    expect(drawn.getAttribute('stroke-dasharray')).toBe('1 1');
+    option('Cherry').click(); TestBed.tick();
+    const fresh = option('Cherry').querySelector('svg path')!;
+    expect(fresh.getAttribute('pathLength')).toBe('1');
+    expect(fresh.getAttribute('stroke-dasharray')).toBe('0 1');
   });
 });
 
@@ -341,6 +387,7 @@ describe('select picking', () => {
 
   it('ignores a disabled option and skips it with the arrows', async () => {
     const { trigger, host } = setup((h) => h.disabledValue.set('banana'));
+    key(trigger(), 'Enter');
     trigger().click(); TestBed.tick();
     await frames(3);
     expect(option('Banana').getAttribute('aria-disabled')).toBe('true');
@@ -458,6 +505,20 @@ describe('select form and parts', () => {
     expect(input.tabIndex).toBe(-1);
   });
 
+  // Base UI renders its hidden input whether or not the select is named,
+  // pinned 1px at the viewport's top-left corner.
+  it('always renders the hidden input, clipped to 1px at the top-left corner', () => {
+    const { el } = setup((h) => h.defaultValue.set('grape'));
+    const input = el.querySelector<HTMLInputElement>('input[aria-hidden="true"]')!;
+    expect(input).not.toBeNull();
+    expect(input.hasAttribute('name')).toBe(false);
+    expect(input.value).toBe('grape');
+    expect(input.tabIndex).toBe(-1);
+    expect(input.style.position).toBe('fixed');
+    expect(input.style.width).toBe('1px');
+    expect(input.style.clipPath).toBe('inset(50%)');
+  });
+
   it('renders the group, its caption label and the separator', () => {
     const { trigger } = setup();
     trigger().click(); TestBed.tick();
@@ -471,5 +532,17 @@ describe('select form and parts', () => {
     const separator = listbox.querySelector<HTMLElement>('ff-select-separator')!;
     expect(separator.getAttribute('role')).toBe('separator');
     for (const cls of ['my-1', '-mx-1', 'h-px', 'shrink-0', 'bg-border/60']) expect(separator.classList).toContain(cls);
+  });
+
+  // React renders the three as divs: the hosts display as blocks through a
+  // host style, so their class lists stay React's exactly.
+  it('displays group, label and separator as blocks without a block class', () => {
+    const { trigger } = setup();
+    trigger().click(); TestBed.tick();
+    for (const part of ['ff-select-group', 'ff-select-label', 'ff-select-separator']) {
+      const host = shownListbox()!.querySelector<HTMLElement>(part)!;
+      expect(host.style.display).toBe('block');
+      expect(host.classList.contains('block')).toBe(false);
+    }
   });
 });

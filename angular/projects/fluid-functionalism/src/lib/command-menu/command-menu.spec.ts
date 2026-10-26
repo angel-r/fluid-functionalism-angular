@@ -131,6 +131,14 @@ describe('CommandMenu', () => {
     expect(rows[1].textContent).toContain('Blank document');
   });
 
+  it('displays the root as a block with the React root classes exactly', async () => {
+    await setup(MenuHost);
+    const root = document.querySelector<HTMLElement>('ff-command-menu')!;
+    expect(root.style.display).toBe('block');
+    for (const cls of ['relative', 'w-full', 'max-h-[inherit]', 'overflow-hidden']) expect(root.classList).toContain(cls);
+    expect(root.classList.contains('block')).toBe(false);
+  });
+
   it('filters as you type and shows the empty state when nothing matches', async () => {
     const fixture = await setup(MenuHost);
     const empty = document.querySelector<HTMLElement>('[data-slot="command-menu-empty"]')!;
@@ -141,7 +149,9 @@ describe('CommandMenu', () => {
     expect(fixture.componentInstance.queries).toEqual(['dark']);
     await type(fixture, 'zzz');
     expect(options()).toHaveLength(0);
-    expect(empty.style.display).toBe('');
+    // A block through the host style, so the class list stays React's.
+    expect(empty.style.display).toBe('block');
+    expect(empty.classList.contains('block')).toBe(false);
     expect(empty.getAttribute('role')).toBe('status');
     expect(empty.textContent?.trim()).toBe('No results.');
     expect(document.querySelector('[role="listbox"]')!.hasAttribute('data-empty')).toBe(true);
