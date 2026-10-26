@@ -22,5 +22,11 @@
     "pdfjs-dist": {
       "optional": true
     }
+  },
+  "exports": {
+    "./styles/*": {
+      "style": "./styles/*",
+      "default": "./styles/*"
+    }
   }
 }
