@@ -96,6 +96,8 @@ let nextId = 0;
   providers: [provideSizeOverride(CommandMenu, (menu) => menu.size())],
   host: {
     'data-slot': 'command-menu',
+    // A block by a host style, so the class list stays React's root div's.
+    style: 'display: block',
     '[class]': 'hostClass()',
   },
   template: `
@@ -186,7 +188,7 @@ export class CommandMenu {
   private readonly reduced = inject(ReducedMotion).value;
   private readonly destroyRef = inject(DestroyRef);
   protected readonly hostClass = computed(() =>
-    cn('relative block w-full max-h-[inherit] overflow-hidden', this.userClass()),
+    cn('relative w-full max-h-[inherit] overflow-hidden', this.userClass()),
   );
 
   private readonly frame = viewChild.required<ElementRef<HTMLElement>>('frame');

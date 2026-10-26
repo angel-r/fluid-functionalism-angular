@@ -365,7 +365,8 @@ export class CommandMenuList {
     'aria-live': 'polite',
     'data-slot': 'command-menu-empty',
     '[class]': 'hostClass()',
-    '[style.display]': 'empty() ? null : "none"',
+    // A block by a host style, so the class list stays React's div's.
+    '[style.display]': 'empty() ? "block" : "none"',
   },
   template: `
     <ng-template #content><ng-content /></ng-template>
@@ -381,6 +382,6 @@ export class CommandMenuEmpty {
   private readonly size = injectSize();
   protected readonly empty = computed(() => this.menu.rows().length === 0);
   protected readonly hostClass = computed(() =>
-    cn('block px-3 py-6 text-center text-muted-foreground', this.size().text, this.userClass()),
+    cn('px-3 py-6 text-center text-muted-foreground', this.size().text, this.userClass()),
   );
 }

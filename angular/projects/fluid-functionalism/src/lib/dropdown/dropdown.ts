@@ -145,7 +145,8 @@ export class Dropdown {
 
 @Component({
   selector: 'ff-dropdown-label',
-  host: { '[class]': 'hostClass()' },
+  // Displayed as a block by a host style, so the class list stays React's.
+  host: { style: 'display: block', '[class]': 'hostClass()' },
   template: '<ng-content />',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -155,7 +156,7 @@ export class DropdownLabel {
   // Group labels are the caption role of the type scale.
   protected readonly hostClass = computed(() =>
     cn(
-      'block px-2 py-1.5 shrink-0 text-muted-foreground',
+      'px-2 py-1.5 shrink-0 text-muted-foreground',
       typeClass('caption', this.size().variant === 'compact' ? 'compact' : 'default'),
       this.userClass(),
     ),
@@ -168,11 +169,11 @@ export class DropdownLabel {
 
 @Component({
   selector: 'ff-dropdown-separator',
-  host: { role: 'separator', '[class]': 'hostClass()' },
+  host: { role: 'separator', style: 'display: block', '[class]': 'hostClass()' },
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DropdownSeparator {
   readonly userClass = input('', { alias: 'class' });
-  protected readonly hostClass = computed(() => cn('block my-1 -mx-1 h-px shrink-0 bg-border/60', this.userClass()));
+  protected readonly hostClass = computed(() => cn('my-1 -mx-1 h-px shrink-0 bg-border/60', this.userClass()));
 }

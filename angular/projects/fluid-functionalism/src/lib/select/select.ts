@@ -83,6 +83,9 @@ interface SelectContextValue {
   pick(value: string): void;
   /** Open or close now (cancels a pending acknowledgment close). */
   setOpen(next: boolean): void;
+  /** How the trigger was last pressed: a pointer open with nothing selected
+   *  focuses the popup itself, a keyboard open the first option (Base UI). */
+  readonly openInput: { keyboard: boolean };
 }
 
 const SELECT_CONTEXT = new InjectionToken<SelectContextValue>('FF_SELECT_CONTEXT');
@@ -116,17 +119,17 @@ const SELECT_CONTENT_CONTEXT = new InjectionToken<SelectContentContextValue>('FF
   host: { style: 'display: contents' },
   template: `
     <ng-content />
-    @if (name()) {
-      <input
-        class="sr-only"
-        aria-hidden="true"
-        tabindex="-1"
-        [attr.name]="name()"
-        [value]="value()"
-        [required]="required()"
-        [disabled]="disabled()"
-      />
-    }
+    <!-- Base UI's hidden input: rendered named or not, clipped to 1px at
+         the viewport's top-left corner. -->
+    <input
+      aria-hidden="true"
+      tabindex="-1"
+      style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0; padding: 0; width: 1px; height: 1px; margin: 0; position: fixed; top: 0; left: 0"
+      [attr.name]="name() ?? null"
+      [value]="value()"
+      [required]="required()"
+      [disabled]="disabled()"
+    />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -183,6 +186,7 @@ export class Select {
     },
     pick: (value) => this.pick(value),
     setOpen: (next) => this.setOpen(next),
+    openInput: { keyboard: false },
   };
 
   constructor() {
@@ -319,6 +323,7 @@ export type SelectTriggerVariant = NonNullable<VariantProps<typeof selectTrigger
       [attr.data-disabled]="select.disabled() ? '' : null"
       [disabled]="select.disabled()"
       [class]="buttonClass()"
+      (pointerdown)="select.openInput.keyboard = false"
       (click)="select.setOpen(!select.open())"
       (keydown)="onKeydown($event)"
     >
@@ -425,6 +430,7 @@ export class SelectTrigger {
   }
 
   protected onKeydown(e: KeyboardEvent) {
+    this.select.openInput.keyboard = true;
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !this.select.open()) {
       e.preventDefault();
       this.select.setOpen(true);
@@ -608,7 +614,10 @@ export class SelectContent {
         // The rows stay registered while the popup sits hidden between
         // opens: re-measure once it is laid out.
         this.hover.remeasure();
-        // Open on the selected option, else the first enabled one.
+        // Open on the selected option. With nothing selected, a keyboard
+        // open lands on the first enabled option and a pointer open on the
+        // listbox itself, so no row lights up under a pointer that is still
+        // on the trigger (Base UI).
         afterLayout(() => {
           const list = this.list().nativeElement;
           if (list.contains(this.document.activeElement)) return;
@@ -616,8 +625,8 @@ export class SelectContent {
           const value = this.select.value();
           const target =
             rows.find((r) => r.getAttribute('data-value') === value && !isDisabledRow(r)) ??
-            rows.find((r) => !isDisabledRow(r));
-          target?.focus();
+            (this.select.openInput.keyboard ? rows.find((r) => !isDisabledRow(r)) : undefined);
+          (target ?? this.popup().nativeElement).focus();
         });
       });
     });
@@ -665,6 +674,20 @@ export class SelectContent {
   private readonly onKeyDownCapture = (e: KeyboardEvent) => {
     // The nav flag must be set before the listbox moves focus.
     this.navGate.trackKeyboardNav(e);
+    // The listbox itself holds focus after a pointer open with nothing
+    // selected: the arrows start from an end, not from the listbox's
+    // roving item (Base UI).
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.target === this.popup().nativeElement) {
+      const rows = Array.from(this.list().nativeElement.querySelectorAll<HTMLElement>('[role="option"]')).filter(
+        (r) => !isDisabledRow(r),
+      );
+      const target = e.key === 'ArrowDown' ? rows[0] : rows.at(-1);
+      if (!target) return;
+      e.preventDefault();
+      e.stopPropagation();
+      target.focus();
+      return;
+    }
     if (e.key !== 'Enter' && e.key !== ' ') return;
     const option = this.optionOf(e.target);
     if (!option) return;
@@ -753,7 +776,10 @@ export class SelectContent {
             stroke-linejoin="round"
             class="text-foreground"
           >
-            <path #checkPath d="M4 12L9 17L20 6" />
+            <!-- pathLength="1" with dash "1 1" is a drawn stroke as motion
+                 writes it (React's motion.path at pathLength 1): the exit
+                 animates from it, and a draw-in resets the dash to "0 1". -->
+            <path #checkPath d="M4 12L9 17L20 6" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="0" />
           </svg>
         }
       </span>
@@ -873,6 +899,9 @@ export class SelectItem {
       const path = this.checkPath()?.nativeElement;
       if (!path || !this.drawPending) return;
       this.drawPending = false;
+      // Undrawn before the first paint: motion writes its first frame on the
+      // next animation frame, which would show the full check for a frame.
+      path.setAttribute('stroke-dasharray', '0 1');
       this.checkAnimation = animate(path, { pathLength: [0, 1] }, { duration: 0.08, ease: 'easeOut' });
     });
 
@@ -892,18 +921,20 @@ export class SelectItem {
 
 @Component({
   selector: 'ff-select-group',
-  host: { role: 'group', '[class]': 'hostClass()' },
+  // Group, label and separator display as blocks by a host style, so their
+  // class lists stay React's.
+  host: { role: 'group', style: 'display: block', '[class]': 'hostClass()' },
   template: '<ng-content />',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectGroup {
   readonly userClass = input('', { alias: 'class' });
-  protected readonly hostClass = computed(() => cn('block', this.userClass()));
+  protected readonly hostClass = computed(() => cn(this.userClass()));
 }
 
 @Component({
   selector: 'ff-select-label',
-  host: { '[class]': 'hostClass()' },
+  host: { style: 'display: block', '[class]': 'hostClass()' },
   template: '<ng-content />',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -913,7 +944,7 @@ export class SelectLabel {
   // Group labels are the caption role of the type scale.
   protected readonly hostClass = computed(() =>
     cn(
-      'block px-2 py-1.5 shrink-0 text-muted-foreground',
+      'px-2 py-1.5 shrink-0 text-muted-foreground',
       typeClass('caption', this.size().variant === 'compact' ? 'compact' : 'default'),
       this.userClass(),
     ),
@@ -922,11 +953,11 @@ export class SelectLabel {
 
 @Component({
   selector: 'ff-select-separator',
-  host: { role: 'separator', '[class]': 'hostClass()' },
+  host: { role: 'separator', style: 'display: block', '[class]': 'hostClass()' },
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectSeparator {
   readonly userClass = input('', { alias: 'class' });
-  protected readonly hostClass = computed(() => cn('block my-1 -mx-1 h-px shrink-0 bg-border/60', this.userClass()));
+  protected readonly hostClass = computed(() => cn('my-1 -mx-1 h-px shrink-0 bg-border/60', this.userClass()));
 }

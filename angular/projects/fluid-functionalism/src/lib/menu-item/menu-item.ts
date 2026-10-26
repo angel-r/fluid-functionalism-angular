@@ -182,7 +182,10 @@ const optionalBoolean = (value: boolean | '' | undefined | null) =>
           stroke-linejoin="round"
           class="text-foreground shrink-0"
         >
-          <path #checkPath d="M4 12L9 17L20 6" />
+          <!-- pathLength="1" with dash "1 1" is a drawn stroke as motion
+               writes it (React's motion.path at pathLength 1): the exit
+               animates from it, and a draw-in resets the dash to "0 1". -->
+          <path #checkPath d="M4 12L9 17L20 6" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="0" />
         </svg>
       }
     </ng-template>
@@ -369,6 +372,9 @@ export class MenuItem {
       const path = this.checkPath()?.nativeElement;
       if (!path || !this.drawPending) return;
       this.drawPending = false;
+      // Undrawn before the first paint: motion writes its first frame on the
+      // next animation frame, which would show the full check for a frame.
+      path.setAttribute('stroke-dasharray', '0 1');
       this.checkAnimation = animate(path, { pathLength: [0, 1] }, { duration: 0.08, ease: 'easeOut' });
     });
 

@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import {
   Button,
-  COMMAND_MENU_IS_MAC,
   COMMAND_MENU_PARTS,
   Elevated,
   Select,
@@ -107,58 +106,54 @@ import {
       </app-demo-section>
 
       <app-demo-section title="Dialog and trigger shortcut">
-        <div class="flex flex-col items-center gap-4">
-          <p class="text-site-body text-muted-foreground">
-            Press {{ mac ? '⌘P' : 'Ctrl+P' }} anywhere on this page. A pick or Escape closes it.
-          </p>
-          <div class="flex flex-wrap items-center gap-3">
-            <button ffButton variant="secondary" class="pr-3" (click)="open.set(true)">
-              Open
-              <kbd ffCommandMenuShortcut keys="mod+p" class="ml-1"></kbd>
-            </button>
-            <ff-command-menu-dialog [(open)]="open" shortcut="mod+p">
-              <ff-command-menu [items]="full" [suggestions]="suggestions" (itemSelect)="run($event)">
-                <ff-command-menu-input [placeholder]="copy.placeholder" />
-                <ff-command-menu-list>
-                  <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
-                </ff-command-menu-list>
-              </ff-command-menu>
-            </ff-command-menu-dialog>
-            <button ffButton variant="ghost" (click)="openNoKey.set(true)">Open, no shortcut</button>
-            <ff-command-menu-dialog [(open)]="openNoKey" [shortcut]="null">
-              <ff-command-menu [items]="full" (itemSelect)="run($event)">
-                <ff-command-menu-input [placeholder]="copy.placeholder" />
-                <ff-command-menu-list>
-                  <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
-                </ff-command-menu-list>
-                <ff-command-menu-footer />
-              </ff-command-menu>
-            </ff-command-menu-dialog>
-          </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button ffButton variant="secondary" class="pr-3" (click)="open.set(true)">
+            <!-- No whitespace before the caps: JSX drops it, and a space would
+                 widen the button. -->
+            Open<kbd ffCommandMenuShortcut keys="mod+p" class="ml-1"></kbd>
+          </button>
+          <ff-command-menu-dialog [(open)]="open" shortcut="mod+p">
+            <ff-command-menu [items]="full" [suggestions]="suggestions" (itemSelect)="run($event)">
+              <ff-command-menu-input [placeholder]="copy.placeholder" />
+              <ff-command-menu-list>
+                <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+              </ff-command-menu-list>
+            </ff-command-menu>
+          </ff-command-menu-dialog>
+          <button ffButton variant="ghost" (click)="openNoKey.set(true)">Open, no shortcut</button>
+          <ff-command-menu-dialog [(open)]="openNoKey" [shortcut]="null">
+            <ff-command-menu [items]="full" (itemSelect)="run($event)">
+              <ff-command-menu-input [placeholder]="copy.placeholder" />
+              <ff-command-menu-list>
+                <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+              </ff-command-menu-list>
+            </ff-command-menu>
+          </ff-command-menu-dialog>
         </div>
       </app-demo-section>
 
       <app-demo-section title="Footer hints">
-        <div class="flex w-full flex-col items-center gap-6">
-          <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
-            <ff-command-menu [items]="footerTabbed()" [suggestions]="suggestions" (itemSelect)="run($event)">
-              <ff-command-menu-input [placeholder]="copy.placeholder" />
-              <ff-command-menu-tabs [tabs]="tabs" [(value)]="footerTab" />
-              <ff-command-menu-list>
-                <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
-              </ff-command-menu-list>
-              <ff-command-menu-footer />
-            </ff-command-menu>
-          </div>
-          <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
-            <ff-command-menu [items]="plain" (itemSelect)="run($event)">
-              <ff-command-menu-input [placeholder]="copy.placeholder" />
-              <ff-command-menu-list>
-                <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
-              </ff-command-menu-list>
-              <ff-command-menu-footer [hints]="customHints" />
-            </ff-command-menu>
-          </div>
+        <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+          <ff-command-menu [items]="full" [suggestions]="suggestions" (itemSelect)="run($event)">
+            <ff-command-menu-input [placeholder]="copy.placeholder" />
+            <ff-command-menu-tabs [tabs]="tabs" [(value)]="footerTab" />
+            <ff-command-menu-list>
+              <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+            </ff-command-menu-list>
+            <ff-command-menu-footer />
+          </ff-command-menu>
+        </div>
+      </app-demo-section>
+
+      <app-demo-section title="Custom footer hints">
+        <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+          <ff-command-menu [items]="plain" (itemSelect)="run($event)">
+            <ff-command-menu-input [placeholder]="copy.placeholder" />
+            <ff-command-menu-list>
+              <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+            </ff-command-menu-list>
+            <ff-command-menu-footer [hints]="customHints" />
+          </ff-command-menu>
         </div>
       </app-demo-section>
 
@@ -188,7 +183,6 @@ import {
 })
 export default class CommandMenuDemo {
   private readonly shape = injectShape();
-  protected readonly mac = inject(COMMAND_MENU_IS_MAC);
   protected readonly copy = COMMAND_MENU_COPY;
   protected readonly tabs = COMMAND_MENU_TABS;
   protected readonly types = COMMAND_MENU_TYPES;
@@ -211,7 +205,6 @@ export default class CommandMenuDemo {
   protected readonly openNoKey = signal(false);
 
   protected readonly tabbed = computed(() => byGroup(this.full, this.tab()));
-  protected readonly footerTabbed = computed(() => byGroup(this.full, this.footerTab()));
   protected readonly filtered = computed(() => {
     const rows = byGroup(this.full, this.type());
     return this.sort() === 'az' ? [...rows].sort((a, b) => a.label.localeCompare(b.label)) : rows;

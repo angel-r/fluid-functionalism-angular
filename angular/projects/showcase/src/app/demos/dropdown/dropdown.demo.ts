@@ -157,165 +157,127 @@ const toggled = <T,>(list: readonly T[], item: T) =>
       </app-demo-section>
 
       <app-demo-section title="Triggered menu">
-        <div class="flex w-full flex-col items-center gap-6">
-          <p class="text-site-body text-muted-foreground">
-            3 parts: <code>ff-dropdown-menu</code>, <code>[ffDropdownTrigger]</code>, <code>ff-dropdown-content</code>.
-            Any element can be the trigger.
-          </p>
-          <ff-dropdown-menu>
-            <button ffButton ffDropdownTrigger variant="ghost">Open menu</button>
-            <ff-dropdown-content [checkedIndex]="view()">
-              @for (item of items; track item.label; let i = $index) {
-                <ff-menu-item
-                  [index]="i"
-                  [icon]="item.icon"
-                  [label]="item.label"
-                  [checked]="view() === i"
-                  (select)="view.set(i)"
-                />
-              }
-            </ff-dropdown-content>
-          </ff-dropdown-menu>
-        </div>
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost">Open menu</button>
+          <ff-dropdown-content [checkedIndex]="view()">
+            @for (item of items; track item.label; let i = $index) {
+              <ff-menu-item
+                [index]="i"
+                [icon]="item.icon"
+                [label]="item.label"
+                [checked]="view() === i"
+                (select)="view.set(i)"
+              />
+            }
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
       </app-demo-section>
 
       <app-demo-section title="Submenus">
-        <div class="flex w-full flex-col items-center gap-6">
-          <p class="text-site-body text-muted-foreground">
-            Hover Move to, then cut across Share to its submenu: the highlight stays on Move to until you stop on
-            another row.
-          </p>
-          <ff-dropdown-menu>
-            <button ffButton ffDropdownTrigger variant="ghost">Q3 report.pdf</button>
-            <ff-dropdown-content>
-              <ff-dropdown-sub>
-                <ff-dropdown-sub-trigger [index]="0" icon="folder" label="Move to" />
-                <ff-dropdown-sub-content>
-                  @for (folder of folders; track folder; let i = $index) {
-                    <ff-menu-item [index]="i" [label]="folder" (select)="lastAction.set('Moved to ' + folder)" />
-                  }
-                </ff-dropdown-sub-content>
-              </ff-dropdown-sub>
-              <ff-dropdown-sub>
-                <ff-dropdown-sub-trigger [index]="1" icon="link" label="Share" />
-                <ff-dropdown-sub-content>
-                  <ff-menu-item [index]="0" icon="link" label="Copy link" (select)="lastAction.set('Link copied')" />
-                  <ff-menu-item [index]="1" icon="mail" label="Email" (select)="lastAction.set('Shared by email')" />
-                </ff-dropdown-sub-content>
-              </ff-dropdown-sub>
-              <ff-menu-item [index]="2" icon="pencil" label="Rename" (select)="lastAction.set('Renamed')" />
-            </ff-dropdown-content>
-          </ff-dropdown-menu>
-          @if (lastAction()) {
-            <p class="text-site-body text-muted-foreground">{{ lastAction() }}</p>
-          }
-        </div>
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost">Q3 report.pdf</button>
+          <ff-dropdown-content>
+            <ff-dropdown-sub>
+              <ff-dropdown-sub-trigger [index]="0" icon="folder" label="Move to" />
+              <ff-dropdown-sub-content>
+                @for (folder of folders; track folder; let i = $index) {
+                  <ff-menu-item [index]="i" [label]="folder" (select)="lastAction.set('Moved to ' + folder)" />
+                }
+              </ff-dropdown-sub-content>
+            </ff-dropdown-sub>
+            <ff-dropdown-sub>
+              <ff-dropdown-sub-trigger [index]="1" icon="link" label="Share" />
+              <ff-dropdown-sub-content>
+                <ff-menu-item [index]="0" icon="link" label="Copy link" (select)="lastAction.set('Link copied')" />
+                <ff-menu-item [index]="1" icon="mail" label="Email" (select)="lastAction.set('Shared by email')" />
+              </ff-dropdown-sub-content>
+            </ff-dropdown-sub>
+            <ff-menu-item [index]="2" icon="pencil" label="Rename" (select)="lastAction.set('Renamed')" />
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
       </app-demo-section>
 
       <app-demo-section title="Multiple selection">
-        <div class="flex w-full flex-col items-center gap-6">
-          <p class="text-site-body text-muted-foreground">
-            Pass <code>checkedIndices</code>: rows become checkboxes, the menu stays open, and touching picks share one
-            background.
-          </p>
-          <ff-dropdown-menu>
-            <button ffButton ffDropdownTrigger variant="ghost">Status</button>
-            <ff-dropdown-content [checkedIndices]="statuses()">
-              @for (status of statusList; track status; let i = $index) {
-                <ff-menu-item
-                  [index]="i"
-                  [label]="status"
-                  [checked]="statuses().includes(i)"
-                  (select)="statuses.set(toggled(statuses(), i))"
-                />
-              }
-            </ff-dropdown-content>
-          </ff-dropdown-menu>
-        </div>
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost">Status</button>
+          <ff-dropdown-content [checkedIndices]="statuses()">
+            @for (status of statusList; track status; let i = $index) {
+              <ff-menu-item
+                [index]="i"
+                [label]="status"
+                [checked]="statuses().includes(i)"
+                (select)="statuses.set(toggled(statuses(), i))"
+              />
+            }
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
       </app-demo-section>
 
       <app-demo-section title="Searchable menu">
-        <div class="flex w-full flex-col items-center gap-6">
-          <p class="text-site-body text-muted-foreground">
-            Put a <code>ff-dropdown-search</code> first and filter the rows you render. Type to filter, arrow down to a
-            row, press Enter.
-          </p>
-          <ff-dropdown-menu>
-            <button ffButton ffDropdownTrigger variant="ghost" trailingIcon="chevron-down">{{ language() }}</button>
-            <ff-dropdown-content [checkedIndex]="languageMatches().indexOf(language())">
-              <ff-dropdown-search [(value)]="languageQuery" placeholder="Search languages" />
-              @for (l of languageMatches(); track l; let i = $index) {
-                <ff-menu-item [index]="i" [label]="l" [checked]="language() === l" (select)="language.set(l)" />
-              }
-              @if (languageMatches().length === 0) {
-                <ff-dropdown-empty>No languages found</ff-dropdown-empty>
-              }
-            </ff-dropdown-content>
-          </ff-dropdown-menu>
-        </div>
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost" trailingIcon="chevron-down">{{ language() }}</button>
+          <ff-dropdown-content [checkedIndex]="languageMatches().indexOf(language())">
+            <ff-dropdown-search [(value)]="languageQuery" placeholder="Search languages" />
+            @for (l of languageMatches(); track l; let i = $index) {
+              <ff-menu-item [index]="i" [label]="l" [checked]="language() === l" (select)="language.set(l)" />
+            }
+            @if (languageMatches().length === 0) {
+              <ff-dropdown-empty>No languages found</ff-dropdown-empty>
+            }
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
       </app-demo-section>
 
       <app-demo-section title="Searchable multiple selection">
-        <div class="flex w-full flex-col items-center gap-6">
-          <p class="text-site-body text-muted-foreground">
-            Both at once. Compute <code>checkedIndices</code> against the filtered rows; Enter toggles the focused row
-            and the menu stays open.
-          </p>
-          <ff-dropdown-menu>
-            <button ffButton ffDropdownTrigger variant="ghost">Labels · {{ labels().length }}</button>
-            <ff-dropdown-content [checkedIndices]="labelChecked()">
-              <ff-dropdown-search [(value)]="labelQuery" placeholder="Search labels" />
-              @for (l of labelMatches(); track l; let i = $index) {
-                <ff-menu-item
-                  [index]="i"
-                  [label]="l"
-                  [checked]="labels().includes(l)"
-                  (select)="labels.set(toggled(labels(), l))"
-                />
-              }
-              @if (labelMatches().length === 0) {
-                <ff-dropdown-empty>No labels found</ff-dropdown-empty>
-              }
-            </ff-dropdown-content>
-          </ff-dropdown-menu>
-        </div>
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost">Labels · {{ labels().length }}</button>
+          <ff-dropdown-content [checkedIndices]="labelChecked()">
+            <ff-dropdown-search [(value)]="labelQuery" placeholder="Search labels" />
+            @for (l of labelMatches(); track l; let i = $index) {
+              <ff-menu-item
+                [index]="i"
+                [label]="l"
+                [checked]="labels().includes(l)"
+                (select)="labels.set(toggled(labels(), l))"
+              />
+            }
+            @if (labelMatches().length === 0) {
+              <ff-dropdown-empty>No labels found</ff-dropdown-empty>
+            }
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
       </app-demo-section>
 
       <app-demo-section title="Create from the query">
-        <div class="flex w-full flex-col items-center gap-6">
-          <p class="text-site-body text-muted-foreground">
-            1 extra row when nothing matches. Type a component that is not there, press ↑ to reach it, then Enter.
-          </p>
-          <ff-dropdown-menu>
-            <button ffButton ffDropdownTrigger variant="ghost">Components · {{ used().length }}</button>
-            <ff-dropdown-content [checkedIndices]="usedChecked()">
-              <ff-dropdown-search [(value)]="componentQuery" placeholder="Search components" />
-              @for (c of componentMatches(); track c; let i = $index) {
-                <ff-menu-item
-                  [index]="i"
-                  [label]="c"
-                  [checked]="used().includes(c)"
-                  (select)="used.set(toggled(used(), c))"
-                />
-              }
-              <!-- A create row while the query matches no label exactly. Last,
-                   after the real matches, so ↑ from the search field reaches it
-                   in one press. -->
-              @if (canCreate()) {
-                <ff-menu-item
-                  [index]="componentMatches().length"
-                  icon="plus"
-                  [label]="'Create “' + componentQ() + '”'"
-                  [closeOnClick]="false"
-                  (select)="create()"
-                />
-              }
-              @if (componentMatches().length === 0 && !canCreate()) {
-                <ff-dropdown-empty>No components found</ff-dropdown-empty>
-              }
-            </ff-dropdown-content>
-          </ff-dropdown-menu>
-        </div>
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost">Components · {{ used().length }}</button>
+          <ff-dropdown-content [checkedIndices]="usedChecked()">
+            <ff-dropdown-search [(value)]="componentQuery" placeholder="Search components" />
+            @for (c of componentMatches(); track c; let i = $index) {
+              <ff-menu-item
+                [index]="i"
+                [label]="c"
+                [checked]="used().includes(c)"
+                (select)="used.set(toggled(used(), c))"
+              />
+            }
+            <!-- A create row while the query matches no label exactly. Last,
+                 after the real matches, so ↑ from the search field reaches it
+                 in one press. -->
+            @if (canCreate()) {
+              <ff-menu-item
+                [index]="componentMatches().length"
+                icon="plus"
+                [label]="'Create “' + componentQ() + '”'"
+                [closeOnClick]="false"
+                (select)="create()"
+              />
+            }
+            @if (componentMatches().length === 0 && !canCreate()) {
+              <ff-dropdown-empty>No components found</ff-dropdown-empty>
+            }
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
       </app-demo-section>
     </app-demo-page>
   `,

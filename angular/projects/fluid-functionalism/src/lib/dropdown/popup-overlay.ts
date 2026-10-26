@@ -38,8 +38,72 @@ export interface PopupPlacement {
 
 const OPPOSITE: Record<PopupSide, PopupSide> = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
 
-/** Keeps the popup this far from the viewport edges, in px. */
-const VIEWPORT_MARGIN = 8;
+/** Keeps the popup this far from the viewport edges, in px (Base UI's
+ *  default `collisionPadding`). */
+const COLLISION_PADDING = 5;
+
+/** Base UI pads every side 1px more for the flip decision than for the
+ *  size, and the side across from the requested one 1px more again, so a
+ *  popup that overflows both sides alike stays where it was asked to go. */
+const FLIP_BIAS = 1;
+
+interface AnchorBox {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
+interface ViewportSize {
+  width: number;
+  height: number;
+}
+
+/**
+ * The side a popup of `size` opens on (Base UI's floating-ui `flip` with its
+ * `bestFit` fallback): the requested side when it fits, else the opposite
+ * one when that fits, else whichever overflows less, the requested side
+ * winning a tie through the flip bias.
+ */
+export function choosePopupSide(
+  preferred: PopupSide,
+  anchor: AnchorBox,
+  size: { width: number; height: number },
+  viewport: ViewportSize,
+  sideOffset: number,
+): PopupSide {
+  const padding = (s: PopupSide) => COLLISION_PADDING + FLIP_BIAS + (s === OPPOSITE[preferred] ? FLIP_BIAS : 0);
+  const overflow = (s: PopupSide) => {
+    const needed = (s === 'top' || s === 'bottom' ? size.height : size.width) + sideOffset;
+    const space =
+      s === 'bottom'
+        ? viewport.height - anchor.bottom
+        : s === 'top'
+          ? anchor.top
+          : s === 'right'
+            ? viewport.width - anchor.right
+            : anchor.left;
+    return needed - (space - padding(s));
+  };
+  const opposite = OPPOSITE[preferred];
+  const wanted = overflow(preferred);
+  if (wanted <= 0) return preferred;
+  const other = overflow(opposite);
+  if (other <= 0) return opposite;
+  return other < wanted ? opposite : preferred;
+}
+
+/** The height left for the popup on `side` (Base UI's `size()`, which
+ *  writes `--available-height` unrounded). */
+export function availableSpace(side: PopupSide, anchor: AnchorBox, viewport: ViewportSize, sideOffset: number): number {
+  const available =
+    side === 'bottom'
+      ? viewport.height - anchor.bottom - sideOffset - COLLISION_PADDING
+      : side === 'top'
+        ? anchor.top - sideOffset - COLLISION_PADDING
+        : viewport.height - 2 * COLLISION_PADDING;
+  return Math.max(0, available);
+}
 
 /**
  * One CDK connected position for a physical side and a logical alignment.
@@ -124,9 +188,9 @@ export function createPopupOverlay(options: PopupOverlayOptions) {
 
   const rtl = () => options.rtl?.() ?? false;
 
-  const positions = () => {
+  const positionsFor = (s: PopupSide) => {
     const p = options.placement();
-    return [p.side, OPPOSITE[p.side]].map((s) => connectedPosition(s, p.align, p.sideOffset, p.alignOffset, rtl()));
+    return [connectedPosition(s, p.align, p.sideOffset, p.alignOffset, rtl())];
   };
 
   const setSide = (next: PopupSide) => {
@@ -144,22 +208,39 @@ export function createPopupOverlay(options: PopupOverlayOptions) {
     el.style.setProperty('--anchor-width', `${anchor.getBoundingClientRect().width}px`);
   };
 
+  const viewportSize = (): ViewportSize | null => {
+    const view = document.defaultView;
+    if (!view) return null;
+    return {
+      width: document.documentElement.clientWidth || view.innerWidth,
+      height: document.documentElement.clientHeight || view.innerHeight,
+    };
+  };
+
   const syncAvailableHeight = () => {
     const el = options.positioner();
     const anchor = options.anchor();
-    const view = document.defaultView;
-    if (!el || !anchor || !view) return;
-    const rect = anchor.getBoundingClientRect();
-    const viewport = document.documentElement.clientHeight || view.innerHeight;
-    const { sideOffset } = options.placement();
-    const s = side();
-    const available =
-      s === 'bottom'
-        ? viewport - rect.bottom - sideOffset - VIEWPORT_MARGIN
-        : s === 'top'
-          ? rect.top - sideOffset - VIEWPORT_MARGIN
-          : viewport - 2 * VIEWPORT_MARGIN;
-    el.style.setProperty('--available-height', `${Math.max(0, Math.round(available))}px`);
+    const viewport = viewportSize();
+    if (!el || !anchor || !viewport) return;
+    const available = availableSpace(side(), anchor.getBoundingClientRect(), viewport, options.placement().sideOffset);
+    el.style.setProperty('--available-height', `${available}px`);
+  };
+
+  // The side to open on, decided once per open like Base UI's flip: the
+  // popup is measured at its natural size (--available-height seeded with
+  // the viewport, as Base UI seeds 100vh), then CDK is handed that one side.
+  // Letting CDK pick between both sides flips a popup capped to exactly the
+  // space below whenever sub-pixel rounding makes it overflow by a hair.
+  const resolveSide = (): PopupSide => {
+    const p = options.placement();
+    const el = options.positioner();
+    const anchor = options.anchor();
+    const viewport = viewportSize();
+    if (!el || !anchor || !viewport) return p.side;
+    el.style.setProperty('--available-height', `${viewport.height}px`);
+    const box = options.motion() ?? el;
+    const size = { width: box.offsetWidth, height: box.offsetHeight };
+    return choosePopupSide(p.side, anchor.getBoundingClientRect(), size, viewport, p.sideOffset);
   };
 
   const ensureOverlay = () => {
@@ -167,10 +248,10 @@ export function createPopupOverlay(options: PopupOverlayOptions) {
     const anchor = options.anchor();
     if (!anchor) return null;
     strategy = createFlexibleConnectedPositionStrategy(injector, anchor)
-      .withPositions(positions())
+      .withPositions(positionsFor(options.placement().side))
       .withFlexibleDimensions(false)
       .withPush(true)
-      .withViewportMargin(VIEWPORT_MARGIN);
+      .withViewportMargin(COLLISION_PADDING);
     strategy.positionChanges.subscribe((change) => setSide(sideOfPair(change.connectionPair, rtl())));
     overlayRef = createOverlayRef(injector, {
       positionStrategy: strategy,
@@ -187,14 +268,16 @@ export function createPopupOverlay(options: PopupOverlayOptions) {
     if (!ref || !el) return;
     const anchor = options.anchor();
     if (anchor) strategy?.setOrigin(anchor);
-    strategy?.withPositions(positions());
     if (!ref.hasAttached()) {
       exiting = false;
       el.style.display = '';
-      setSide(options.placement().side);
       syncAnchorWidth();
+      strategy?.withPositions(positionsFor(options.placement().side));
       ref.attach(new DomPortal(el));
       attached.set(true);
+      const resolved = resolveSide();
+      strategy?.withPositions(positionsFor(resolved));
+      setSide(resolved);
       ref.updatePosition();
       const motion = options.motion();
       if (motion) {

@@ -116,7 +116,9 @@ function createPinnedSize(pinned: () => SizeVariant | undefined, parent: SizeCon
   // resolves DI from this host, the way React context crosses portals.
   providers: [{ provide: SizeContext, useFactory: () => inject(Combobox).sizeContext }],
   host: { style: 'display: contents' },
-  template: `<ng-content />@if (name(); as formName) {@if (multiple()) {@for (v of values(); track v) {<input type="hidden" [name]="formName" [value]="v" />}} @else {<input type="hidden" [name]="formName" [value]="values()[0] ?? ''" [required]="required()" />}}`,
+  // Base UI's clipped 1px input sits after the parts whether or not the
+  // combobox is named; the named hidden inputs carry the form value.
+  template: `<ng-content /><input aria-hidden="true" tabindex="-1" style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0; padding: 0; width: 1px; height: 1px; margin: 0; position: fixed; top: 0; left: 0" [value]="multiple() ? '' : (values()[0] ?? '')" />@if (name(); as formName) {@if (multiple()) {@for (v of values(); track v) {<input type="hidden" [name]="formName" [value]="v" />}} @else {<input type="hidden" [name]="formName" [value]="values()[0] ?? ''" [required]="required()" />}}`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Combobox<T extends ComboboxItemData = ComboboxItemData, V extends ComboboxValue = ComboboxValue> {
@@ -392,12 +394,12 @@ export class Combobox<T extends ComboboxItemData = ComboboxItemData, V extends C
           return;
         }
         if (count === 0) return;
-        // Loop through the field: past either end the highlight clears (the
-        // input is the stop), and the next press wraps — the APG pattern.
+        // Wrap straight from one end to the other: with the always-on
+        // highlight React turns off Base UI's allowEscape, so the input is
+        // never a stop between the ends.
         const step = down ? 1 : -1;
         const current = this.safeHighlight()?.index ?? (down ? -1 : count);
-        const next = current + step;
-        this.highlight.set(next < 0 || next >= count ? null : { index: next, keyboard: true });
+        this.highlight.set({ index: (current + step + count) % count, keyboard: true });
         return;
       }
       case 'Enter': {
