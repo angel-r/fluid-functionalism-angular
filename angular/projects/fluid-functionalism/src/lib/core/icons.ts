@@ -73,13 +73,30 @@ import {
 export type IconNode = [tag: string, attrs: Record<string, string | number>][];
 
 /**
- * The whole contract an icon has to meet: either SVG child nodes (rendered
- * into a 24×24 stroke <svg> by `<ff-icon>`), or a component that accepts the
- * `size`, `strokeWidth` and `class` inputs and forwards them to its <svg>.
- * Components also animate stroke width through the class (1.5 → 2 on hover
- * is a common cue); a filled icon set ignores it and simply loses that cue.
+ * SVG nodes plus how to frame them, for sets that differ from Lucide's 24×24
+ * stroke frame: another viewBox, filled glyphs, a mirroring class, or a set
+ * that switches weight with the stroke width (Phosphor light/regular).
  */
-export type IconDefinition = IconNode | Type<unknown>;
+export interface IconFrame {
+  /** Child nodes, or a function of the stroke width for weight-based sets. */
+  nodes: IconNode | ((strokeWidth: number) => IconNode);
+  /** Defaults to '0 0 24 24'. */
+  viewBox?: string;
+  /** Filled glyphs: `fill="currentColor"` and no stroke. */
+  filled?: boolean;
+  /** Extra classes on the <svg> (e.g. '-scale-x-100' to mirror a glyph). */
+  class?: string;
+}
+
+/**
+ * The whole contract an icon has to meet: SVG child nodes (rendered into a
+ * 24×24 stroke <svg> by `<ff-icon>`), an `IconFrame`, or a component that
+ * accepts the `size`, `strokeWidth` and `class` inputs and forwards them to
+ * its <svg>. Components also animate stroke width through the class (1.5 → 2
+ * on hover is a common cue); a filled icon set ignores it and simply loses
+ * that cue.
+ */
+export type IconDefinition = IconNode | IconFrame | Type<unknown>;
 
 // Names describe the role, not the glyph, so a library whose icon is called
 // something else still fills the same slot (`more-horizontal` is Lucide's

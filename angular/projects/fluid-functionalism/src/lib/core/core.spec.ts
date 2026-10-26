@@ -17,6 +17,7 @@ import {
   provideIcons,
   shapeMap,
   surfaceClasses,
+  type IconFrame,
   type IconNode,
 } from './index';
 
@@ -154,6 +155,36 @@ describe('ff-icon', () => {
     expect(svg.getAttribute('stroke-width')).toBe('1.5');
     expect(svg.getAttribute('width')).toBe('20');
     expect(svg.getAttribute('class')).toBe('lucide lucide-x text-foreground');
+  });
+
+  it('renders an icon frame with its own viewBox, fill and extra class', () => {
+    const filled: IconFrame = { nodes: [['path', { d: 'M0 0h256v256z' }]], viewBox: '0 0 256 256', filled: true, class: '-scale-x-100' };
+    TestBed.configureTestingModule({ providers: [provideIcons({ check: filled })] });
+    const fixture = TestBed.createComponent(IconHost);
+    fixture.detectChanges();
+    const svg = (fixture.nativeElement as HTMLElement).querySelector('svg')!;
+    expect(svg.getAttribute('viewBox')).toBe('0 0 256 256');
+    expect(svg.getAttribute('fill')).toBe('currentColor');
+    expect(svg.getAttribute('stroke')).toBe('none');
+    expect(svg.classList.contains('-scale-x-100')).toBe(true);
+    expect(svg.classList.contains('stroke-[1.5]')).toBe(true);
+  });
+
+  it('swaps weight-based nodes with the stroke width while keeping the svg', () => {
+    const weighted: IconFrame = {
+      nodes: (stroke) => [['path', { d: stroke >= 1.75 ? 'M1 1' : 'M2 2' }]],
+    };
+    TestBed.configureTestingModule({ providers: [provideIcons({ x: weighted })] });
+    const fixture = TestBed.createComponent(LiveIconHost);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const svg = el.querySelector('svg')!;
+    expect(svg.querySelector('path')!.getAttribute('d')).toBe('M1 1');
+    fixture.componentInstance.stroke.set(1.5);
+    fixture.detectChanges();
+    expect(el.querySelector('svg')).toBe(svg);
+    expect(svg.querySelectorAll('path').length).toBe(1);
+    expect(svg.querySelector('path')!.getAttribute('d')).toBe('M2 2');
   });
 
   it('follows provideIcons overrides', () => {
