@@ -81,6 +81,7 @@ export class CalendarSlide {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly mounted = signal(false);
   private exitTimer: ReturnType<typeof setTimeout> | null = null;
+  private frame: number | null = null;
   private wasPresent = true;
 
   constructor() {
@@ -89,10 +90,14 @@ export class CalendarSlide {
       if (this.enter() && this.present()) {
         const from = variants.enter(this.config().direction);
         this.write(from);
-        animate(
-          this.host,
-          { opacity: [from.opacity, 1], x: [from.x, 0], y: [from.y, 0] },
-          variants.centerTransition,
+        // Like motion/react: the panel paints at its enter pose first and
+        // the spring starts on the next frame.
+        this.nextFrame(() =>
+          animate(
+            this.host,
+            { opacity: [from.opacity, 1], x: [from.x, 0], y: [from.y, 0] },
+            variants.centerTransition,
+          ),
         );
       }
       this.mounted.set(true);
@@ -122,6 +127,16 @@ export class CalendarSlide {
 
     inject(DestroyRef).onDestroy(() => {
       if (this.exitTimer !== null) clearTimeout(this.exitTimer);
+      if (this.frame !== null) cancelAnimationFrame(this.frame);
+    });
+  }
+
+  /** Runs `start` on the next frame, replacing any start still pending. */
+  private nextFrame(start: () => void) {
+    if (this.frame !== null) cancelAnimationFrame(this.frame);
+    this.frame = requestAnimationFrame(() => {
+      this.frame = null;
+      start();
     });
   }
 
@@ -141,9 +156,11 @@ export class CalendarSlide {
       this.exitTimer = null;
       this.exited.emit();
     };
-    animate(this.host, { opacity: to.opacity, x: to.x, y: to.y }, variants.exitTransition).finished.then(
-      finish,
-      finish,
+    this.nextFrame(() =>
+      animate(this.host, { opacity: to.opacity, x: to.x, y: to.y }, variants.exitTransition).finished.then(
+        finish,
+        finish,
+      ),
     );
     this.exitTimer = setTimeout(finish, exitFallback);
   }
@@ -152,7 +169,7 @@ export class CalendarSlide {
     if (this.exitTimer !== null) clearTimeout(this.exitTimer);
     this.exitTimer = null;
     const variants = slideVariants(this.config());
-    animate(this.host, { opacity: 1, x: 0, y: 0 }, variants.centerTransition);
+    this.nextFrame(() => animate(this.host, { opacity: 1, x: 0, y: 0 }, variants.centerTransition));
   }
 }
 
