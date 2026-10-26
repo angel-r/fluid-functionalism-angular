@@ -11,6 +11,8 @@
  */
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { Calendar } from '../calendar/calendar';
 import { vi } from 'vitest';
 import { DatePicker, type DatePickerCalendarProps, type DatePickerPreset } from './date-picker';
 import type { DateRange } from '../calendar/calendar-dates';
@@ -348,6 +350,22 @@ describe('date picker popover', () => {
     TestBed.tick();
     await t.open();
     expect(t.dayButton(/October 19th, 2026/)).toBeTruthy();
+  });
+
+  it('draws the calendar in English unless a locale is given, whatever the browser locale', async () => {
+    // React passes no locale to its calendar, so DayPicker stays en-US.
+    const resolved = Intl.DateTimeFormat.prototype.resolvedOptions;
+    const spy = vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockImplementation(function (this: Intl.DateTimeFormat) {
+      return { ...resolved.call(this), locale: 'es-ES' };
+    });
+    const t = setup((h) => h.locale.set(undefined));
+    await t.open();
+    const calendar = () => t.fixture.debugElement.query(By.directive(Calendar)).componentInstance as Calendar;
+    expect(calendar().locale()).toBe('en-US');
+    spy.mockRestore();
+    t.host.locale.set('de-DE');
+    TestBed.tick();
+    expect(calendar().locale()).toBe('de-DE');
   });
 
   it('reaches the calendar through calendarProps', async () => {

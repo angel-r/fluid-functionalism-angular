@@ -85,7 +85,7 @@ export interface DatePickerCalendarProps {
   showOutsideDays?: boolean;
   weekStartsOn?: WeekStartsOn;
   ISOWeek?: boolean;
-  /** BCP 47; defaults to the picker's `locale`. */
+  /** BCP 47; defaults to the picker's `locale`, else `en-US` like the React calendar. */
   locale?: string;
   labels?: Partial<CalendarLabels>;
   formatters?: Partial<CalendarFormatters>;
@@ -421,9 +421,9 @@ export class DatePicker {
   protected readonly field = computed(() => this.variant() === 'outline');
   protected readonly hourCycle = computed(() => resolveHourCycle(this.locale(), this.hourCycleInput()));
   protected readonly cal = computed<DatePickerCalendarProps>(() => this.calendarProps() ?? {});
-  protected readonly calendarLocale = computed(
-    () => this.cal().locale ?? this.locale() ?? new Intl.DateTimeFormat().resolvedOptions().locale,
-  );
+  // React passes no locale to its calendar, so DayPicker draws en-US whatever
+  // the browser; a picker `locale` (or calendarProps.locale) opts in.
+  protected readonly calendarLocale = computed(() => this.cal().locale ?? this.locale() ?? 'en-US');
   protected readonly resolvedNumberOfMonths = computed<1 | 2>(
     () => this.numberOfMonths() ?? (this.mode() === 'range' ? 2 : 1),
   );
