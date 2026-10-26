@@ -1,2 +1,1 @@
-// Placeholder: the menu item port lands here.
-export {};
+export * from './menu-item';

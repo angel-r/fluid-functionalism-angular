@@ -1,2 +1,1 @@
-// Placeholder: the dropdown search port lands here.
-export {};
+export * from './dropdown-search';

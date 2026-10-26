@@ -1,2 +1,1 @@
-// Placeholder: the mobile drawer port lands here.
-export {};
+export * from './mobile-drawer';
