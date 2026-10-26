@@ -33,57 +33,43 @@ function demoPresets(today = new Date()): DatePickerPreset[] {
       description="Outline or ghost trigger for a date, a range, or a date and a time: a calendar popover with presets, and time slot lists that show each duration."
     >
       <app-demo-section title="Date">
-        <div class="flex w-full max-w-md flex-col gap-3">
+        <div class="w-full">
           <ff-date-picker [(value)]="date" />
-          <p class="text-site-caption text-muted-foreground">Opens on the selected day, or today. Pick one and it closes.</p>
         </div>
       </app-demo-section>
 
       <app-demo-section title="Range with presets">
-        <div class="flex w-full max-w-md flex-col gap-3">
+        <div class="w-full">
           <ff-date-picker mode="range" [(value)]="range" [presets]="presets" />
-          <p class="text-site-caption text-muted-foreground">
-            Pick a start and an end, or a preset. It closes once the end is set; Escape mid-pick puts the previous
-            range back.
-          </p>
         </div>
       </app-demo-section>
 
       <app-demo-section title="Date and time">
-        <div class="flex w-full max-w-md flex-col gap-3">
-          <div class="flex w-full flex-col gap-1">
-            <div class="px-2 text-site-title text-foreground" [style.font-variation-settings]="semibold">
-              Design review
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="w-20 px-2 text-site-body text-muted-foreground">When</span>
-              <ff-date-picker variant="ghost" [(value)]="eventDate" [(timeRange)]="eventTime" />
-            </div>
+        <div class="flex w-full flex-col gap-1">
+          <div class="px-2 text-site-title text-foreground" [style.font-variation-settings]="semibold">
+            Design review
           </div>
-          <p class="text-site-caption text-muted-foreground">
-            2 segments, 2 popovers. Type 1130 or 11:30am in a time, or arrow through the slots. The end list counts the
-            duration from the start.
-          </p>
+          <div class="flex items-center gap-2">
+            <span class="w-20 px-2 text-site-body text-muted-foreground">When</span>
+            <ff-date-picker variant="ghost" [(value)]="eventDate" [(timeRange)]="eventTime" />
+          </div>
         </div>
-        <div class="flex w-full max-w-md flex-col gap-3">
+      </app-demo-section>
+
+      <app-demo-section title="Date and time">
+        <div class="w-full">
           <ff-date-picker [(value)]="deadline" [(time)]="deadlineTime" [step]="30" />
-          <p class="text-site-caption text-muted-foreground">
-            time takes one time instead. step sets the minutes between slots.
-          </p>
         </div>
       </app-demo-section>
 
       <app-demo-section title="Booked days">
-        <div class="flex w-full max-w-md flex-col gap-3">
+        <div class="w-full">
           <ff-date-picker
             mode="range"
             placeholder="Check in → check out"
             [(value)]="stay"
             [calendarProps]="bookingProps"
           />
-          <p class="text-site-caption text-muted-foreground">
-            calendarProps reaches the calendar inside: booked nights, past days, cell size.
-          </p>
         </div>
       </app-demo-section>
     </app-demo-page>

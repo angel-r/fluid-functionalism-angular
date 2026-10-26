@@ -463,6 +463,18 @@ describe('Calendar grid and keyboard', () => {
     });
     expect(document.activeElement).toBe(dayButton(/November 17th, 2026/));
   });
+
+  it('autoFocus keeps the tab stop focused when two months re-wrap their weeks after measuring', async () => {
+    const { dayButton, flush, fixture } = render((h) => {
+      h.autoFocus.set(true);
+      h.mode.set('range');
+      h.numberOfMonths.set(2);
+      h.selected.set(range(new Date(2026, 10, 17), new Date(2026, 10, 19)));
+    });
+    await fixture.whenStable();
+    flush();
+    expect(document.activeElement).toBe(dayButton(/November 17th, 2026/));
+  });
 });
 
 describe('Calendar navigation', () => {

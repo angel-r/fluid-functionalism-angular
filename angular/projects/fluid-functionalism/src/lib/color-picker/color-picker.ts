@@ -97,8 +97,11 @@ const sliderNumber = (v: SliderValue) => (typeof v === 'number' ? v : v[0]);
 
     <!-- A hue picked on the rail is a new stated hue, so the sticky OKLCH hue
          is dropped and OKLCH H follows the color again. -->
+    <!-- The stack's [&>*]:mb-0 reaches the ff-slider hosts; each host passes
+         it on to the slider root inside, React's direct child. -->
     <div class="flex flex-col [&>*]:mb-0 [&>*+*]:-mt-px">
       <ff-slider
+        class="[&>*]:mb-0"
         aria-label="Hue"
         [value]="hsv().h"
         (valueChange)="onHue($event)"
@@ -114,6 +117,7 @@ const sliderNumber = (v: SliderValue) => (typeof v === 'number' ? v : v[0]);
       <!-- Alpha runs on whole percents. The gradient layers over the same 8px
            checker as the tiles, and the thumb shows the opaque color. -->
       <ff-slider
+        class="[&>*]:mb-0"
         aria-label="Alpha"
         [value]="alphaPercent()"
         (valueChange)="onAlpha($event)"

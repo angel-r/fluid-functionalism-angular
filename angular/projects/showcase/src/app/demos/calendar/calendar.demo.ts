@@ -28,68 +28,34 @@ function demoRate(day: Date) {
       description="Month grid for a day or a range: one fluid hover across both months, a range band that follows the pointer, booked and unavailable days, and week numbers."
     >
       <app-demo-section title="Single">
-        <div class="flex flex-col items-center gap-3">
-          <ff-calendar [(selected)]="date" />
-          <p class="text-site-caption text-muted-foreground">
-            Click a day, or arrow to it and press Enter. PageUp and PageDown change the month.
-          </p>
-        </div>
+        <ff-calendar [(selected)]="date" />
       </app-demo-section>
 
       <app-demo-section title="Range">
-        <div class="flex flex-col items-center gap-3">
-          <ff-calendar mode="range" [numberOfMonths]="2" orientation="horizontal" [(selected)]="range" />
-          <p class="text-site-caption text-muted-foreground">
-            2 months, one hover. Pick a start, then move: the band follows the pointer across the month break.
-          </p>
-        </div>
+        <ff-calendar mode="range" [numberOfMonths]="2" orientation="horizontal" [(selected)]="range" />
       </app-demo-section>
 
       <app-demo-section title="Stacked months">
-        <div class="flex flex-col items-center gap-3">
-          <ff-calendar mode="range" [numberOfMonths]="2" orientation="vertical" [(selected)]="stacked" />
-          <p class="text-site-caption text-muted-foreground">
-            orientation="vertical" stacks the months under one weekday row; "auto" picks this when 2 months don't fit
-            side by side.
-          </p>
-        </div>
+        <ff-calendar mode="range" [numberOfMonths]="2" orientation="vertical" [(selected)]="stacked" />
       </app-demo-section>
 
       <app-demo-section title="Booked and unavailable">
-        <div class="flex flex-col items-center gap-3">
-          <ff-calendar mode="range" [(selected)]="booking" [booked]="booked" [disabled]="past" />
-          <p class="text-site-caption text-muted-foreground">
-            Booked days are struck through and a range can't cross them. Past days only fade.
-          </p>
-        </div>
-        <div class="flex flex-col items-center gap-3">
-          <ff-calendar [(selected)]="weekday" [available]="weekdays" />
-          <p class="text-site-caption text-muted-foreground">
-            available flips the rule: every day it doesn't match is unavailable.
-          </p>
-        </div>
+        <ff-calendar mode="range" [(selected)]="booking" [booked]="booked" [disabled]="past" />
+      </app-demo-section>
+
+      <app-demo-section title="Booked and unavailable">
+        <ff-calendar [(selected)]="weekday" [available]="weekdays" />
       </app-demo-section>
 
       <app-demo-section title="Cell size">
-        <div class="flex flex-col items-center gap-3">
-          <ff-calendar [cellSize]="56" [(selected)]="big" [dayDetail]="rate" [dayDetailTemplate]="rateTpl" />
-          <ng-template #rateTpl let-rate>
-            <span [class]="rate <= 119 ? 'text-[color:var(--success)]' : ''">\${{ rate }}</span>
-          </ng-template>
-          <p class="text-site-caption text-muted-foreground">
-            cellSize sets the cell in px; the numbers keep their size. dayDetail puts a line under each number, a price
-            here: good deals show green.
-          </p>
-        </div>
+        <ff-calendar [cellSize]="56" [(selected)]="big" [dayDetail]="rate" [dayDetailTemplate]="rateTpl" />
+        <ng-template #rateTpl let-rate>
+          <span [class]="rate <= 119 ? 'text-[color:var(--success)]' : ''">\${{ rate }}</span>
+        </ng-template>
       </app-demo-section>
 
       <app-demo-section title="Week numbers">
-        <div class="flex flex-col items-center gap-3">
-          <ff-calendar showWeekNumber [(selected)]="week" />
-          <p class="text-site-caption text-muted-foreground">
-            ISO week numbers in a muted column, with weeks starting on Monday.
-          </p>
-        </div>
+        <ff-calendar showWeekNumber [(selected)]="week" />
       </app-demo-section>
 
       <app-demo-section title="Compact">

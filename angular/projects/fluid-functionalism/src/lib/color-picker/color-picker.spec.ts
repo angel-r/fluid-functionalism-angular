@@ -243,6 +243,15 @@ describe('ColorPicker: rails', () => {
     expect(last()?.parsed.a).toBe(0.99);
     expect(last()?.value).toBe('#ff0000fc');
   });
+
+  it("drops each rail root's bottom margin, as the React stack's [&>*]:mb-0 does", () => {
+    const { root } = setup();
+    for (const label of ['Hue', 'Alpha']) {
+      const host = root().querySelector<HTMLElement>(`ff-slider[aria-label="${label}"]`)!;
+      expect(host.classList.contains('[&>*]:mb-0')).toBe(true);
+      expect(host.firstElementChild!.classList.contains('mb-2')).toBe(true);
+    }
+  });
 });
 
 describe('ColorPicker: format menu', () => {

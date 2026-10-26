@@ -798,10 +798,7 @@ export class Calendar implements CalendarContext {
 
     afterNextRender(() => {
       this.autoFocusPending = this.autoFocus();
-      if (this.autoFocus()) {
-        const target = this.focusTarget();
-        if (target !== null) this.findDayButton(target)?.focus();
-      }
+      if (this.autoFocus()) this.autoFocusDay();
     });
 
     inject(DestroyRef).onDestroy(() => this.ring.destroy());
@@ -1065,6 +1062,28 @@ export class Calendar implements CalendarContext {
       if (!button.closest('[aria-hidden="true"]')) return button;
     }
     return null;
+  }
+
+  /**
+   * DayPicker's autoFocus. The first render also measures the month stride,
+   * and two months side by side then re-wrap their weeks, dropping the day
+   * just focused (React measures before DayPicker's autofocus effect runs):
+   * the render that follows focuses it again, still as a script focus.
+   */
+  private autoFocusDay() {
+    const target = this.focusTarget();
+    if (target === null) return;
+    const button = this.findDayButton(target);
+    button?.focus();
+    afterNextRender(
+      () => {
+        const active = this.host.ownerDocument.activeElement;
+        if (!button || button.isConnected || (active && active !== this.host.ownerDocument.body)) return;
+        this.autoFocusPending = true;
+        this.findDayButton(target)?.focus();
+      },
+      { injector: this.injector },
+    );
   }
 
   /** Moves focus to a day's button, after the render that shows it. */
