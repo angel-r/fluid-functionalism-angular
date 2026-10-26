@@ -1,2 +1,1 @@
-// Placeholder: the tabs port lands here.
-export {};
+export { Tabs, TabsList, TabItem, TabPanel } from './tabs';
