@@ -240,6 +240,25 @@ describe('AskUserQuestions: single select', () => {
     expect(hidden.getAttribute('tabindex')).toBe('-1');
     expect(hidden.getAttribute('role')).toBe('radio');
   });
+
+  it("is a block box with React's exact root class list (no extra display class)", () => {
+    const { row } = renderAuq();
+    const root = row('Designer').closest<HTMLElement>('ff-ask-user-questions')!;
+    expect(root.style.display).toBe('block');
+    expect(root.classList.contains('block')).toBe(false);
+    expect(root.classList.contains('bg-card')).toBe(true);
+  });
+
+  it("renders Base UI's hidden form input as a row child next to the control span, with its inline styles", () => {
+    const { row } = renderAuq();
+    const input = row('Designer').querySelector<HTMLInputElement>('input')!;
+    expect(input.parentElement).toBe(row('Designer'));
+    expect(input.previousElementSibling?.getAttribute('role')).toBe('radio');
+    expect(input.classList.length).toBe(0);
+    expect(input.style.position).toBe('fixed');
+    expect(input.style.clipPath).toBe('inset(50%)');
+    expect(input.style.width).toBe('1px');
+  });
 });
 
 // ── Skip ─────────────────────────────────────────────────

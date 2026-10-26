@@ -77,12 +77,20 @@ const FOOTER_POP: PresencePose = { opacity: 0, scale: 0.85 };
   providers: [{ provide: FLUID_HOVER, useFactory: () => inject(AskUserQuestions).hover }],
   templateUrl: './ask-user-questions.html',
   host: {
+    // A block box standing in for React's root <div>, with its exact classes.
+    style: 'display: block',
     '[class]': 'hostClass()',
     '(keydown)': 'handleRootKey($event)',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AskUserQuestions {
+  /** Base UI's visually hidden form inputs (Radio / Checkbox), style for style. */
+  protected readonly hiddenRadioStyle =
+    'clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:0;position:fixed;top:0;left:0';
+  protected readonly hiddenCheckboxStyle =
+    'clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:absolute';
+
   /** Ordered list of questions to ask. */
   readonly questions = input.required<AskUserQuestion[]>();
   /** The active question. Bind `[(currentIndex)]` to control it; omitted,
@@ -265,11 +273,11 @@ export class AskUserQuestions {
       ? cn(
           // overflow-hidden crops the footer buttons to the card's rounded
           // bounds, so a button animating out is clipped at the edge.
-          'block relative w-full max-w-[520px] overflow-hidden bg-card border border-border',
+          'relative w-full max-w-[520px] overflow-hidden bg-card border border-border',
           this.shape().container,
           this.userClass(),
         )
-      : cn('block w-full max-w-[520px] p-5 bg-card border border-border', this.shape().container, this.userClass()),
+      : cn('w-full max-w-[520px] p-5 bg-card border border-border', this.shape().container, this.userClass()),
   );
   protected readonly headerClass = computed(() =>
     cn(

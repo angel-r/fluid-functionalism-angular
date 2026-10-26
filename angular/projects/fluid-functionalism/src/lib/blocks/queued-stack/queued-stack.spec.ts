@@ -123,7 +123,10 @@ describe('QueuedStack', () => {
     expect(cards().map((c) => c.textContent?.includes('first') || c.textContent?.includes('second') || c.textContent?.includes('third'))).toEqual([true, true, true]);
     expect(cards().map((c) => c.style.zIndex)).toEqual(['100', '99', '98']);
     expect(cards()[0].style.height).toBe(`${QUEUE_CARD_H}px`);
-    expect(cards()[0].style.transformOrigin).toBe('bottom center');
+    // React declares `transformOrigin: "bottom center"`, but framer rewrites it
+    // to 50% 50% as soon as it renders a transform, so every transformed card
+    // (peeks, fan-out, enter, exit) scales about its centre.
+    expect(cards().map((c) => c.style.transformOrigin)).toEqual(['', '', '']);
     expect(cards()[0].classList.contains('pl-3.5')).toBe(true);
     expect(cards()[0].classList.contains('shadow-surface-3')).toBe(true);
   });
@@ -280,6 +283,32 @@ describe('QueuedStack', () => {
       { timeout: 2000 },
     );
     expect(card('a')).not.toBeNull();
+  });
+
+  it('a stack seeded at mount keeps its last card for the exit when the queue empties', async () => {
+    const { host, stack, card, render } = setup((h) => h.queue.set([queued('a', 'first')]));
+    host.queue.set([]);
+    render();
+    expect(stack()).not.toBeNull();
+    expect(card('a')).not.toBeNull();
+    await vi.waitFor(
+      () => {
+        render();
+        expect(stack()).toBeNull();
+      },
+      { timeout: 2000 },
+    );
+  });
+
+  it('a count seeded at mount stays for its exit when the overflow goes', () => {
+    const { host, el, render } = setup((h) =>
+      h.queue.set([queued('a', '1'), queued('b', '2'), queued('c', '3'), queued('d', '4')]),
+    );
+    const count = () => el.querySelector('[data-slot="queued-stack-count"]');
+    expect(count()).not.toBeNull();
+    host.queue.set([queued('a', '1'), queued('b', '2'), queued('c', '3')]);
+    render();
+    expect(count()).not.toBeNull();
   });
 
   it('morphs a dispatched text card into the sent bubble that claims its layout id', async () => {

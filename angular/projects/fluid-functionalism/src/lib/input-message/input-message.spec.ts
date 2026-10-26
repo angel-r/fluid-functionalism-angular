@@ -691,4 +691,16 @@ describe('InputMessage: suggestions', () => {
       expect(im.querySelector('[role="listbox"]')).toBeNull();
     });
   });
+
+  it('accepting a suggestion keeps the list mounted while its region collapses, then drops it', async () => {
+    const { host, im, render } = setup((h) => h.suggestions.set(list));
+    im.querySelectorAll<HTMLElement>('[role="option"]')[0].click();
+    render();
+    expect(host.value()).toBe('Alpha');
+    expect(im.querySelector('[role="listbox"]')).not.toBeNull();
+    await vi.waitFor(() => {
+      render();
+      expect(im.querySelector('[role="listbox"]')).toBeNull();
+    });
+  });
 });

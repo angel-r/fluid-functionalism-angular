@@ -167,7 +167,6 @@ interface CardState {
               [attr.data-dragging]="draggingId() === entry.key ? '' : null"
               [class]="cardClass(entry.item)"
               [style.height.px]="cardH()"
-              style="transform-origin: bottom center"
               [style.z-index]="zIndexOf(entry)"
               [style.cursor]="expanded() ? 'grab' : 'default'"
               [style.touch-action]="expanded() ? 'none' : null"
@@ -287,12 +286,20 @@ export class QueuedStack {
     source: this.open,
     computation: (isOpen, prev) => (prev === undefined ? false : !isOpen),
   });
-  protected readonly mounted = computed(() => this.open() || this.stackExiting());
+  // The exiting flags are read on every pass, even while shown: a linkedSignal
+  // first read at the close has no previous value and would skip the exit.
+  protected readonly mounted = computed(() => {
+    const exiting = this.stackExiting();
+    return this.open() || exiting;
+  });
   private readonly countExiting = linkedSignal<boolean, boolean>({
     source: () => this.hiddenCount() > 0,
     computation: (shown, prev) => (prev === undefined ? false : !shown),
   });
-  protected readonly countMounted = computed(() => this.hiddenCount() > 0 || this.countExiting());
+  protected readonly countMounted = computed(() => {
+    const exiting = this.countExiting();
+    return this.hiddenCount() > 0 || exiting;
+  });
   // `holdOnEmpty`: an emptied stack fades out with its last cards in place.
   private readonly presence = createPresenceList(() => this.queue(), (item) => item.id, true);
   protected readonly entries = this.presence.entries;

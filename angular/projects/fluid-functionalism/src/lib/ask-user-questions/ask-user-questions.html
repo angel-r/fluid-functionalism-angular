@@ -132,17 +132,21 @@
                       [attr.aria-checked]="isSelected(opt, i) ? 'true' : 'false'"
                       [attr.data-checked]="isSelected(opt, i) ? '' : null"
                       [attr.data-unchecked]="isSelected(opt, i) ? null : ''"
-                      ><input
-                        [type]="isMulti() ? 'checkbox' : 'radio'"
-                        class="sr-only"
-                        aria-hidden="true"
-                        tabindex="-1"
-                        [attr.name]="isMulti() ? optionId(opt, i) : null"
-                        [value]="optionId(opt, i)"
-                        [checked]="isSelected(opt, i)"
-                        (click)="$event.stopPropagation()"
-                        (change)="handleHiddenChange(optionId(opt, i), $any($event.target).checked)"
-                    /></span>
+                    ></span>
+                    <!-- Base UI's visually hidden form input: a sibling of the
+                         control span, with Base UI's exact inline styles. -->
+                    <input
+                      ffAuqHiddenControl
+                      [type]="isMulti() ? 'checkbox' : 'radio'"
+                      [attr.style]="isMulti() ? hiddenCheckboxStyle : hiddenRadioStyle"
+                      aria-hidden="true"
+                      tabindex="-1"
+                      [attr.name]="isMulti() ? optionId(opt, i) : null"
+                      [value]="optionId(opt, i)"
+                      [checked]="isSelected(opt, i)"
+                      (click)="$event.stopPropagation()"
+                      (change)="handleHiddenChange(optionId(opt, i), $any($event.target).checked)"
+                    />
                   </div>
                 }
 
