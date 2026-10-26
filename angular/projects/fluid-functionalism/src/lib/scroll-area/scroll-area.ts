@@ -29,6 +29,8 @@ type Axis = 'vertical' | 'horizontal';
 
 /** Smallest thumb length, in px, however long the content gets. */
 const MIN_THUMB_SIZE = 16;
+/** Radix's floor (`getThumbSize`). */
+const MIN_TRACK_THUMB_SIZE = 18;
 /** How long `data-scrolling` outlives the last scroll event, in ms. */
 const SCROLL_TIMEOUT = 500;
 
@@ -59,9 +61,9 @@ function edges(element: Element, box: 'margin' | 'padding', axis: Axis) {
 }
 
 /** Thumb length and offset for one axis: the visible fraction of the free track. */
-function thumbGeometry(track: number, client: number, scroll: number, position: number) {
+function thumbGeometry(track: number, client: number, scroll: number, position: number, min = MIN_THUMB_SIZE) {
   const range = scroll - client;
-  const size = Math.min(track, Math.max(MIN_THUMB_SIZE, scroll > 0 ? (client / scroll) * track : track));
+  const size = Math.min(track, Math.max(min, scroll > 0 ? (client / scroll) * track : track));
   const free = track - size;
   const offset = range > 0 ? (Math.min(Math.max(position, 0), range) / range) * free : 0;
   return { size, offset, free, range };
@@ -175,10 +177,13 @@ export class ScrollBar {
   private geometry(metrics: ScrollMetrics, orientation: Axis, thumb: HTMLElement) {
     const vertical = orientation === 'vertical';
     const length = vertical ? this.host.clientHeight : this.host.clientWidth;
-    const track = Math.max(0, length - edges(this.host, 'padding', orientation) - edges(thumb, 'margin', orientation));
+    const inset = this.area.thumbSizing() === 'inset';
+    const margins = inset ? edges(thumb, 'margin', orientation) : 0;
+    const track = Math.max(0, length - edges(this.host, 'padding', orientation) - margins);
+    const min = inset ? MIN_THUMB_SIZE : MIN_TRACK_THUMB_SIZE;
     return vertical
-      ? thumbGeometry(track, metrics.clientHeight, metrics.scrollHeight, metrics.scrollTop)
-      : thumbGeometry(track, metrics.clientWidth, metrics.scrollWidth, metrics.scrollLeft);
+      ? thumbGeometry(track, metrics.clientHeight, metrics.scrollHeight, metrics.scrollTop, min)
+      : thumbGeometry(track, metrics.clientWidth, metrics.scrollWidth, metrics.scrollLeft, min);
   }
 
   private pointerPosition(event: PointerEvent) {
@@ -326,6 +331,13 @@ export class ScrollArea {
   /** Classes for the inner scrolling viewport — where the scroll-fade
    *  utility goes. (React: `viewportClassName`.) */
   readonly viewportClass = input('');
+  /**
+   * How the thumb is measured. `"inset"` (Base UI, the standalone area) fits
+   * it inside its own margins; `"track"` (Radix, which every component's list
+   * uses on the React site) measures the whole track and floors at 18px, so
+   * the margins only shift it.
+   */
+  readonly thumbSizing = input<'inset' | 'track'>('inset');
   /** Classes for the outer container — set the height/width constraint here. */
   readonly userClass = input('', { alias: 'class' });
 

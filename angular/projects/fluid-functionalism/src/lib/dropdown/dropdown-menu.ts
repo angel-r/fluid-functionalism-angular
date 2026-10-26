@@ -286,7 +286,7 @@ const POPUP_TEMPLATE = `
       >
         <!-- The list scrolls inside a ScrollArea; the inner wrapper is the
              rows' offsetParent, so the overlays scroll with them. -->
-        <ff-scroll-area [class]="scrollAreaClass" [viewportClass]="viewportClass()">
+        <ff-scroll-area [class]="scrollAreaClass" [viewportClass]="viewportClass()" thumbSizing="track">
           <div #list class="relative flex flex-col p-1">
             <!-- Selected backgrounds — merged runs in multiple mode -->
             @if (multiple()) {

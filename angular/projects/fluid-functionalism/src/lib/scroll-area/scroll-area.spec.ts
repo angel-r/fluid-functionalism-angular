@@ -23,6 +23,7 @@ import { ScrollArea } from './scroll-area';
       class="h-56 w-64"
       [orientation]="orientation()"
       [viewportClass]="viewportClass()"
+      [thumbSizing]="thumbSizing()"
     >
       <p data-testid="row">Row</p>
     </ff-scroll-area>
@@ -31,6 +32,7 @@ import { ScrollArea } from './scroll-area';
 class Host {
   readonly orientation = signal<'vertical' | 'horizontal' | 'both'>('vertical');
   readonly viewportClass = signal('scroll-fade');
+  readonly thumbSizing = signal<'inset' | 'track'>('inset');
 }
 
 /** Layout stubs: [client, scroll] per axis for the viewport, and the
@@ -169,6 +171,30 @@ describe('ScrollArea: scrollbar', () => {
     layout.viewport.scrollHeight = 10000;
     scroll(0);
     expect(scrollbar('vertical')!.style.getPropertyValue('--scroll-area-thumb-height')).toBe('16px');
+  });
+
+  it('inset sizing (Base UI) fits the thumb inside its margins', () => {
+    const { scrollbar, thumb, scroll } = setup();
+    layout.viewport.scrollHeight = 400;
+    scroll(0);
+    thumb('vertical')!.style.margin = '4px 0px';
+    scroll(150);
+    // (100 - 8) * 100/400 = 23; halfway along 92 - 23 = 69.
+    expect(scrollbar('vertical')!.style.getPropertyValue('--scroll-area-thumb-height')).toBe('23px');
+    expect(thumb('vertical')!.style.transform).toBe('translate3d(0px, 34.5px, 0px)');
+  });
+
+  it('track sizing (Radix, used inside components) measures the whole track and floors at 18px', () => {
+    const { scrollbar, thumb, scroll } = setup((h) => h.thumbSizing.set('track'));
+    layout.viewport.scrollHeight = 400;
+    scroll(0);
+    thumb('vertical')!.style.margin = '4px 0px';
+    scroll(150);
+    expect(scrollbar('vertical')!.style.getPropertyValue('--scroll-area-thumb-height')).toBe('25px');
+    expect(thumb('vertical')!.style.transform).toBe('translate3d(0px, 37.5px, 0px)');
+    layout.viewport.scrollHeight = 10000;
+    scroll(0);
+    expect(scrollbar('vertical')!.style.getPropertyValue('--scroll-area-thumb-height')).toBe('18px');
   });
 
   it('shows on hover: data-hovering follows the pointer over the area', () => {

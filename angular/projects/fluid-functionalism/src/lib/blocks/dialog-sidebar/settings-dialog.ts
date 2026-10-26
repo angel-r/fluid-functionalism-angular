@@ -149,7 +149,7 @@ const SECTIONS: SettingsSection[] = [
                 {{ current().description }}
               </p>
             </div>
-            <ff-scroll-area class="min-h-0 flex-1">
+            <ff-scroll-area class="min-h-0 flex-1" thumbSizing="track">
               <div class="flex flex-col gap-6 px-6 pb-6">
                 @switch (current().id) {
                   @case ('notifications') {
