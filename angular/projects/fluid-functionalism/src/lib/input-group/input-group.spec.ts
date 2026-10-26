@@ -62,7 +62,8 @@ function setup(configure: (host: Host) => void = () => {}) {
       input: root.querySelector<HTMLInputElement>('input')!,
       box: root.querySelector<HTMLElement>('[data-slot="input-container"]')!,
       error: root.querySelector<HTMLElement>('[data-slot="input-error"]'),
-      icon: root.querySelector<HTMLElement>('[data-slot="input-icon"]'),
+      // React renders the <svg> straight in the box; ff-icon's host is display: contents.
+      icon: root.querySelector<SVGSVGElement>('[data-slot="input-container"] svg'),
     };
   };
   const group = fixture.debugElement.query(By.directive(InputGroup)).componentInstance as InputGroup;
@@ -107,12 +108,17 @@ describe('InputGroup', () => {
     expect(box.classList).toContain('bg-transparent');
     expect(box.classList).toContain('ring-transparent');
     expect(icon!.classList).toContain('text-muted-foreground');
+    expect(icon!.getAttribute('stroke-width')).toBe('1.5');
+    expect(box.querySelector('[data-slot="input-icon"]')).toBeNull();
 
     group.hover.setActiveIndex(1);
     flush();
     expect(box.classList).toContain('bg-muted/50');
     expect(box.classList).toContain('ring-border');
+    // Same node, so the CSS transition on color and stroke-width runs.
+    expect(field(1).icon).toBe(icon);
     expect(icon!.classList).toContain('text-foreground');
+    expect(icon!.getAttribute('stroke-width')).toBe('2');
 
     group.hover.setActiveIndex(null);
     input.focus();
@@ -130,7 +136,7 @@ describe('InputGroup', () => {
 
   it('renders the icon at the size step with the field', () => {
     const { field } = setup();
-    const svg = field(1).icon!.querySelector('svg')!;
+    const svg = field(1).icon!;
     expect(svg.getAttribute('class')).toContain('lucide-mail');
     expect(svg.getAttribute('width')).toBe('16');
     expect(field(0).icon).toBeNull();
@@ -198,7 +204,7 @@ describe('InputGroup', () => {
     expect(field(0).box.classList).toContain('h-7');
     expect(field(0).box.classList).toContain('px-2');
     expect(field(0).label.classList).toContain('pl-2');
-    expect(field(1).icon!.querySelector('svg')!.getAttribute('width')).toBe('14');
+    expect(field(1).icon!.getAttribute('width')).toBe('14');
   });
 
   it('emits touch when the input loses focus', () => {

@@ -18,7 +18,15 @@ import { spring } from '../core/springs';
 import { enterTransition } from '../core/motion';
 import { fontWeights } from '../core/font-weight';
 import { injectShape } from '../core/shape';
-import { HOVER_PREVIEW_BG, PIP_SIZE, TOOLTIP_TEXT_CLASS, type HoverPreview, type SliderVariant } from './slider-math';
+import {
+  HOVER_PREVIEW_BG,
+  PIP_SIZE,
+  TOOLTIP_TEXT_CLASS,
+  radixRangeInsets,
+  radixThumbLeft,
+  type HoverPreview,
+  type SliderVariant,
+} from './slider-math';
 import { injectMotionValues, injectTween, springTo, tooltipEnter, tooltipLeave } from './slider-motion';
 import { SliderThumb } from './slider-thumb';
 
@@ -42,6 +50,7 @@ const LINE_HOVER = 'color-mix(in srgb, var(--foreground) 50%, transparent)';
   imports: [SliderThumb],
   host: {
     class: 'relative w-full touch-none',
+    style: 'display: block',
     '(pointerenter)': 'onEnter()',
     '(pointerleave)': 'onLeave()',
     '(mousemove)': 'onMouseMove($event)',
@@ -86,9 +95,19 @@ const LINE_HOVER = 'color-mix(in srgb, var(--foreground) 50%, transparent)';
     >
       <!-- Invisible ARIA slider for keyboard nav + a11y; [&_*]:pointer-events-none
            keeps its thumb off the hit path too, so presses always reach the row. -->
-      <div class="absolute inset-0 opacity-0 pointer-events-none [&_*]:pointer-events-none" [attr.data-disabled]="disabled() ? '' : null">
-        <div class="w-full h-full relative">
-          <div class="w-full h-full"><div></div></div>
+      <span
+        dir="ltr"
+        data-orientation="horizontal"
+        class="absolute inset-0 opacity-0 pointer-events-none [&_*]:pointer-events-none"
+        style="--radix-slider-thumb-transform: translateX(-50%)"
+        [attr.aria-disabled]="disabled()"
+        [attr.data-disabled]="disabled() ? '' : null"
+      >
+        <span data-orientation="horizontal" class="w-full h-full">
+          <span data-orientation="horizontal" [style.left]="ariaRange().left" [style.right]="ariaRange().right"></span>
+        </span>
+        <!-- The thumb has no size here, so Radix adds no in-bounds offset. -->
+        <span style="transform: var(--radix-slider-thumb-transform); position: absolute" [style.left]="ariaThumbLeft()">
           <span
             ffSliderThumb
             class="block outline-none"
@@ -101,8 +120,8 @@ const LINE_HOVER = 'color-mix(in srgb, var(--foreground) 50%, transparent)';
             (valueCommit)="value.set($event)"
             (focusVisibleChange)="isFocused.set($event)"
           ></span>
-        </div>
-      </div>
+        </span>
+      </span>
 
       <!-- Hover preview: the 40% accent bar from the fill edge to the snapped
            hover value. Unrounded; at min or max the row's clip rounds it. -->
@@ -231,6 +250,9 @@ export class SliderComfortable {
     ),
   );
   protected readonly tooltipTextClass = computed(() => cn(TOOLTIP_TEXT_CLASS, this.shape().bg));
+  /** The hidden range span and thumb wrapper, placed as Radix Slider places them. */
+  protected readonly ariaRange = computed(() => radixRangeInsets([this.value()], this.min(), this.max()));
+  protected readonly ariaThumbLeft = computed(() => radixThumbLeft(this.value(), this.min(), this.max(), 0));
   protected readonly valueMinWidth = computed(() => `${String(this.formatValue()(this.max())).length}ch`);
 
   // Row presses and the scrubber's handle strip track their drags apart.

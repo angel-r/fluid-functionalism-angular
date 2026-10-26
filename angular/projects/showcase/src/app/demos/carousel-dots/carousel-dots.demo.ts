@@ -69,9 +69,6 @@ class CarouselSlide {
     <app-demo-page title="Carousel dots" description="Dots for a carousel, static or on autoplay.">
       <app-demo-section title="Static">
         <div class="flex flex-col items-center gap-3">
-          <p class="max-w-sm text-center text-site-body text-muted-foreground">
-            Hover a dot to see its click area, then click it. The highlight glides from dot to dot.
-          </p>
           <app-carousel-slide [index]="staticSlide()" [direction]="staticDirection()" />
           <div (pointerdown.capture)="byHand = true" (keydown.capture)="byHand = true">
             <ff-carousel-dots
@@ -86,10 +83,6 @@ class CarouselSlide {
 
       <app-demo-section title="Autoplay">
         <div class="flex flex-col items-center gap-3">
-          <p class="max-w-sm text-center text-site-body text-muted-foreground">
-            Add <code class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground">autoplay</code>
-            and the pill fills, then the next slide comes in. Hover the slide to pause. Reduced motion turns the timer off.
-          </p>
           <div (mouseenter)="hovering.set(true)" (mouseleave)="hovering.set(false)">
             <app-carousel-slide [index]="autoSlide()" [direction]="autoDirection()" />
           </div>

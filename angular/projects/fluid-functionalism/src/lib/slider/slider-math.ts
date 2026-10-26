@@ -143,6 +143,32 @@ export function keyboardTarget(
 }
 
 // ---------------------------------------------------------------------------
+// Hidden primitive geometry (Radix Slider)
+// ---------------------------------------------------------------------------
+
+function radixPercent(value: number, min: number, max: number): number {
+  const span = max - min;
+  return span === 0 ? 0 : Math.max(0, Math.min(100, (100 / span) * (value - min)));
+}
+
+/** The thumb wrapper's `left`, as Radix Slider writes it: the value's percent
+ *  plus an offset that keeps a `width`-wide thumb inside the track (none
+ *  while the thumb has no size). */
+export function radixThumbLeft(value: number, min: number, max: number, width: number): string {
+  const percent = radixPercent(value, min, max);
+  const half = width / 2;
+  const offset = width ? half - (half / 50) * percent : 0;
+  return `calc(${percent}% + ${offset}px)`;
+}
+
+/** The hidden range span's `left` / `right` insets, as Radix Slider writes them. */
+export function radixRangeInsets(values: readonly number[], min: number, max: number): { left: string; right: string } {
+  const percents = values.map((v) => radixPercent(v, min, max));
+  const start = values.length > 1 ? Math.min(...percents) : 0;
+  return { left: `${start}%`, right: `${100 - Math.max(...percents)}%` };
+}
+
+// ---------------------------------------------------------------------------
 // DOM helpers
 // ---------------------------------------------------------------------------
 

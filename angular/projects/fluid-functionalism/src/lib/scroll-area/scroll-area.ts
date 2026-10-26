@@ -356,7 +356,9 @@ export class ScrollArea {
     () => !this.isTouch() && this.orientation() === 'both' && this.hasOverflowX() && this.hasOverflowY(),
   );
 
-  protected readonly hostClass = computed(() => cn('relative overflow-hidden', this.userClass()));
+  // `block`: the host stands in for React's root <div>; a custom element is
+  // inline by default, which would ignore the h-* / w-* classes it carries.
+  protected readonly hostClass = computed(() => cn('block relative overflow-hidden', this.userClass()));
   protected readonly viewportClassName = computed(() =>
     cn('ff-scroll-area-viewport size-full rounded-[inherit]', this.viewportClass()),
   );
