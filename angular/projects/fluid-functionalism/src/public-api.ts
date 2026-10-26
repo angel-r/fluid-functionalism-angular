@@ -42,3 +42,4 @@ export * from './lib/sidebar';
 export * from './lib/command-menu';
 export * from './lib/date-picker';
 export * from './lib/input-message';
+export * from './lib/icon-packs';
