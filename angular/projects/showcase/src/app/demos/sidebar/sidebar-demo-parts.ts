@@ -1,15 +1,12 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, booleanAttribute, computed, input, signal } from '@angular/core';
 import {
-  DropdownContent,
-  DropdownMenu,
-  DropdownTrigger,
   Icon,
   MenuItem,
-  SIDEBAR_MENU_POPUP,
+  SidebarBlockMenu,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarInput,
+  SidebarInsetTopbar,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
@@ -17,68 +14,116 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarTrigger,
+  SidebarSearchField,
+  SidebarUserFooter,
+  SidebarWorkspaceHeader,
+  WorkspaceTile,
+  fontWeights,
+  injectShape,
 } from 'fluid-functionalism';
 import { AI_NAV, AI_WORKSPACE, type WikiBranch } from './sidebar-demo-data';
 
-/** The header every example shares: a workspace row and a search field.
- *  (The sidebar-workspace-header and sidebar-search-field blocks land in a
- *  later tier; these are their plain-part equivalents.) */
+// ---------------------------------------------------------------------------
+// Workspace-switcher rows (mirrors lib/docs/workspace-demo.tsx): letter tiles
+// in grey shades as the rows' icons. The visible square renders at the
+// trigger's 20px, centred on the row's icon slot, so the tiles land on the
+// sidebar's leading icon axis. Each tile is an icon component: it takes the
+// icon contract's size / strokeWidth / class inputs.
+// ---------------------------------------------------------------------------
+
+@Directive()
+abstract class DemoLetterTile {
+  readonly size = input(16);
+  readonly strokeWidth = input(1.5);
+  readonly userClass = input('', { alias: 'class' });
+  protected abstract readonly letter: string;
+  protected abstract readonly colors: string;
+  private readonly shape = injectShape();
+  protected readonly semibold = fontWeights.semibold;
+  protected readonly tileClass = computed(
+    () =>
+      `absolute top-1/2 left-1/2 flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[10px] ${
+        this.shape().bgRadius >= 20 ? 'rounded-full' : 'rounded-md'
+      } ${this.colors}`,
+  );
+}
+
+const LETTER_TILE_TEMPLATE = `
+  <span [class]="'relative flex shrink-0 ' + userClass()" [style.width.px]="size()" [style.height.px]="size()">
+    <span [class]="tileClass()" [style.font-variation-settings]="semibold">{{ letter }}</span>
+  </span>
+`;
+
+@Component({ selector: 'app-demo-tile-acme', template: LETTER_TILE_TEMPLATE, host: { style: 'display: contents' } })
+class AcmeTile extends DemoLetterTile {
+  protected readonly letter = 'A';
+  protected readonly colors = 'bg-foreground text-background';
+}
+
+@Component({ selector: 'app-demo-tile-fluid', template: LETTER_TILE_TEMPLATE, host: { style: 'display: contents' } })
+class FluidTile extends DemoLetterTile {
+  protected readonly letter = 'F';
+  protected readonly colors = 'bg-muted-foreground text-background';
+}
+
+@Component({ selector: 'app-demo-tile-personal', template: LETTER_TILE_TEMPLATE, host: { style: 'display: contents' } })
+class PersonalTile extends DemoLetterTile {
+  protected readonly letter = 'P';
+  protected readonly colors = 'bg-muted-foreground/60 text-background';
+}
+
+/** The header every example shares: the sidebar-workspace-header block fed
+ *  this page's workspace and the shared switcher menu, then the
+ *  sidebar-search-field block. */
 @Component({
   selector: 'app-sidebar-demo-header',
-  imports: [SidebarHeader, SidebarInput, SidebarMenu, SidebarMenuItem, SidebarMenuButton, Icon],
+  imports: [SidebarHeader, SidebarWorkspaceHeader, WorkspaceTile, SidebarBlockMenu, SidebarSearchField, MenuItem],
   host: { class: 'contents' },
   template: `
     <div ffSidebarHeader>
-      <ul ffSidebarMenu aria-label="Workspace">
-        <li ffSidebarMenuItem>
-          <button ffSidebarMenuButton aria-label="Switch workspace">
-            <span class="-mx-0.5 flex size-5 shrink-0 items-center justify-center rounded-md bg-foreground text-[11px] font-semibold text-background">A</span>
-            <span class="min-w-0 truncate text-[13px] text-foreground">{{ workspace }}</span>
-            <span class="ml-auto -mr-0.5 flex size-6 shrink-0 items-center justify-center">
-              <ff-icon name="chevrons-up-down" [size]="16" [strokeWidth]="1.5" class="text-muted-foreground" />
-            </span>
-          </button>
-        </li>
-      </ul>
-      <input ffSidebarInput placeholder="Search" aria-label="Search" />
+      <ff-sidebar-workspace-header [name]="workspace" [checkedIndex]="0">
+        <span ffWorkspaceTile>A</span>
+        <ng-template ffSidebarBlockMenu>
+          <ff-menu-item [index]="0" [icon]="tiles.acme" label="Acme Inc" [checked]="true" />
+          <ff-menu-item [index]="1" [icon]="tiles.fluid" label="Fluid Labs" />
+          <ff-menu-item [index]="2" [icon]="tiles.personal" label="Personal" />
+          <ff-menu-item [index]="3" icon="plus" label="New workspace" />
+        </ng-template>
+      </ff-sidebar-workspace-header>
+      <ff-sidebar-search-field />
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarDemoHeader {
   protected readonly workspace = AI_WORKSPACE;
+  protected readonly tiles = { acme: AcmeTile, fluid: FluidTile, personal: PersonalTile };
 }
 
-/** The footer's user row, opening a dropdown on the sidebar menu grid. */
+/** The footer's user row: the sidebar-user-footer block, opening its menu
+ *  upward on the sidebar menu grid. */
 @Component({
   selector: 'app-sidebar-demo-footer-user',
-  imports: [SidebarMenu, SidebarMenuItem, SidebarMenuButton, DropdownMenu, DropdownTrigger, DropdownContent, MenuItem, Icon],
+  imports: [SidebarUserFooter, SidebarBlockMenu, MenuItem],
   host: { class: 'contents' },
   template: `
-    <ul ffSidebarMenu aria-label="User">
-      <li ffSidebarMenuItem>
-        <ff-dropdown-menu>
-          <button ffSidebarMenuButton ffDropdownTrigger aria-label="Open user menu">
-            <span class="-ml-0.5 -mr-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-foreground outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10">MT</span>
-            <span class="min-w-0 truncate text-[13px] text-foreground">Micka Touillaud</span>
-            <span class="ml-auto -mr-0.5 flex size-6 shrink-0 items-center justify-center">
-              <ff-icon name="chevrons-up-down" [size]="16" [strokeWidth]="1.5" class="text-muted-foreground" />
-            </span>
-          </button>
-          <ff-dropdown-content [class]="popupClass" side="top" align="start" [sideOffset]="6">
-            <ff-menu-item [index]="0" icon="user" label="Profile" />
-            <ff-menu-item [index]="1" icon="settings" label="Settings" />
-            <ff-menu-item [index]="2" icon="arrow-left" label="Log out" />
-          </ff-dropdown-content>
-        </ff-dropdown-menu>
-      </li>
-    </ul>
+    <ff-sidebar-user-footer name="Micka Touillaud">
+      <span
+        class="flex size-5 items-center justify-center rounded-full bg-muted text-[10px] text-foreground outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+        [style.font-variation-settings]="semibold"
+        >MT</span
+      >
+      <ng-template ffSidebarBlockMenu>
+        <ff-menu-item [index]="0" icon="user" label="Profile" />
+        <ff-menu-item [index]="1" icon="settings" label="Settings" />
+        <ff-menu-item [index]="2" icon="arrow-left" label="Log out" />
+      </ng-template>
+    </ff-sidebar-user-footer>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarDemoFooterUser {
-  protected readonly popupClass = SIDEBAR_MENU_POPUP;
+  protected readonly semibold = fontWeights.semibold;
 }
 
 /** The product's top-level nav under a collapsible section label. Flat in
@@ -241,14 +286,14 @@ export class SidebarDemoBranches {
   }
 }
 
-/** The main region's bare topbar: the trigger and an optional caption. */
+/** The main region's bare topbar: the sidebar-inset-topbar block with an
+ *  optional caption. */
 @Component({
   selector: 'app-sidebar-demo-topbar',
-  imports: [SidebarTrigger],
+  imports: [SidebarInsetTopbar],
   host: { class: 'contents' },
   template: `
-    <header class="flex h-12 shrink-0 items-center gap-2 px-3">
-      <ff-sidebar-trigger />
+    <header ffSidebarInsetTopbar>
       <span class="text-[13px] text-muted-foreground">{{ title() }}</span>
     </header>
   `,
