@@ -1,2 +1,1 @@
-// Placeholder: the checkbox group port lands here.
-export {};
+export { CheckboxGroup, CheckboxItem } from './checkbox-group';
