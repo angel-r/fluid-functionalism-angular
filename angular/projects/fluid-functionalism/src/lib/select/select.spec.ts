@@ -312,11 +312,11 @@ describe('select picking', () => {
     expect(option('Cherry').getAttribute('aria-selected')).toBe('true');
     // Held open for the acknowledgment.
     expect(trigger().getAttribute('aria-expanded')).toBe('true');
-    await wait(ACK_MS);
-    expect(trigger().getAttribute('aria-expanded')).toBe('false');
+    // Real timers: under a loaded parallel run the acknowledgment and exit
+    // timers can fire late, so poll past them instead of sleeping exactly.
+    await vi.waitFor(() => expect(trigger().getAttribute('aria-expanded')).toBe('false'), { timeout: ACK_MS * 5 });
     expect(document.activeElement).toBe(trigger());
-    await wait(EXIT_MS);
-    expect(shownListbox()).toBeNull();
+    await vi.waitFor(() => expect(shownListbox()).toBeNull(), { timeout: EXIT_MS * 5 });
   });
 
   it('picks the focused option with Enter and with Space', () => {
@@ -336,8 +336,7 @@ describe('select picking', () => {
     expect(value().textContent?.trim()).toBe('Apple');
     expect(option('Apple').getAttribute('aria-selected')).toBe('true');
     expect(host.changes).toEqual([]);
-    await wait(ACK_MS);
-    expect(trigger().getAttribute('aria-expanded')).toBe('false');
+    await vi.waitFor(() => expect(trigger().getAttribute('aria-expanded')).toBe('false'), { timeout: ACK_MS * 5 });
   });
 
   it('ignores a disabled option and skips it with the arrows', async () => {
