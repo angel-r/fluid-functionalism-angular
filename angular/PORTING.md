@@ -47,3 +47,18 @@ The Base UI and Radix flavors share one behavior: port it once.
 - Run focused tests from `angular/`: `npx ng test fluid-functionalism --watch=false --include='**/<name>/*.spec.ts'`.
 - Do not run `ng build`, `ng serve`, `npm install`, formatters or generators: several ports run in parallel in this workspace.
 - English for code, comments, docs and demo copy.
+
+## Gotchas found in tier 1
+
+- **Exits:** TestBed (jsdom) never runs `animate.leave` callbacks, even with animations enabled. Implement exits imperatively (keep the element, run motion, remove on `finished`, plus an `exitFallbackMs` timer) — see `fluid-hover-highlight.ts`, `tabs/layer.ts`.
+- **Class order:** host `[class]` and `cn()` reorder tokens. Assert with `classList.contains`, never `className` substrings.
+- **CDK overlay in jsdom:** the flexible position strategy reads `document.documentElement.clientWidth/clientHeight` (0 in jsdom): stub them (1024×768) or the overlay flips. `createOverlayRef` defaults to the popover API; pass the component `Injector` so DI reaches overlay content.
+- **Mocks:** `vi.mock` cannot intercept modules in the prebundled `@angular/build:unit-test` runner. Put heavy or external dependencies behind an `InjectionToken` seam (see `FILE_THUMBNAIL_PDF_RENDERER`).
+- **Provide + consume:** a component that provides a token (e.g. `SizeContext`) must read its parent's with `inject(Token, { skipSelf: true })`; injecting itself throws a circular dependency.
+- **Projected content renders once.** To show it in different wrappers, put `<ng-content />` in an `<ng-template>` and render it with `ngTemplateOutlet` in each branch. A second visual copy (bold-label sizers) mirrors text via `MutationObserver`.
+- **Projection and DI:** projected content resolves DI from the declaring template, i.e. from the component host's `providers`, not from directives inside the component's own template.
+- **`:focus-visible` in jsdom** only matches a scripted focus after a prior `keydown` (Tab). Ring tests must dispatch one first and mock `offsetWidth/offsetHeight` plus wait two rAFs for fluid hover rects.
+- **Two-way values:** a user action writes the `model()` and also emits the React-named output (`toggle`, `select`), so `[(x)]` and `[x]` + `(output)` both work; avoid double toggles by emitting before computing from the model.
+- **Outputs as clickability:** to know whether a parent bound an output (React's "has onClick"), build it with `outputFromObservable` over a subscriber-counting Observable (see `card.ts`).
+- **Type-check demos without `ng build`:** `npx ngc -p <scratch tsconfig>` with `noEmit` and `strictTemplates`, listing only your demo files (drop `baseUrl`), keeps parallel workers from colliding on `dist/`.
+- **Reuse ported parts** through relative imports (`../button`, `../tooltip`, `../scroll-area`, `../menu-item`, `../dropdown-search`, `../radio-group`, `../checkbox-group`, `../slider`); never re-implement them.
