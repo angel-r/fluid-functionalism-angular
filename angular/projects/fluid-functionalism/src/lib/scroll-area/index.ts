@@ -1,2 +1,1 @@
-// Placeholder: the scroll area port lands here.
-export {};
+export * from './scroll-area';

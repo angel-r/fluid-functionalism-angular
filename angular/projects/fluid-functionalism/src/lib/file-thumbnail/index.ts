@@ -1,2 +1,1 @@
-// Placeholder: the file thumbnail port lands here.
-export {};
+export * from './file-thumbnail';
