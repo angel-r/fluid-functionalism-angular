@@ -25,7 +25,7 @@ Assumptions (not requested, revisit if wrong):
 | T0 | S1,S3 | Fork, workspace scaffold, root tooling excludes `angular/` | inline | done | 1cc139a |
 | T1 | S2,S4 | Theme CSS (tokens, surfaces, type-scale, reveal, utilities, component CSS) + pure libs: cn, springs, font-weight, popup, type-scale, surface-classes, theme service | inline | done | a6d8f85 |
 | T2 | S2,A1 | DI foundations: shape/size/surface/icon tokens, `provideFluid`, elevated, touch-primary, keyboard-nav-gate | inline | done | a6d8f85 |
-| T3 | S2,S4,S5 | Fluid hover engine + highlight + pick-nearest (+ tests) | inline | done | (this commit) |
+| T3 | S2,S4,S5 | Fluid hover engine + highlight + pick-nearest (+ tests) | inline | done | 76d9f63 |
 | T4 | S2,S5 | Merge-split selection backgrounds | inline | todo | |
 | T5 | S2,S5,S6 | Tier 1 components (badge, thinking-indicator, switch, slider, tooltip, button, scroll-area, file-thumbnail, mobile-drawer, carousel-dots, table, card, input-group, radio-group, checkbox-group, accordion, tabs, tabs-subtle, menu-item, dropdown-search) | delegated, parallel writers (disjoint dirs) | todo | |
 | T6 | S2,S5,S6 | Tier 2 (banner, dialog, input-copy, thinking-steps, chat-message, dropdown(-sub), select, combobox, calendar, color-picker, ask-user-questions, sidebar-core) | delegated, parallel writers | todo | |
