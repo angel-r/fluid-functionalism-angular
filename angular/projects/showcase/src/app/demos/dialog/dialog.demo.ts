@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
   Button,
   Dialog,
@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  SettingsDialog,
   type DialogSize,
 } from 'fluid-functionalism';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
@@ -27,7 +28,7 @@ const DIALOG_PARTS = [
 
 @Component({
   selector: 'app-dialog-demo',
-  imports: [DemoPage, DemoSection, DIALOG_PARTS],
+  imports: [DemoPage, DemoSection, DIALOG_PARTS, SettingsDialog],
   template: `
     <app-demo-page title="Dialog" description="3 widths, spring in and out.">
       <app-demo-section title="Basic">
@@ -66,11 +67,19 @@ const DIALOG_PARTS = [
           }
         </div>
       </app-demo-section>
+
+      <!-- The dialog-sidebar block: an xl dialog, a Sidebar of sections, a
+           scrolling panel. Below sm a Select takes over. -->
+      <app-demo-section title="With a sidebar">
+        <button ffButton variant="secondary" (click)="settingsOpen.set(true)">Open settings</button>
+        <ff-settings-dialog [open]="settingsOpen()" (openChange)="settingsOpen.set($event)" />
+      </app-demo-section>
     </app-demo-page>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DialogDemo {
+  protected readonly settingsOpen = signal(false);
   protected readonly sizes: { size: DialogSize; label: string; description: string }[] = [
     { size: 'sm', label: 'Small', description: '400px: a confirmation, 1 field, a short message.' },
     { size: 'lg', label: 'Large', description: '540px: a short form, or a longer confirmation.' },
