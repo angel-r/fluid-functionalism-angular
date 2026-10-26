@@ -121,6 +121,16 @@ describe('provideFluid', () => {
 })
 class IconHost {}
 
+@Component({
+  imports: [Icon],
+  template: `<ff-icon name="x" [size]="size()" [strokeWidth]="stroke()" [class]="cls()" />`,
+})
+class LiveIconHost {
+  readonly size = signal(16);
+  readonly stroke = signal(2);
+  readonly cls = signal('text-muted-foreground');
+}
+
 describe('ff-icon', () => {
   it('renders the default Lucide icon with the class on the svg', () => {
     const fixture = TestBed.createComponent(IconHost);
@@ -129,6 +139,21 @@ describe('ff-icon', () => {
     expect(svg.getAttribute('width')).toBe('14');
     expect(svg.getAttribute('class')).toBe('lucide lucide-check stroke-[1.5]');
     expect(svg.querySelectorAll('path').length).toBeGreaterThan(0);
+  });
+
+  it('updates size, stroke and class in place so CSS transitions can tween', () => {
+    const fixture = TestBed.createComponent(LiveIconHost);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const svg = el.querySelector('svg')!;
+    fixture.componentInstance.stroke.set(1.5);
+    fixture.componentInstance.cls.set('text-foreground');
+    fixture.componentInstance.size.set(20);
+    fixture.detectChanges();
+    expect(el.querySelector('svg')).toBe(svg);
+    expect(svg.getAttribute('stroke-width')).toBe('1.5');
+    expect(svg.getAttribute('width')).toBe('20');
+    expect(svg.getAttribute('class')).toBe('lucide lucide-x text-foreground');
   });
 
   it('follows provideIcons overrides', () => {
