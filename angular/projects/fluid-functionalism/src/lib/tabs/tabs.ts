@@ -414,6 +414,7 @@ export class TabsList {
   host: {
     '[attr.data-fluid-hover-index]': 'index()',
     '[class]': 'hostClass()',
+    '(mousedown)': 'onMouseDown($event)',
     '(click)': 'onClick()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -484,6 +485,14 @@ export class TabItem {
       untracked(() => this.list.hover.registerItem(index, this.element));
       onCleanup(() => this.list.hover.unregisterItem(index, this.element));
     });
+  }
+
+  // A main-button press selects at once, like Radix (mousedown) and Base UI
+  // (activateOnFocus on press): the pill starts moving on press, not release.
+  protected onMouseDown(e: MouseEvent) {
+    if (e.button !== 0 || e.ctrlKey || this.isSelected()) return;
+    this.onClick();
+    this.tab.open();
   }
 
   protected onClick() {

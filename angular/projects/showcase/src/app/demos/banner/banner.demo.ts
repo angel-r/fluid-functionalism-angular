@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { BANNER_PARTS, Button, type BannerContrast, type BannerStatus } from 'fluid-functionalism';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
@@ -17,7 +18,7 @@ const CONTRASTS: { contrast: BannerContrast; label: string }[] = [
 
 @Component({
   selector: 'app-banner-demo',
-  imports: [DemoPage, DemoSection, BANNER_PARTS, Button],
+  imports: [NgTemplateOutlet, DemoPage, DemoSection, BANNER_PARTS, Button],
   template: `
     <app-demo-page
       title="Banner"
@@ -61,23 +62,8 @@ const CONTRASTS: { contrast: BannerContrast; label: string }[] = [
       </app-demo-section>
 
       <app-demo-section title="Fixed">
-        <div class="flex w-full max-w-[560px] flex-col items-start gap-3">
-          <div class="h-[300px] w-full overflow-y-auto rounded-xl border border-border bg-background">
-            @if (fixedShown()) {
-              <ff-banner variant="fixed" status="warning" dismissible>
-                <p ffBannerTitle>Registry maintenance tonight at 22:00 UTC</p>
-                <div ffBannerActions>
-                  <ff-banner-action>Details</ff-banner-action>
-                </div>
-              </ff-banner>
-            }
-            <div class="flex flex-col gap-3 p-4">
-              @for (line of lines; track $index) {
-                <div class="h-4 rounded bg-muted" [style.width.%]="line"></div>
-              }
-            </div>
-          </div>
-          <button ffButton variant="tertiary" size="compact" (click)="replayFixed()">Replay</button>
+        <div class="w-full max-w-[560px]">
+          <ng-container *ngTemplateOutlet="mockPage; context: { $implicit: true }" />
         </div>
       </app-demo-section>
 
@@ -104,20 +90,59 @@ const CONTRASTS: { contrast: BannerContrast; label: string }[] = [
           </div>
         </div>
       </app-demo-section>
+
+      <app-demo-section title="Fixed: replay the entrance">
+        <div class="flex w-full max-w-[560px] flex-col items-start gap-3">
+          <ng-container *ngTemplateOutlet="mockPage; context: { $implicit: replayShown() }" />
+          <button ffButton variant="tertiary" size="compact" (click)="replayFixed()">Replay</button>
+        </div>
+      </app-demo-section>
     </app-demo-page>
+
+    <!-- The docs' MockPage: a header strip, the banner, then skeleton rows. -->
+    <ng-template #mockPage let-shown>
+      <div class="flex h-[300px] w-full flex-col overflow-hidden rounded-xl border border-border/60 bg-background">
+        <div class="flex h-11 shrink-0 items-center gap-4 border-b border-border/60 px-4" aria-hidden="true">
+          <div class="size-5 rounded-md bg-muted"></div>
+          <div class="flex items-center gap-3">
+            <div class="h-2.5 w-10 rounded-full bg-muted"></div>
+            <div class="h-2.5 w-12 rounded-full bg-muted"></div>
+            <div class="h-2.5 w-9 rounded-full bg-muted"></div>
+          </div>
+          <div class="ml-auto size-6 rounded-full bg-muted"></div>
+        </div>
+        @if (shown) {
+          <ff-banner variant="fixed" status="warning" dismissible>
+            <p ffBannerTitle>Registry maintenance tonight at 22:00 UTC</p>
+            <div ffBannerActions>
+              <ff-banner-action>Details</ff-banner-action>
+            </div>
+          </ff-banner>
+        }
+        <div class="min-h-0 flex-1 overflow-y-auto">
+          <div class="flex flex-col gap-3 p-5" aria-hidden="true">
+            <div class="h-3 w-1/3 rounded-full bg-muted"></div>
+            @for (width of rowWidths; track $index) {
+              <div class="h-2.5 rounded-full bg-muted" [style.width.%]="width"></div>
+            }
+          </div>
+        </div>
+      </div>
+    </ng-template>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BannerDemo {
   protected readonly statuses = STATUSES;
   protected readonly contrasts = CONTRASTS;
-  protected readonly lines = [92, 76, 84, 60, 88, 70, 95, 64, 80, 72, 90, 58, 86, 74];
-  protected readonly fixedShown = signal(true);
+  // The docs' MockPage skeleton rows.
+  protected readonly rowWidths = [92, 84, 88, 60, 95, 78, 86, 70, 50, 90, 82, 94, 66, 88, 74, 58];
+  protected readonly replayShown = signal(true);
   protected readonly open = signal(true);
 
   /** Remounts the fixed bar, like the docs' replay button. */
   protected replayFixed() {
-    this.fixedShown.set(false);
-    setTimeout(() => this.fixedShown.set(true));
+    this.replayShown.set(false);
+    setTimeout(() => this.replayShown.set(true));
   }
 }

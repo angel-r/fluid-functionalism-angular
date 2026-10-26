@@ -645,15 +645,15 @@ export class AccordionTrigger {
   selector: 'ff-accordion-content',
   template: `
     <div
+      #motion
       role="region"
       [id]="item.panelId"
       [attr.aria-labelledby]="item.triggerId"
       [attr.data-open]="item.isOpen() ? '' : null"
       [hidden]="hidden()"
+      [class]="motionClass()"
     >
-      <div #motion [class]="motionClass()">
-        <div #measure [class]="measureClass()"><ng-content /></div>
-      </div>
+      <div #measure [class]="measureClass()"><ng-content /></div>
     </div>
   `,
   host: { style: 'display: contents' },
