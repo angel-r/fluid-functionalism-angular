@@ -173,6 +173,15 @@ describe('Sidebar: offcanvas rail', () => {
     await detect();
     expect(byId('surface').textContent).toBe('1');
   });
+
+  it('paints the floating card one step above the page, not above its own content level', async () => {
+    const { el, fixture, detect } = await setup();
+    fixture.componentInstance.variant.set('floating');
+    await detect();
+    const card = el.querySelector<HTMLElement>('ff-sidebar-shell [data-sidebar="sidebar"]')!;
+    expect(card.classList).toContain('bg-surface-2');
+    expect(card.classList).not.toContain('bg-surface-3');
+  });
 });
 
 describe('SidebarContent', () => {
@@ -214,6 +223,8 @@ describe('Sidebar: mobile sheet', () => {
     expect(sheet.classList).toContain('left-0');
     expect(sheet.contains(byId('content'))).toBe(true);
     expect(byId('surface').textContent).toBe('3');
+    // The sheet panel itself is painted two steps above the page (1 → 3).
+    expect(sheet.classList).toContain('bg-surface-3');
     // Inside the sheet the region scrolls natively.
     expect(sheet.querySelector('ff-scroll-area')).toBeNull();
     expect(sheet.querySelector('[data-sidebar="content"]')!.classList).toContain('overflow-y-auto');

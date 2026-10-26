@@ -20,7 +20,7 @@ import { SidebarInput } from '../../sidebar-core';
 @Component({
   selector: 'ff-sidebar-search-field',
   imports: [Icon, SidebarInput],
-  host: { class: 'block' },
+  host: { style: 'display: contents' },
   template: `
     <div class="group/search relative">
       <ff-icon

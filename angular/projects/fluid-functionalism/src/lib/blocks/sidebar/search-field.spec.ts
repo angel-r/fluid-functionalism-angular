@@ -49,6 +49,13 @@ describe('SidebarSearchField', () => {
     }
   });
 
+  it("has a transparent host, so the search wrapper is the box (React renders it as the root)", () => {
+    const { el } = setup();
+    const host = el.querySelector<HTMLElement>('ff-sidebar-search-field')!;
+    expect(host.style.display).toBe('contents');
+    expect(host.classList.contains('block')).toBe(false);
+  });
+
   it('shows the shortcut chip only on hover or focus', () => {
     const { el } = setup();
     const kbd = el.querySelector<HTMLElement>('kbd')!;

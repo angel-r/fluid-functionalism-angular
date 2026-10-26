@@ -1,7 +1,23 @@
-import { ChangeDetectionStrategy, Component, Directive, booleanAttribute, computed, input, signal } from '@angular/core';
 import {
+  ChangeDetectionStrategy,
+  Component,
+  Directive,
+  ElementRef,
+  afterRenderEffect,
+  booleanAttribute,
+  computed,
+  inject,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
+import {
+  DropdownContent,
+  DropdownMenu,
+  DropdownTrigger,
   Icon,
   MenuItem,
+  SIDEBAR_MENU_POPUP,
   SidebarBlockMenu,
   SidebarGroup,
   SidebarGroupLabel,
@@ -15,11 +31,13 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarSearchField,
-  SidebarUserFooter,
   SidebarWorkspaceHeader,
   WorkspaceTile,
   fontWeights,
+  enterTransition,
+  injectAnimateFluid,
   injectShape,
+  spring,
 } from 'fluid-functionalism';
 import { AI_NAV, AI_WORKSPACE, type WikiBranch } from './sidebar-demo-data';
 
@@ -100,30 +118,81 @@ export class SidebarDemoHeader {
   protected readonly tiles = { acme: AcmeTile, fluid: FluidTile, personal: PersonalTile };
 }
 
-/** The footer's user row: the sidebar-user-footer block, opening its menu
- *  upward on the sidebar menu grid. */
+/** A 20px avatar standing in for the docs' /micka.png (the showcase ships no
+ *  photo assets): a neutral portrait silhouette as an inline SVG data URI. */
+const AVATAR_SRC =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="#e5e5e5"/>' +
+      '<circle cx="20" cy="16" r="7" fill="#404040"/><path d="M6 40c1-8 7-12 14-12s13 4 14 12z" fill="#171717"/></svg>',
+  );
+
+/** The footer's user row, as the React docs page builds it (DemoFooterUser):
+ *  avatar, name and a chevron slot, opening its menu upward on the sidebar
+ *  menu grid. */
 @Component({
   selector: 'app-sidebar-demo-footer-user',
-  imports: [SidebarUserFooter, SidebarBlockMenu, MenuItem],
+  imports: [SidebarMenu, SidebarMenuItem, SidebarMenuButton, DropdownMenu, DropdownTrigger, DropdownContent, MenuItem, Icon],
   host: { class: 'contents' },
   template: `
-    <ff-sidebar-user-footer name="Micka Touillaud">
-      <span
-        class="flex size-5 items-center justify-center rounded-full bg-muted text-[10px] text-foreground outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
-        [style.font-variation-settings]="semibold"
-        >MT</span
-      >
-      <ng-template ffSidebarBlockMenu>
-        <ff-menu-item [index]="0" icon="user" label="Profile" />
-        <ff-menu-item [index]="1" icon="settings" label="Settings" />
-        <ff-menu-item [index]="2" icon="arrow-left" label="Log out" />
-      </ng-template>
-    </ff-sidebar-user-footer>
+    <ul ffSidebarMenu aria-label="User">
+      <li ffSidebarMenuItem>
+        <ff-dropdown-menu>
+          <button ffSidebarMenuButton ffDropdownTrigger aria-label="Open user menu">
+            <!-- -ml-0.5 centres the 20px avatar on the rows' leading icon
+                 axis (24px in); the chevron rides a 24px slot pulled -mr-0.5
+                 onto the trailing action axis. -->
+            <img
+              [src]="avatar"
+              alt=""
+              width="20"
+              height="20"
+              style="color: transparent"
+              class="-ml-0.5 -mr-0.5 size-5 shrink-0 rounded-full outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+            />
+            <span class="min-w-0 truncate text-[13px] text-foreground">Micka Touillaud</span>
+            <span class="ml-auto -mr-0.5 flex size-6 shrink-0 items-center justify-center">
+              <ff-icon name="chevrons-up-down" [size]="16" [strokeWidth]="1.5" class="text-muted-foreground" />
+            </span>
+          </button>
+          <ff-dropdown-content [class]="popupClass" side="top" align="start" [sideOffset]="6">
+            <ff-menu-item [index]="0" icon="user" label="Profile" />
+            <ff-menu-item [index]="1" icon="settings" label="Settings" />
+            <ff-menu-item [index]="2" icon="arrow-left" label="Log out" />
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
+      </li>
+    </ul>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarDemoFooterUser {
-  protected readonly semibold = fontWeights.semibold;
+  protected readonly avatar = AVATAR_SRC;
+  protected readonly popupClass = SIDEBAR_MENU_POPUP;
+}
+
+/** A chevron's rotation as React's `<motion.span animate={{ rotate }}
+ *  transition={spring.fast}>`: written at mount, sprung on change. */
+@Directive({ selector: '[appSpringRotate]' })
+export class SpringRotate {
+  readonly appSpringRotate = input.required<number>();
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly animate = injectAnimateFluid();
+
+  constructor() {
+    let current: number | null = null;
+    afterRenderEffect(() => {
+      const next = this.appSpringRotate();
+      untracked(() => {
+        if (current === null) {
+          this.el.style.transform = next ? `rotate(${next}deg)` : 'none';
+        } else if (next !== current) {
+          this.animate(this.el, { rotate: [current, next] }, enterTransition(spring.fast));
+        }
+        current = next;
+      });
+    });
+  }
 }
 
 /** The product's top-level nav under a collapsible section label. Flat in
@@ -141,6 +210,7 @@ export class SidebarDemoFooterUser {
     SidebarMenuSubItem,
     SidebarMenuSubButton,
     Icon,
+    SpringRotate,
   ],
   host: { class: 'contents' },
   template: `
@@ -166,7 +236,7 @@ export class SidebarDemoFooterUser {
               >
                 {{ item.label }}
                 <span class="ml-auto -mr-0.5 flex size-6 shrink-0 items-center justify-center">
-                  <span class="inline-flex transition-transform duration-80" [class.rotate-90]="!!open()[item.label]">
+                  <span class="inline-flex" [appSpringRotate]="open()[item.label] ? 90 : 0">
                     <ff-icon
                       name="chevron-right"
                       [size]="16"
@@ -216,7 +286,16 @@ export class SidebarDemoNav {
 /** One wiki section's branches: parent rows that fold their children. */
 @Component({
   selector: 'app-sidebar-demo-branches',
-  imports: [SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, Icon],
+  imports: [
+    SidebarMenu,
+    SidebarMenuItem,
+    SidebarMenuButton,
+    SidebarMenuSub,
+    SidebarMenuSubItem,
+    SidebarMenuSubButton,
+    Icon,
+    SpringRotate,
+  ],
   host: { class: 'contents' },
   template: `
     <ul ffSidebarMenu>
@@ -232,7 +311,7 @@ export class SidebarDemoNav {
           >
             {{ branch.label }}
             <span class="ml-auto -mr-0.5 flex size-6 shrink-0 items-center justify-center">
-              <span class="inline-flex transition-transform duration-80" [class.rotate-90]="isOpen(branch.label)">
+              <span class="inline-flex" [appSpringRotate]="isOpen(branch.label) ? 90 : 0">
                 <ff-icon
                   name="chevron-right"
                   [size]="16"

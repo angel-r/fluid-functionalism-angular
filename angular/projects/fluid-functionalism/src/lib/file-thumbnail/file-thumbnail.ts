@@ -89,6 +89,9 @@ function subscribeObjectUrl(file: File) {
 @Component({
   selector: 'ff-file-thumbnail',
   host: {
+    // The host stands in for React's <div>: a block box (inline would drop
+    // its size outside a flex parent), with the same class list.
+    style: 'display: block',
     '[class]': 'hostClass()',
     '[style.width.px]': 'size()',
     '[style.height.px]': 'size()',

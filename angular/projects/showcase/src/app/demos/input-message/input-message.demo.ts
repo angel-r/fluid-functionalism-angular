@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  afterNextRender,
+  afterRenderEffect,
+  inject,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
 import { Button, ChatMessage, Icon, InputMessage, type InputMessageSendEvent } from 'fluid-functionalism';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 import { QueuedChatDemo } from './queued-chat';
@@ -33,7 +44,7 @@ interface Turn {
     </ng-template>
 
     <app-demo-page
-      title="Input message"
+      title="InputMessage"
       description="Chat-style message composer with an auto-resizing textarea, flexible left/right action slots, and a built-in send button on a Surface-2 substrate."
     >
       <app-demo-section title="Basic">
@@ -53,63 +64,86 @@ interface Turn {
         </div>
       </app-demo-section>
 
-      <app-demo-section title="Attachments">
-        <div class="flex w-full max-w-xl flex-col gap-3">
-          @if (attachMessages().length > 0) {
-            <div class="flex flex-col gap-2">
-              @for (m of attachMessages(); track $index) {
-                <ff-chat-message [from]="m.from" [files]="m.files">{{ m.text }}</ff-chat-message>
-              }
+      <!-- Preview-header controls (Reset, Resume/Pause) sit outside the stage,
+           which holds only what the React preview body holds. -->
+      <div class="flex flex-col gap-3">
+        <app-demo-section title="Attachments">
+          <!-- The React preview body is h-[440px] with compact (16px) padding,
+               so its self-stretched wrapper is 408px tall. -->
+          <div class="relative w-full self-stretch" style="height: 408px">
+            <div #attachScroll class="absolute inset-0 overflow-y-auto scrollbar-hide">
+              <div class="flex min-h-full flex-col justify-start gap-2" [style.padding-bottom.px]="attachInputH() + 12">
+                @for (m of attachMessages(); track $index) {
+                  <ff-chat-message [from]="m.from" [files]="m.files">{{ m.text }}</ff-chat-message>
+                }
+              </div>
             </div>
-            <div class="flex justify-end">
-              <button ffButton variant="ghost" size="sm" leadingIcon="rotate-ccw" (click)="resetAttach()">Reset</button>
-            </div>
-          }
-          <ff-input-message
-            [(value)]="attachValue"
-            [(files)]="attachFiles"
-            (send)="onAttachSend($event)"
-          />
-        </div>
-      </app-demo-section>
+            <ff-input-message
+              #attachInput
+              class="absolute inset-x-0 bottom-0"
+              [(value)]="attachValue"
+              [(files)]="attachFiles"
+              (send)="onAttachSend($event)"
+            />
+          </div>
+        </app-demo-section>
+        @if (attachMessages().length > 0) {
+          <div class="flex justify-end">
+            <button ffButton variant="ghost" size="sm" leadingIcon="rotate-ccw" (click)="resetAttach()">Reset</button>
+          </div>
+        }
+      </div>
 
-      <app-demo-section title="Queued messages">
-        <app-queued-chat />
-      </app-demo-section>
+      <div class="flex flex-col gap-3">
+        <app-demo-section title="Queued messages">
+          <app-queued-chat #queued />
+        </app-demo-section>
+        @if (queued.playback(); as action) {
+          <div class="flex justify-end">
+            <button ffButton variant="ghost" size="sm" [leadingIcon]="action.icon" (click)="action.run()">
+              {{ action.label }}
+            </button>
+          </div>
+        }
+      </div>
 
-      <app-demo-section title="Left slot only">
+      <app-demo-section title="Left Slot Only">
         <div class="w-full max-w-xl">
           <ff-input-message [(value)]="leftValue" [leftSlot]="attachSlot" (send)="leftValue.set('')" />
         </div>
       </app-demo-section>
 
-      <app-demo-section title="Right slot only">
+      <app-demo-section title="Right Slot Only">
         <div class="w-full max-w-xl">
           <ff-input-message [(value)]="rightValue" [rightSlot]="modelSlot" (send)="rightValue.set('')" />
         </div>
       </app-demo-section>
 
-      <app-demo-section title="Send handler">
-        <div class="flex w-full max-w-xl flex-col gap-3">
-          @if (messages().length > 0) {
-            <div class="flex flex-col gap-2">
-              @for (m of messages(); track $index) {
-                <ff-chat-message from="user">{{ m }}</ff-chat-message>
-              }
-            </div>
-            <div class="flex justify-end">
-              <button ffButton variant="ghost" size="sm" leadingIcon="rotate-ccw" (click)="messages.set([])">
-                Clear messages
-              </button>
-            </div>
-          }
-          <ff-input-message
-            [(value)]="handlerValue"
-            placeholder="Press Enter to send. Shift+Enter for newline."
-            (send)="onHandlerSend($event)"
-          />
-        </div>
-      </app-demo-section>
+      <div class="flex flex-col gap-3">
+        <app-demo-section title="Send Handler">
+          <div class="flex w-full max-w-xl flex-col gap-3">
+            @if (messages().length > 0) {
+              <div class="flex flex-col gap-2">
+                @for (m of messages(); track $index) {
+                  <ff-chat-message from="user">{{ m }}</ff-chat-message>
+                }
+              </div>
+            }
+            <ff-input-message
+              [(value)]="handlerValue"
+              placeholder="Press Enter to send. Shift+Enter for newline."
+              (send)="onHandlerSend($event)"
+            />
+          </div>
+        </app-demo-section>
+        @if (messages().length > 0) {
+          <div class="flex justify-end">
+            <button ffButton variant="ghost" size="sm" leadingIcon="rotate-ccw" (click)="messages.set([])">
+              Clear messages
+            </button>
+          </div>
+        }
+      </div>
 
       <app-demo-section title="Compact">
         <div class="w-full max-w-xl">
@@ -144,6 +178,32 @@ export default class InputMessageDemo {
   protected readonly attachValue = signal('');
   protected readonly attachFiles = signal<File[]>(this.initialFiles);
   protected readonly attachMessages = signal<Turn[]>([]);
+  /** Composer height: the transcript reserves it as bottom padding. */
+  protected readonly attachInputH = signal(0);
+  private readonly attachInput = viewChild.required('attachInput', { read: ElementRef<HTMLElement> });
+  private readonly attachScroll = viewChild.required<ElementRef<HTMLElement>>('attachScroll');
+
+  constructor() {
+    // Same floating-composer treatment as the React docs: measure the composer
+    // to reserve scroll padding, and keep the transcript pinned to the bottom.
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const el = this.attachInput().nativeElement;
+      this.attachInputH.set(el.offsetHeight);
+      if (typeof ResizeObserver === 'undefined') return;
+      const ro = new ResizeObserver(() => this.attachInputH.set(el.offsetHeight));
+      ro.observe(el);
+      destroyRef.onDestroy(() => ro.disconnect());
+    });
+    afterRenderEffect(() => {
+      this.attachMessages();
+      this.attachInputH();
+      untracked(() => {
+        const el = this.attachScroll().nativeElement;
+        el.scrollTop = el.scrollHeight;
+      });
+    });
+  }
 
   protected onAttachSend({ value, files }: InputMessageSendEvent) {
     if (!value && files.length === 0) return;

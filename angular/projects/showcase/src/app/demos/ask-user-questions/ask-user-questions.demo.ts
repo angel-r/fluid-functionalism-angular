@@ -25,38 +25,40 @@ interface Example {
       title="AskUserQuestions"
       description="Stepped question flow with 2–5 options, single or multi-select, inline 'other' input, optional skip, and multi-question navigation."
     >
+      <!-- The stage holds only the component, like the React preview body; the
+           replay/reset controls sit below it (React has them in the preview header). -->
       @for (example of examples; track example.title; let i = $index) {
-        <app-demo-section [title]="example.title">
-          <div class="flex w-full max-w-[520px] flex-col items-stretch gap-3">
+        <div class="flex flex-col gap-3">
+          <app-demo-section [title]="example.title">
             <!-- Re-keyed on replay, so the flow remounts from the start. -->
             @for (key of [replay()[i]]; track key) {
               <ff-ask-user-questions [questions]="example.questions" />
             }
-            <div>
-              <button ffButton variant="tertiary" size="compact" leadingIcon="rotate-ccw" (click)="replayExample(i)">
-                Replay
-              </button>
-            </div>
+          </app-demo-section>
+          <div class="flex justify-end">
+            <button ffButton variant="tertiary" size="compact" leadingIcon="rotate-ccw" (click)="replayExample(i)">
+              Replay
+            </button>
           </div>
-        </app-demo-section>
+        </div>
       }
 
-      <app-demo-section title="Controlled">
-        <div class="flex w-full max-w-[520px] flex-col items-stretch gap-3">
+      <div class="flex flex-col gap-3">
+        <app-demo-section title="Controlled">
           <ff-ask-user-questions
             [questions]="controlledQuestions"
             [(currentIndex)]="index"
             [(answers)]="answers"
             (complete)="index.set(0)"
           />
-          <div class="flex items-center gap-3">
-            <button ffButton variant="tertiary" size="compact" leadingIcon="rotate-ccw" (click)="reset()">Reset</button>
-            <span class="text-site-caption text-muted-foreground">
-              Question {{ index() + 1 }} · {{ answeredCount() }} answered
-            </span>
-          </div>
+        </app-demo-section>
+        <div class="flex items-center justify-end gap-3">
+          <span class="text-site-caption text-muted-foreground">
+            Question {{ index() + 1 }} · {{ answeredCount() }} answered
+          </span>
+          <button ffButton variant="tertiary" size="compact" leadingIcon="rotate-ccw" (click)="reset()">Reset</button>
         </div>
-      </app-demo-section>
+      </div>
     </app-demo-page>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -102,7 +102,13 @@ export function createCollapsibleRegion(open: () => boolean, options: Collapsibl
     source: open,
     computation: (isOpen, prev) => (prev === undefined ? false : !isOpen),
   });
-  const mounted = computed(() => open() || exiting());
+  // Read `exiting` on every pass, even while open: a linkedSignal first read
+  // at the close has no previous value, would report "not exiting" and drop a
+  // region that was open at mount without its collapse.
+  const mounted = computed(() => {
+    const isExiting = exiting();
+    return open() || isExiting;
+  });
 
   let firstRender = true;
   let animation: FluidAnimation | null = null;

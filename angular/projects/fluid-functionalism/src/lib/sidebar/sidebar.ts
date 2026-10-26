@@ -47,7 +47,11 @@ const pageLevel = signal(1).asReadonly();
 @Component({
   selector: 'ff-sidebar',
   imports: [NgTemplateOutlet, SidebarShell, SidebarSheet],
+  // Projected content sits on `contentLevel`; the shell and the sheet in this
+  // component's own view paint themselves relative to the page underneath, so
+  // they get the substrate (React reads `useSurface()` above the provider).
   providers: [{ provide: SURFACE_LEVEL, useFactory: () => inject(Sidebar).contentLevel }],
+  viewProviders: [{ provide: SURFACE_LEVEL, useFactory: () => inject(Sidebar).substrate }],
   host: {
     '[attr.data-slot]': "static() ? 'sidebar' : null",
     '[attr.data-state]': "static() ? null : (sidebar.open() ? 'expanded' : 'collapsed')",
@@ -109,7 +113,8 @@ export class Sidebar {
   protected readonly sidebar = injectSidebar();
   protected readonly static = computed(() => this.collapsible() === 'none');
 
-  private readonly substrate = inject(SURFACE_LEVEL, { optional: true, skipSelf: true }) ?? pageLevel;
+  /** The surface under the sidebar (provided to this component's own view). */
+  readonly substrate = inject(SURFACE_LEVEL, { optional: true, skipSelf: true }) ?? pageLevel;
   private readonly railLevel = injectSidebarContentLevel(this.variant);
   /** What the projected content sits on (provided as SURFACE_LEVEL): the
    *  page in a static column, two steps up in the mobile sheet, else the

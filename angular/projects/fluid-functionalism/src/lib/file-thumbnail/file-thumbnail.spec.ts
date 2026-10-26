@@ -88,6 +88,12 @@ describe('FileThumbnail: frame', () => {
     }
   });
 
+  it("is a block box like React's <div>, so its size applies outside a flex parent", () => {
+    const { thumbs } = setup([text]);
+    expect(thumbs()[0].style.display).toBe('block');
+    expect(thumbs()[0].classList).not.toContain('block');
+  });
+
   it('an explicit radius goes inline', () => {
     const { thumbs } = setup([text], (h) => h.radius.set(6));
     expect(thumbs()[0].style.borderRadius).toBe('6px');
