@@ -1,7 +1,7 @@
 # Angular port of fluid-functionalism
 
 Objective: port every fluid-functionalism component to Angular 22 inside `angular/` (library `fluid-functionalism` + `showcase` app), keeping the React/Next source intact for upstream merges.
-Branch: `feat/angular-port` · Delivery strategy: ask-on-risk (chain strategy pending) · Test runner: `ng test` (Vitest, jsdom) from `angular/`.
+Branch: `feat/angular-port` · Delivery strategy: single-pr ("Todo junto") · Test runner: `ng test` (Vitest, jsdom) from `angular/`.
 
 ## Specs
 
@@ -26,7 +26,7 @@ Assumptions (not requested, revisit if wrong):
 | T1 | S2,S4 | Theme CSS (tokens, surfaces, type-scale, reveal, utilities, component CSS) + pure libs: cn, springs, font-weight, popup, type-scale, surface-classes, theme service | inline | done | a6d8f85 |
 | T2 | S2,A1 | DI foundations: shape/size/surface/icon tokens, `provideFluid`, elevated, touch-primary, keyboard-nav-gate | inline | done | a6d8f85 |
 | T3 | S2,S4,S5 | Fluid hover engine + highlight + pick-nearest (+ tests) | inline | done | 76d9f63 |
-| T4 | S2,S5 | Merge-split selection backgrounds | inline | todo | |
+| T4 | S2,S5 | Merge-split selection backgrounds | inline | done | (this commit) |
 | T5 | S2,S5,S6 | Tier 1 components (badge, thinking-indicator, switch, slider, tooltip, button, scroll-area, file-thumbnail, mobile-drawer, carousel-dots, table, card, input-group, radio-group, checkbox-group, accordion, tabs, tabs-subtle, menu-item, dropdown-search) | delegated, parallel writers (disjoint dirs) | todo | |
 | T6 | S2,S5,S6 | Tier 2 (banner, dialog, input-copy, thinking-steps, chat-message, dropdown(-sub), select, combobox, calendar, color-picker, ask-user-questions, sidebar-core) | delegated, parallel writers | todo | |
 | T7 | S2,S5,S6 | Tier 3 (sidebar-menu, sidebar, command-menu, date-picker, input-message) | delegated, parallel writers | todo | |
@@ -45,3 +45,5 @@ Route evidence: T5–T8 delegate writers by the parallelism reason (independent 
 - **L5** (2026-10-26): Engram mirror `odd/angular-port/tasks` pending. Engram resolves from `C:\Users\angel\Documents\Angel` (ambiguous: deporwin, inventarioapi), not from this repository.
 - **L6** (2026-10-26): T1+T2 done. `styles/theme.css` = globals.css 3-306, 320-483, 937-1533 (every registry.json css/cssVars entry verified present). Providers → DI: abstract `ShapeContext`/`SizeContext` + `[ffShapeProvider]`/`[ffSizeProvider]` directives + root contexts from `provideFluid()`; `SURFACE_LEVEL` token + `[ffSurface]`/`[ffElevated]`; icons via `FF_ICONS` + `<ff-icon>` over vanilla `lucide` nodes; `ReducedMotion` + `animateFluid()` replaces `MotionConfig reducedMotion="user"`. `omit` dropped (React prop spreading only). Gotcha fixed: `inject()` inside a `linkedSignal` source runs lazily outside the injection context — inject first. Checks: `ng test` 13/13, lib + showcase build, headless screenshot of /foundations OK.
 - **L7** (2026-10-26): T3 done. `createFluidHover()` controller (signals) + `[ffFluidHover]` / `[ffFluidHoverItem]` directives + `<ff-fluid-hover-highlight>` (manual AnimatePresence over `motion` keyframes). Gotcha fixed: Angular runs each effect's cleanup right before that effect re-runs (React runs all cleanups first), so a row moving off an index could unregister the new row there; added `unregisterItem(index, element)`. Checks: `ng test` 44/44 (pick-nearest ported verbatim, gap-click / DOM-mark / highlight suites ported), Playwright on system Chrome: highlight glides row 0 → row 2 (y 4 → 81.7 @40ms → 84), no console errors.
+- **L8** (2026-10-26, user, verbatim answer to chain strategy): "Todo junto" → delivery strategy `single-pr`.
+- **L9** (2026-10-26): T4 done. `createSelectionRuns` (computed with id memo) + `createMergeSplitBlocks` (boundary effects, resolve timers, follow-up rAF) + pure `buildBlocks` + `<ff-selection-backgrounds>` (manual presence; entering blocks use explicit [from, to] keyframes). Checks: `ng test` 52/52, lib build OK.
