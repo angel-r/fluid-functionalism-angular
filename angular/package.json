@@ -20,6 +20,7 @@
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
     "clsx": "^2.1.1",
+    "lucide": "^1.61.0",
     "motion": "^14.6.0",
     "rxjs": "~7.8.0",
     "tailwind-merge": "^3.7.0",

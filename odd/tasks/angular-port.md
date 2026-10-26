@@ -1,0 +1,46 @@
+# Angular port of fluid-functionalism
+
+Objective: port every fluid-functionalism component to Angular 22 inside `angular/` (library `fluid-functionalism` + `showcase` app), keeping the React/Next source intact for upstream merges.
+Branch: `feat/angular-port` · Delivery strategy: ask-on-risk (chain strategy pending) · Test runner: `ng test` (Vitest, jsdom) from `angular/`.
+
+## Specs
+
+- **S1** — Fork named "-angular": `angel-r/fluid-functionalism-angular`, upstream remote kept. (Done.)
+- **S2** — "portar todos estos componentes a angular 22": every public registry item in `registry.json` (ui, lib, hook, block, CSS-only theme items) gets an Angular 22 equivalent. One implementation per component (the Base UI and Radix flavours share one behavior). Components are standalone, signal-based, zoneless-compatible, prefix `ff`.
+- **S3** — Structure chosen by the user: "Workspace Angular al lado (Recommended)": `angular/` holds a publishable library (ng-packagr) and a simple showcase app; React/Next code stays untouched so upstream merges keep working; primitives with `@angular/aria` + `@angular/cdk/overlay`; springs with vanilla `motion`.
+- **S4** — Visual and motion parity: the same CSS tokens (`app/globals.css` 24-483 and 950-1533, per-item `css` blobs in `registry.json`), the same spring tiers (`registry/default/lib/springs.ts`), and the same fluid-hover glide behavior.
+- **S5** — Behavior tests: port the behavior tests listed in the Log (fluid hover, pick-nearest, banner, button, calendar, checkbox group, command menu, date picker, dropdown keyboard/submenu, touch fields, ...) to Vitest via the public component interface.
+- **S6** — The showcase has one route per component with a representative demo.
+
+Assumptions (not requested, revisit if wrong):
+- A1: React context providers become DI (`InjectionToken` + `provideFluid()`), React hooks become directives/services; `asChild` becomes attribute selectors or content projection.
+- A2: Icons default to lucide via `@lucide/angular` behind an icon-map token; the tabler/phosphor/hugeicons/untitledui packs are ported last and only if an Angular package exists.
+- A3: `@daypicker/react` is replaced by a custom calendar grid; Base UI NumberField/ScrollArea by custom implementations.
+- A4: The Next docs site (playgrounds, presets, changelog, OG, evals, skill) is out of scope.
+
+## Tasks
+
+| ID | Specs | Scope | Route | Status | Commit |
+|----|-------|-------|-------|--------|--------|
+| T0 | S1,S3 | Fork, workspace scaffold, root tooling excludes `angular/` | inline | done | 1cc139a |
+| T1 | S2,S4 | Theme CSS (tokens, surfaces, type-scale, reveal, utilities, component CSS) + pure libs: cn, springs, font-weight, popup, type-scale, surface-classes, theme service | inline | done | (this commit) |
+| T2 | S2,A1 | DI foundations: shape/size/surface/icon tokens, `provideFluid`, elevated, touch-primary, keyboard-nav-gate | inline | done | (this commit) |
+| T3 | S2,S4,S5 | Fluid hover engine + highlight + pick-nearest (+ tests) | inline | todo | |
+| T4 | S2,S5 | Merge-split selection backgrounds | inline | todo | |
+| T5 | S2,S5,S6 | Tier 1 components (badge, thinking-indicator, switch, slider, tooltip, button, scroll-area, file-thumbnail, mobile-drawer, carousel-dots, table, card, input-group, radio-group, checkbox-group, accordion, tabs, tabs-subtle, menu-item, dropdown-search) | delegated, parallel writers (disjoint dirs) | todo | |
+| T6 | S2,S5,S6 | Tier 2 (banner, dialog, input-copy, thinking-steps, chat-message, dropdown(-sub), select, combobox, calendar, color-picker, ask-user-questions, sidebar-core) | delegated, parallel writers | todo | |
+| T7 | S2,S5,S6 | Tier 3 (sidebar-menu, sidebar, command-menu, date-picker, input-message) | delegated, parallel writers | todo | |
+| T8 | S2,S6 | Blocks (queued-stack, sidebar blocks, sidebar-app, dialog-sidebar) | delegated, parallel writers | todo | |
+| T9 | S2,A2 | Alternative icon packs | inline | todo | |
+| T10 | S3,S6 | README for `angular/`, showcase index, full test + build seam check | inline | todo | |
+
+Route evidence: T5–T8 delegate writers by the parallelism reason (independent components with disjoint `src/lib/<name>/` and `demos/<name>/` surfaces); the parent owns `public-api.ts`, showcase routes, and git.
+
+## Log
+
+- **L1** (2026-10-26, user, verbatim): "Vamos a hacer fork de esto con nombre -angular, y vamos a portar todos estos componentes a angular 22 https://github.com/mickadesign/fluid-functionalism"
+- **L2** (2026-10-26, user choice): structure "Workspace Angular al lado (Recommended)".
+- **L3** (2026-10-26, user, verbatim): "desactivar rdd para este repo" → ran `gentle-ai review mode disable --scope clone`; native review stays off for this clone.
+- **L4** (2026-10-26): map from explorer. 18 dual-flavour components share `registry/default/*` cores; 15 default-only; 7 blocks. Largest: color-picker 2447, slider ~1960, ask-user-questions 1880, calendar 1782, sidebar-core 1660, command-menu 1587, sidebar-menu 1510, date-picker-core 1488, input-message 1407, combobox ~1270. Behavior tests to port: use-fluid-hover-click, pick-nearest, fluid-hover-highlight, sidebar-hover, banner, button-render, calendar, checkbox-group-base, group-focus-ring, color-picker-sync, command-menu, date-picker, dropdown-keyboard, dropdown-submenu, dropdown-inline-shape, omit, touch-fields, type-scale, reveal.
+- **L5** (2026-10-26): Engram mirror `odd/angular-port/tasks` pending. Engram resolves from `C:\Users\angel\Documents\Angel` (ambiguous: deporwin, inventarioapi), not from this repository.
+- **L6** (2026-10-26): T1+T2 done. `styles/theme.css` = globals.css 3-306, 320-483, 937-1533 (every registry.json css/cssVars entry verified present). Providers → DI: abstract `ShapeContext`/`SizeContext` + `[ffShapeProvider]`/`[ffSizeProvider]` directives + root contexts from `provideFluid()`; `SURFACE_LEVEL` token + `[ffSurface]`/`[ffElevated]`; icons via `FF_ICONS` + `<ff-icon>` over vanilla `lucide` nodes; `ReducedMotion` + `animateFluid()` replaces `MotionConfig reducedMotion="user"`. `omit` dropped (React prop spreading only). Gotcha fixed: `inject()` inside a `linkedSignal` source runs lazily outside the injection context — inject first. Checks: `ng test` 13/13, lib + showcase build, headless screenshot of /foundations OK.

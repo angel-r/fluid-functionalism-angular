@@ -1,12 +1,21 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ThemeService, injectShapeContext, injectSizeContext } from 'fluid-functionalism';
+import { demos } from './demos/registry';
 
 @Component({
-  imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.css',
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  protected readonly title = signal('showcase');
+  protected readonly theme = inject(ThemeService);
+  protected readonly shape = injectShapeContext();
+  protected readonly size = injectSizeContext();
+  protected readonly groups = computed(() =>
+    (['Foundations', 'Components', 'Blocks'] as const)
+      .map((group) => ({ group, items: demos.filter((d) => d.group === group) }))
+      .filter((g) => g.items.length > 0),
+  );
 }

@@ -1,1 +1,5 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@import "../../fluid-functionalism/styles/theme.css";
+
+/* Tailwind only emits classes it can read in source: scan the library too. */
+@source "../../fluid-functionalism/src";
