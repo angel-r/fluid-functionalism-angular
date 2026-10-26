@@ -110,7 +110,7 @@ let nextListId = 0;
         <div #motion [class]="motionClass">
           @if (popover.mounted()) {
             <div data-slot="date-picker-popup" [ffElevated]="2" [shadowLevel]="3" [class]="popupClass">
-              <ff-scroll-area [class]="scrollAreaClass" [viewportClass]="viewportClass">
+              <ff-scroll-area [class]="scrollAreaClass" [viewportClass]="viewportClass" thumbSizing="track">
                 <div
                   #list
                   role="listbox"

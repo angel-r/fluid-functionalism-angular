@@ -473,7 +473,7 @@ export class SelectTrigger {
         >
           <!-- The list scrolls inside a ScrollArea; the inner wrapper is the
                rows' offsetParent, so the overlays scroll with them. -->
-          <ff-scroll-area [class]="scrollAreaClass" [viewportClass]="viewportClass">
+          <ff-scroll-area [class]="scrollAreaClass" [viewportClass]="viewportClass" thumbSizing="track">
             <div #list class="relative flex flex-col p-1">
               <!-- The selected background and the focus ring are torn down as
                    the close begins rather than exit-animated, so a reopen

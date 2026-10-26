@@ -221,6 +221,7 @@ export class CommandMenuItem {
          scrolls; short content sizes both to the rows. -->
     <ff-scroll-area
       class="flex min-h-0 flex-1 flex-col"
+      thumbSizing="track"
       viewportClass="min-h-0 flex-1 [&>div[style]]:!block [&>div[style]]:!min-w-0 [--scroll-fade-size:32px] scroll-fade"
     >
       <!-- A row click must not blur the field: the palette is driven from

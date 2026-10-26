@@ -174,7 +174,7 @@ export class Sidebar {
            content — rows would stop shrinking near the min width instead of
            truncating, so the viewport's direct child is forced back to a
            plain shrinkable block. -->
-      <ff-scroll-area [class]="areaClass()" [viewportClass]="viewportClassName()">
+      <ff-scroll-area [class]="areaClass()" [viewportClass]="viewportClassName()" thumbSizing="track">
         <div data-sidebar="content" class="flex w-full min-w-0 flex-col">
           <ng-container [ngTemplateOutlet]="children" />
         </div>
