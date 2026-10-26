@@ -1,0 +1,261 @@
+<div
+  data-slot="calendar"
+  [class]="rootClass()"
+  [attr.data-mode]="mode()"
+  [attr.data-required]="required() || null"
+  [attr.data-multiple-months]="twoMonths() || null"
+  [attr.data-week-numbers]="showWeekNumber() || null"
+  [attr.dir]="dir() ?? null"
+>
+  <div
+    #monthsBox
+    data-slot="calendar-months"
+    [class]="monthsClass()"
+    [attr.data-orientation]="twoMonths() ? resolvedOrientation() : null"
+    (keydown)="onMonthsKeyDown($event)"
+    (mousedown)="onMonthsMouseDown()"
+    (mouseenter)="onMonthsMouseEnter()"
+    (mousemove)="onMonthsMouseMove($event)"
+    (mouseleave)="hover.onMouseLeave()"
+    (click)="hover.onClick($event)"
+    (focusin)="onMonthsFocusIn($event)"
+    (focusout)="onMonthsFocusOut($event)"
+  >
+    @if (stacked()) {
+      <!-- Stacked: one weekday row, pinned above both grids. -->
+      <div #weekdayRow aria-hidden="true" data-calendar-inert class="sticky top-0 z-[4] flex bg-inherit">
+        @if (showWeekNumber()) {
+          <span class="w-[var(--cell-size)] shrink-0"></span>
+        }
+        @for (weekday of weekdays(); track weekday.key) {
+          <span [class]="weekdayClass()">{{ weekday.text }}</span>
+        }
+        <span class="sr-only">{{ weekNumberHeaderLabel() }}</span>
+      </div>
+      @if (!navHidden()) {
+        <!-- The chevrons float over the first caption row, outside the masked strip. -->
+        <div
+          data-calendar-inert
+          class="absolute right-0 top-[calc(var(--cell-size)*0.8_+_16px)] z-[5] flex h-[var(--cell-size)] items-center supports-[width:round(1px,1px)]:top-[calc(round(down,var(--cell-size)*0.8,1px)_+_16px)]"
+        >
+          <ff-calendar-nav [buttons]="['previous', 'next']" />
+        </div>
+      }
+    }
+
+    <!-- The months sit in a masked strip: soft edges side by side, a fade
+         under the weekday row when stacked. Its mask makes its own stacking
+         layer, so the day numbers stay above the hover fills. -->
+    <div #strip [class]="stripClass()" [style]="stripStyle()">
+      <ff-fluid-hover-highlight [hover]="hover" [class]="highlightClass()" [transition]="highlightTransition()" />
+      <!-- Over a filled day, an inner ring glides on the highlight's rect. -->
+      <ff-fluid-hover-highlight [hover]="hover" [class]="innerRingClass()" [transition]="highlightTransition()" />
+      <ng-container #ringAnchor />
+
+      @for (slot of views(); track slot.index) {
+        <div data-slot="calendar-month" [class]="monthClass()">
+          <div data-slot="calendar-caption" data-calendar-inert [class]="captionClass()">
+            @if (twoUp()) {
+              <div class="absolute left-0 top-1/2 -translate-y-1/2">
+                @if (navStart(slot.index).length > 0) {
+                  <ff-calendar-nav [buttons]="navStart(slot.index)" />
+                }
+              </div>
+            }
+            @if (twoUp() && stride() !== null) {
+              <div class="pointer-events-none absolute inset-y-0" [style]="twoUpLayerStyle(slot.index)">
+                <div class="absolute inset-y-0 flex items-center justify-center" [style]="twoUpInnerStyle(slot.index)">
+                  <ng-container [ngTemplateOutlet]="caption" [ngTemplateOutletContext]="{ $implicit: slot }" />
+                </div>
+              </div>
+            } @else if (oneUp()) {
+              <div class="pointer-events-none absolute inset-y-0" [style]="oneUpLayerStyle()">
+                <div [class]="oneUpInnerClass()" [style]="oneUpInnerStyle()">
+                  <ng-container [ngTemplateOutlet]="caption" [ngTemplateOutletContext]="{ $implicit: slot }" />
+                </div>
+              </div>
+              <span aria-hidden="true" class="flex-1"></span>
+            } @else {
+              <ng-container [ngTemplateOutlet]="caption" [ngTemplateOutletContext]="{ $implicit: slot }" />
+            }
+            @if (twoUp()) {
+              <div class="absolute right-0 top-1/2 -translate-y-1/2">
+                @if (navEnd(slot.index).length > 0) {
+                  <ff-calendar-nav [buttons]="navEnd(slot.index)" />
+                }
+              </div>
+            } @else if (navEnd(slot.index).length > 0) {
+              <ff-calendar-nav [buttons]="navEnd(slot.index)" />
+            }
+          </div>
+
+          <div
+            data-slot="calendar-grid"
+            role="grid"
+            [attr.aria-label]="gridLabel(months()[slot.index])"
+            [attr.aria-multiselectable]="mode() === 'range' ? true : null"
+            class="flex flex-col rdp-month_grid"
+          >
+            @if (showWeekdaysRow()) {
+              <div role="row" aria-hidden="true" data-calendar-inert class="flex rdp-weekdays">
+                @if (showWeekNumber()) {
+                  <div
+                    role="columnheader"
+                    [attr.aria-label]="weekNumberHeaderLabel()"
+                    class="w-[var(--cell-size)] shrink-0 rdp-week_number_header"
+                  ></div>
+                }
+                @for (weekday of weekdays(); track weekday.key) {
+                  <div role="columnheader" [attr.aria-label]="weekday.label" [class]="weekdayClass() + ' rdp-weekday'">{{ weekday.text }}</div>
+                }
+              </div>
+            }
+            <div data-slot="calendar-weeks" [ffCalendarWeeks]="slideConfig().offset === 0" #weeksBox="ffCalendarWeeks">
+              @for (view of slot.panels; track view.panel.key) {
+                <div
+                  role="rowgroup"
+                  [attr.aria-hidden]="view.panel.present ? null : true"
+                  [class]="panelClass(view)"
+                  [ffCalendarSlide]="view.panel.present"
+                  [ffCalendarSlideConfig]="slideConfig()"
+                  [ffCalendarSlideEnter]="view.panel.enter"
+                  [ffCalendarSlideMeasure]="true"
+                  (ffCalendarSlideHeight)="weeksBox.onHeight($event)"
+                  (ffCalendarSlideExited)="onPanelExited(slot.index, view.panel.key)"
+                >
+                  @if (sideHeader()) {
+                    <!-- The grid's column headers travel with their days. -->
+                    <div role="row" data-calendar-inert class="flex">
+                      @if (showWeekNumber()) {
+                        <span
+                          role="columnheader"
+                          [attr.aria-label]="weekNumberHeaderLabel()"
+                          class="w-[var(--cell-size)] shrink-0"
+                        ></span>
+                      }
+                      @for (weekday of weekdays(); track weekday.key) {
+                        <span role="columnheader" [attr.aria-label]="weekday.label" [class]="weekdayClass()">{{ weekday.text }}</span>
+                      }
+                    </div>
+                  }
+                  @if (sideHeader() && sharedRows() !== null && !fill()) {
+                    <!-- Every month takes the taller month's height, so neither
+                         resizes in the middle of a sideways slide. -->
+                    <div class="flex flex-col" [style.min-height]="sharedRowsStyle()">
+                      <ng-container [ngTemplateOutlet]="weeksTpl" [ngTemplateOutletContext]="{ $implicit: view }" />
+                    </div>
+                  } @else {
+                    <ng-container [ngTemplateOutlet]="weeksTpl" [ngTemplateOutletContext]="{ $implicit: view }" />
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- The month name. The one sliding out stays visible for the crossfade but
+     leaves the live region, so a month change is announced once. No clip:
+     the label is trimmed to cap height. -->
+<ng-template #caption let-slot>
+  <span class="relative inline-grid">
+    @for (view of slot.panels; track view.panel.key) {
+      <span
+        [attr.role]="view.panel.present ? 'status' : null"
+        [attr.aria-live]="view.panel.present ? 'polite' : null"
+        [attr.aria-hidden]="view.panel.present ? null : true"
+        [class]="captionTextClass(view)"
+        [style.font-variation-settings]="semibold"
+        [ffCalendarSlide]="view.panel.present"
+        [ffCalendarSlideConfig]="slideConfig()"
+        [ffCalendarSlideEnter]="view.panel.enter"
+        >{{ view.caption }}</span
+      >
+    }
+  </span>
+</ng-template>
+
+<ng-template #weeksTpl let-view>
+  @for (week of view.weeks; track week.key) {
+    <div role="row" class="flex rdp-week">
+      @if (showWeekNumber()) {
+        <div role="rowheader" [attr.aria-label]="week.label" data-calendar-inert [class]="weekNumberClass()">{{ week.text }}</div>
+      }
+      @for (d of week.days; track d.key) {
+        <div
+          role="gridcell"
+          [attr.aria-selected]="d.ariaSelected"
+          [attr.data-day]="d.key"
+          [attr.data-today]="d.today || null"
+          [attr.data-outside]="d.outside || null"
+          [attr.data-hidden]="d.hidden || null"
+          [class]="d.cellClass"
+        >
+          @if (d.band; as b) {
+            <!-- The hover fill: a long band reads heavier than a small one,
+                 so it takes the lightest token. -->
+            <span
+              aria-hidden="true"
+              data-slot="calendar-range-band"
+              class="pointer-events-none absolute inset-y-0 bg-hover"
+              [style.left]="b.left"
+              [style.right]="b.right"
+              [style.border-top-left-radius]="b.tl"
+              [style.border-bottom-left-radius]="b.bl"
+              [style.border-top-right-radius]="b.tr"
+              [style.border-bottom-right-radius]="b.br"
+            ></span>
+          }
+          @if (!d.hidden) {
+            <button
+              type="button"
+              [ffFluidHoverItem]="view.panel.present && d.index !== null ? d.index : undefined"
+              [attr.aria-label]="d.label"
+              [attr.aria-describedby]="d.hasDetail ? d.detailId : null"
+              [attr.tabindex]="view.panel.present ? d.tabIndex : -1"
+              [attr.data-calendar-index]="d.index"
+              [attr.data-calendar-inert]="d.disabled ? '' : null"
+              [attr.data-selected]="d.isEnd || null"
+              [attr.data-range-middle]="d.inMiddle || null"
+              [attr.data-booked]="d.booked || null"
+              [attr.data-unavailable]="d.disabled || null"
+              [attr.data-preview-end]="d.isPreviewEnd || null"
+              [disabled]="d.disabled"
+              [class]="d.buttonClass"
+              [style.font-variation-settings]="d.weight"
+              (click)="onDayClick($event, d)"
+              (focus)="onDayFocus(d)"
+              (blur)="onDayBlur()"
+              (keydown)="onDayKeyDown($event, d)"
+            >
+              <span class="[text-box:trim-both_cap_alphabetic]">{{ d.text }}</span>
+              @if (d.hasDetail) {
+                <span
+                  [id]="d.detailId"
+                  data-slot="calendar-day-detail"
+                  [class]="d.detailClass"
+                  [style.font-variation-settings]="normalWeight"
+                  >@if (dayDetailTemplate(); as template) {<ng-container
+                      [ngTemplateOutlet]="template"
+                      [ngTemplateOutletContext]="{ $implicit: d.detail, date: d.day.date }"
+                    />} @else {<ng-container>{{ d.detail }}</ng-container>}</span
+                >
+              }
+              <!-- With a detail under it, today is marked by its weight alone. -->
+              @if (d.today && !d.hasDetail) {
+                <span
+                  aria-hidden="true"
+                  data-slot="calendar-today-dot"
+                  class="absolute bottom-[14%] left-1/2 size-1 -translate-x-1/2 rounded-full bg-current"
+                ></span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</ng-template>
