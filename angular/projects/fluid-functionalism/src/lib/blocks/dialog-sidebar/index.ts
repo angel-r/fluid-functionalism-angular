@@ -1,2 +1,1 @@
-// Placeholder: the dialog-sidebar block port lands here.
-export {};
+export { SettingsDialog } from './settings-dialog';
