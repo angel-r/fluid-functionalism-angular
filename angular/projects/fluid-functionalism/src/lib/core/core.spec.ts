@@ -132,6 +132,14 @@ class LiveIconHost {
   readonly cls = signal('text-muted-foreground');
 }
 
+@Component({
+  imports: [Icon],
+  template: `<ff-icon name="x" [size]="13" [strokeWidth]="stroke()" />`,
+})
+class UnsetStrokeHost {
+  readonly stroke = signal<number | undefined>(undefined);
+}
+
 describe('ff-icon', () => {
   it('renders the default Lucide icon with the class on the svg', () => {
     const fixture = TestBed.createComponent(IconHost);
@@ -172,7 +180,7 @@ describe('ff-icon', () => {
 
   it('swaps weight-based nodes with the stroke width while keeping the svg', () => {
     const weighted: IconFrame = {
-      nodes: (stroke) => [['path', { d: stroke >= 1.75 ? 'M1 1' : 'M2 2' }]],
+      nodes: (stroke) => [['path', { d: (stroke ?? 0) >= 1.75 ? 'M1 1' : 'M2 2' }]],
     };
     TestBed.configureTestingModule({ providers: [provideIcons({ x: weighted })] });
     const fixture = TestBed.createComponent(LiveIconHost);
@@ -185,6 +193,35 @@ describe('ff-icon', () => {
     expect(el.querySelector('svg')).toBe(svg);
     expect(svg.querySelectorAll('path').length).toBe(1);
     expect(svg.querySelector('path')!.getAttribute('d')).toBe('M2 2');
+  });
+
+  it('draws Lucide at stroke 2 when the caller passes no stroke width', () => {
+    const fixture = TestBed.createComponent(UnsetStrokeHost);
+    fixture.detectChanges();
+    const svg = (fixture.nativeElement as HTMLElement).querySelector('svg')!;
+    expect(svg.getAttribute('stroke-width')).toBe('2');
+  });
+
+  it("leaves the stroke to the glyph when a frame's unset stroke is null, as the React packs do", () => {
+    // Untitled UI spreads strokeWidth={undefined} over its default, so the
+    // <svg> renders with no stroke-width; Hugeicons keeps per-node widths.
+    const glyph: IconFrame = {
+      unsetStrokeWidth: null,
+      nodes: (stroke) => (stroke === undefined ? [['path', { d: 'M1 1', 'stroke-width': '1.5' }]] : [['path', { d: 'M1 1' }]]),
+    };
+    TestBed.configureTestingModule({ providers: [provideIcons({ x: glyph })] });
+    const fixture = TestBed.createComponent(UnsetStrokeHost);
+    fixture.detectChanges();
+    const svg = (fixture.nativeElement as HTMLElement).querySelector('svg')!;
+    expect(svg.hasAttribute('stroke-width')).toBe(false);
+    expect(svg.querySelector('path')!.getAttribute('stroke-width')).toBe('1.5');
+    fixture.componentInstance.stroke.set(2);
+    fixture.detectChanges();
+    expect(svg.getAttribute('stroke-width')).toBe('2');
+    expect(svg.querySelector('path')!.hasAttribute('stroke-width')).toBe(false);
+    fixture.componentInstance.stroke.set(undefined);
+    fixture.detectChanges();
+    expect(svg.hasAttribute('stroke-width')).toBe(false);
   });
 
   it('follows provideIcons overrides', () => {

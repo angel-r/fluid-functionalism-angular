@@ -31,7 +31,7 @@ describe('icon packs', () => {
 })
 class Host {
   readonly icon = signal<IconDefinition>(tablerIcons['chevron-right']!);
-  readonly stroke = signal(2);
+  readonly stroke = signal<number | undefined>(2);
 }
 
 describe('icon packs in ff-icon', () => {
@@ -72,5 +72,34 @@ describe('icon packs in ff-icon', () => {
     for (const path of Array.from(svg(fixture).querySelectorAll('path'))) {
       expect(path.hasAttribute('stroke-width')).toBe(false);
     }
+  });
+
+  it('renders an unset stroke the way each React pack does', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.stroke.set(undefined);
+    // Tabler: the component default, 2.
+    fixture.detectChanges();
+    expect(svg(fixture).getAttribute('stroke-width')).toBe('2');
+    // Untitled UI: no stroke-width at all (the SVG default, 1).
+    fixture.componentInstance.icon.set(untitleduiIcons['arrow-down']!);
+    fixture.detectChanges();
+    expect(svg(fixture).hasAttribute('stroke-width')).toBe(false);
+    // Hugeicons: each node keeps its own width until a stroke is set.
+    fixture.componentInstance.icon.set(hugeiconsIcons['chevron-right']!);
+    fixture.detectChanges();
+    expect(svg(fixture).hasAttribute('stroke-width')).toBe(false);
+    expect(svg(fixture).querySelector('path')!.getAttribute('stroke-width')).toBe('1.5');
+    fixture.componentInstance.stroke.set(2);
+    fixture.detectChanges();
+    expect(svg(fixture).getAttribute('stroke-width')).toBe('2');
+    expect(svg(fixture).querySelector('path')!.hasAttribute('stroke-width')).toBe(false);
+    // Phosphor: unset draws the light weight.
+    fixture.componentInstance.icon.set(phosphorIcons['chevron-right']!);
+    fixture.componentInstance.stroke.set(undefined);
+    fixture.detectChanges();
+    const light = svg(fixture).querySelector('path')!.getAttribute('d');
+    fixture.componentInstance.stroke.set(1.5);
+    fixture.detectChanges();
+    expect(svg(fixture).querySelector('path')!.getAttribute('d')).toBe(light);
   });
 });
