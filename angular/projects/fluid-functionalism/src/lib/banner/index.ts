@@ -1,2 +1,2 @@
-// Placeholder: the banner port lands here.
-export {};
+export * from './banner';
+export { focusNeighbour } from './banner-motion';
