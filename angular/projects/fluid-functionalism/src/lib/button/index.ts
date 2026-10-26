@@ -1,2 +1,1 @@
-// Placeholder: the button port lands here.
-export {};
+export * from './button';

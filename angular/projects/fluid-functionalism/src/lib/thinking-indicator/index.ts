@@ -1,2 +1,1 @@
-// Placeholder: the thinking indicator port lands here.
-export {};
+export * from './thinking-indicator';
