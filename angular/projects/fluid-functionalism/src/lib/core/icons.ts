@@ -1,65 +1,5 @@
 import { InjectionToken, type Provider, type Type, inject } from '@angular/core';
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  Bell,
-  Brain,
-  Calendar,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  ChevronsUpDown,
-  Circle,
-  Clock,
-  Copy,
-  CornerDownLeft,
-  CornerDownRight,
-  Dot,
-  Ellipsis,
-  EllipsisVertical,
-  Folder,
-  Globe,
-  Heart,
-  Home,
-  Image,
-  Inbox,
-  Info,
-  Lightbulb,
-  Link,
-  Loader,
-  Lock,
-  Mail,
-  Menu,
-  MessageCircle,
-  Monitor,
-  Moon,
-  Paintbrush,
-  Palette,
-  PanelLeft,
-  PanelRight,
-  Pause,
-  Pencil,
-  Pipette,
-  Play,
-  Plus,
-  RectangleHorizontal,
-  Rocket,
-  RotateCcw,
-  Scaling,
-  Search,
-  Settings,
-  Shield,
-  SkipForward,
-  SlidersHorizontal,
-  SquareLibrary,
-  Star,
-  Sun,
-  User,
-  Users,
-  X,
-} from 'lucide';
+import { lucideIcons } from './lucide-icons';
 
 // ---------------------------------------------------------------------------
 // Components never import an icon directly: they look one up by the role it
@@ -78,14 +18,36 @@ export type IconNode = [tag: string, attrs: Record<string, string | number>][];
  * that switches weight with the stroke width (Phosphor light/regular).
  */
 export interface IconFrame {
-  /** Child nodes, or a function of the stroke width for weight-based sets. */
-  nodes: IconNode | ((strokeWidth: number) => IconNode);
+  /**
+   * Child nodes, or a function of the stroke width for weight-based sets
+   * (`undefined` when the caller passes none).
+   */
+  nodes: IconNode | ((strokeWidth: number | undefined) => IconNode);
   /** Defaults to '0 0 24 24'. */
   viewBox?: string;
   /** Filled glyphs: `fill="currentColor"` and no stroke. */
   filled?: boolean;
   /** Extra classes on the <svg> (e.g. '-scale-x-100' to mirror a glyph). */
   class?: string;
+  /**
+   * The <svg> stroke-width when the caller passes none. Defaults to 2
+   * (Lucide, Tabler); `null` leaves the attribute off, as the React Untitled UI
+   * and Hugeicons components do, so the SVG default or per-node widths apply.
+   */
+  unsetStrokeWidth?: number | null;
+}
+
+/**
+ * Nodes that keep their own stroke widths until the caller sets one, then
+ * defer to the <svg>'s (Hugeicons: React's HugeiconsIcon only sets a stroke
+ * when it is given one).
+ */
+export function perNodeStroke(nodes: IconNode): (strokeWidth: number | undefined) => IconNode {
+  const stripped: IconNode = nodes.map(([tag, attrs]) => {
+    const { ['stroke-width']: _, ...rest } = attrs;
+    return [tag, rest];
+  });
+  return (strokeWidth) => (strokeWidth === undefined ? nodes : stripped);
 }
 
 /**
@@ -162,67 +124,7 @@ export type IconName =
   | 'sliders-horizontal'
   | 'info';
 
-export const defaultIcons: Record<IconName, IconDefinition> = {
-  'chevron-right': ChevronRight as IconNode,
-  'chevron-down': ChevronDown as IconNode,
-  'pipette': Pipette as IconNode,
-  'x': X as IconNode,
-  'copy': Copy as IconNode,
-  'menu': Menu as IconNode,
-  'dot': Dot as IconNode,
-  'monitor': Monitor as IconNode,
-  'sun': Sun as IconNode,
-  'moon': Moon as IconNode,
-  'rectangle-horizontal': RectangleHorizontal as IconNode,
-  'circle': Circle as IconNode,
-  'square-library': SquareLibrary as IconNode,
-  'clock': Clock as IconNode,
-  'star': Star as IconNode,
-  'settings': Settings as IconNode,
-  'plus': Plus as IconNode,
-  'arrow-left': ArrowLeft as IconNode,
-  'arrow-right': ArrowRight as IconNode,
-  'arrow-up': ArrowUp as IconNode,
-  'arrow-down': ArrowDown as IconNode,
-  'search': Search as IconNode,
-  'loader': Loader as IconNode,
-  'users': Users as IconNode,
-  'lock': Lock as IconNode,
-  'mail': Mail as IconNode,
-  'bell': Bell as IconNode,
-  'shield': Shield as IconNode,
-  'palette': Palette as IconNode,
-  'lightbulb': Lightbulb as IconNode,
-  'rocket': Rocket as IconNode,
-  'heart': Heart as IconNode,
-  'paintbrush': Paintbrush as IconNode,
-  'brain': Brain as IconNode,
-  'globe': Globe as IconNode,
-  'user': User as IconNode,
-  'image': Image as IconNode,
-  'link': Link as IconNode,
-  'check': Check as IconNode,
-  'rotate-ccw': RotateCcw as IconNode,
-  'play': Play as IconNode,
-  'pause': Pause as IconNode,
-  'home': Home as IconNode,
-  'message-circle': MessageCircle as IconNode,
-  'inbox': Inbox as IconNode,
-  'pencil': Pencil as IconNode,
-  'scaling': Scaling as IconNode,
-  'skip-forward': SkipForward as IconNode,
-  'corner-down-right': CornerDownRight as IconNode,
-  'corner-down-left': CornerDownLeft as IconNode,
-  'panel-left': PanelLeft as IconNode,
-  'panel-right': PanelRight as IconNode,
-  'chevrons-up-down': ChevronsUpDown as IconNode,
-  'more-horizontal': Ellipsis as IconNode,
-  'more-vertical': EllipsisVertical as IconNode,
-  'calendar': Calendar as IconNode,
-  'folder': Folder as IconNode,
-  'sliders-horizontal': SlidersHorizontal as IconNode,
-  'info': Info as IconNode,
-};
+export const defaultIcons: Record<IconName, IconDefinition> = lucideIcons;
 
 export const FF_ICONS = new InjectionToken<Record<IconName, IconDefinition>>('FF_ICONS', {
   factory: () => defaultIcons,

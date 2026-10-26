@@ -37,7 +37,8 @@ export class Icon {
   readonly name = input<IconName>();
   readonly icon = input<IconDefinition>();
   readonly size = input<number | string>(24);
-  readonly strokeWidth = input<number | string>(2);
+  /** Unset means the glyph's own default (see `IconFrame.unsetStrokeWidth`). */
+  readonly strokeWidth = input<number | string | undefined>(undefined);
   readonly userClass = input<string>('', { alias: 'class' });
 
   private readonly icons = inject(FF_ICONS);
@@ -66,7 +67,8 @@ export class Icon {
   private readonly nodes = computed<IconNode>(() => {
     const frame = this.frame();
     if (!frame) return [];
-    return typeof frame.nodes === 'function' ? frame.nodes(Number(this.strokeWidth())) : frame.nodes;
+    const stroke = this.strokeWidth();
+    return typeof frame.nodes === 'function' ? frame.nodes(stroke === undefined ? undefined : Number(stroke)) : frame.nodes;
   });
 
   protected readonly componentInputs = computed(() => ({
@@ -93,7 +95,10 @@ export class Icon {
       const attrs = this.liveAttrs();
       this.frame();
       if (!this.svg) return;
-      for (const [key, value] of Object.entries(attrs)) this.renderer.setAttribute(this.svg, key, value);
+      for (const [key, value] of Object.entries(attrs)) {
+        if (value === null) this.renderer.removeAttribute(this.svg, key);
+        else this.renderer.setAttribute(this.svg, key, value);
+      }
     });
     // Weight-based sets swap their children with the stroke width; the <svg>
     // itself stays.
@@ -105,12 +110,14 @@ export class Icon {
     });
   }
 
-  private readonly liveAttrs = computed(() => {
+  private readonly liveAttrs = computed<Record<string, string | null>>(() => {
     const name = this.name();
+    const unset = this.frame()?.unsetStrokeWidth;
+    const stroke = this.strokeWidth() ?? (unset === undefined ? 2 : unset);
     return {
       width: String(this.size()),
       height: String(this.size()),
-      'stroke-width': String(this.strokeWidth()),
+      'stroke-width': stroke === null ? null : String(stroke),
       class: ['lucide', name ? `lucide-${name}` : '', this.frame()?.class ?? '', this.userClass()]
         .filter(Boolean)
         .join(' '),
@@ -120,7 +127,7 @@ export class Icon {
   private renderSvg(frame: IconFrame): SVGSVGElement {
     const r = this.renderer;
     const svg = r.createElement('svg', SVG_NS) as SVGSVGElement;
-    const attrs: Record<string, string> = {
+    const attrs: Record<string, string | null> = {
       xmlns: SVG_NS,
       viewBox: frame.viewBox ?? '0 0 24 24',
       fill: frame.filled ? 'currentColor' : 'none',
@@ -130,7 +137,7 @@ export class Icon {
       'aria-hidden': 'true',
       ...untracked(this.liveAttrs),
     };
-    for (const [key, value] of Object.entries(attrs)) r.setAttribute(svg, key, value);
+    for (const [key, value] of Object.entries(attrs)) if (value !== null) r.setAttribute(svg, key, value);
     this.renderChildren(svg, untracked(this.nodes));
     return svg;
   }
