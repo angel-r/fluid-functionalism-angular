@@ -145,24 +145,29 @@ describe('Tooltip: position', () => {
 });
 
 describe('Tooltip: position under a scrollbar gutter', () => {
-  it('shifts a right-anchored pane (side="left") back by the gutter CDK counts as viewport', () => {
+  it('moves a right-anchored pane (side="left") back by the gutter CDK counts as viewport', () => {
     // html { scrollbar-gutter: stable }: the root reports the full width while
     // the pane's bounding box stops at the gutter, so CDK's `right` is off by it.
+    const openLeft = () =>
+      setup((h) => {
+        h.side.set('left');
+        h.forceOpen.set(true);
+      }).popup()!.parentElement!;
+    const flush = parseFloat(openLeft().style.right);
+    TestBed.resetTestingModule();
     const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth')!;
     Object.defineProperty(Element.prototype, 'clientWidth', {
       configurable: true,
       get(this: Element) {
-        return this.classList.contains('cdk-overlay-connected-position-bounding-box') ? 1014 : descriptor.get!.call(this);
+        const width = descriptor.get!.call(this);
+        return this.classList.contains('cdk-overlay-connected-position-bounding-box') ? width - 10 : width;
       },
     });
     try {
-      const { popup } = setup((h) => {
-        h.side.set('left');
-        h.forceOpen.set(true);
-      });
-      expect(popup()!.parentElement!.style.right).not.toBe('');
-      const [dx] = popup()!.style.translate.split(' ').map((v) => parseFloat(v));
-      expect(dx).toBeCloseTo(10, 3);
+      const pane = openLeft();
+      expect(parseFloat(pane.style.right)).toBeCloseTo(flush - 10, 3);
+      const [dx] = pane.firstElementChild instanceof HTMLElement ? [parseFloat(pane.firstElementChild.style.translate || '0')] : [0];
+      expect(dx).toBeCloseTo(0, 3);
     } finally {
       Object.defineProperty(Element.prototype, 'clientWidth', descriptor);
     }
