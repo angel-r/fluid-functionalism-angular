@@ -18,4 +18,10 @@ export const demos: DemoEntry[] = [
     group: 'Foundations',
     load: () => import('./foundations/foundations.demo'),
   },
+  {
+    slug: 'fluid-hover',
+    title: 'Fluid hover',
+    group: 'Foundations',
+    load: () => import('./fluid-hover/fluid-hover.demo'),
+  },
 ];
