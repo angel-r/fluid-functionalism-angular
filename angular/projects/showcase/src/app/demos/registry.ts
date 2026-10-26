@@ -210,4 +210,28 @@ export const demos: DemoEntry[] = [
     group: 'Components',
     load: () => import('./ask-user-questions/ask-user-questions.demo'),
   },
+  {
+    slug: 'sidebar',
+    title: 'Sidebar',
+    group: 'Components',
+    load: () => import('./sidebar/sidebar.demo'),
+  },
+  {
+    slug: 'command-menu',
+    title: 'Command menu',
+    group: 'Components',
+    load: () => import('./command-menu/command-menu.demo'),
+  },
+  {
+    slug: 'date-picker',
+    title: 'Date picker',
+    group: 'Components',
+    load: () => import('./date-picker/date-picker.demo'),
+  },
+  {
+    slug: 'input-message',
+    title: 'Input message',
+    group: 'Components',
+    load: () => import('./input-message/input-message.demo'),
+  },
 ];

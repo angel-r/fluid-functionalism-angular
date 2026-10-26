@@ -37,3 +37,8 @@ export * from './lib/calendar';
 export * from './lib/color-picker';
 export * from './lib/ask-user-questions';
 export * from './lib/sidebar-core';
+export * from './lib/sidebar-menu';
+export * from './lib/sidebar';
+export * from './lib/command-menu';
+export * from './lib/date-picker';
+export * from './lib/input-message';
