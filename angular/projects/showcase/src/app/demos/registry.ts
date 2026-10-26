@@ -234,4 +234,22 @@ export const demos: DemoEntry[] = [
     group: 'Components',
     load: () => import('./input-message/input-message.demo'),
   },
+  {
+    slug: 'queued-stack',
+    title: 'Queued stack',
+    group: 'Blocks',
+    load: () => import('./queued-stack/queued-stack.demo'),
+  },
+  {
+    slug: 'dialog-sidebar',
+    title: 'Dialog sidebar',
+    group: 'Blocks',
+    load: () => import('./dialog-sidebar/dialog-sidebar.demo'),
+  },
+  {
+    slug: 'sidebar-app',
+    title: 'Sidebar app',
+    group: 'Blocks',
+    load: () => import('./sidebar-app/sidebar-app.demo'),
+  },
 ];

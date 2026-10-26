@@ -43,3 +43,7 @@ export * from './lib/command-menu';
 export * from './lib/date-picker';
 export * from './lib/input-message';
 export * from './lib/icon-packs';
+export * from './lib/blocks/queued-stack';
+export * from './lib/blocks/dialog-sidebar';
+export * from './lib/blocks/sidebar';
+export * from './lib/blocks/sidebar-app';
