@@ -1,0 +1,281 @@
+@if (!question()) {
+  <p class="text-[length:var(--fs-body,13px)] leading-[var(--lh-body,20px)] text-muted-foreground">No questions.</p>
+} @else {
+  <!-- Header: static across questions, only the number changes. Lives
+       outside the morphing region so it never shifts. -->
+  <div [class]="headerClass()">
+    <span>Question {{ safeIndex() + 1 }} of {{ total() }}</span>
+  </div>
+
+  <!-- The field context of the React Base UI Field: display contents, so it
+       stays out of layout. The freeText textarea and the footer error are
+       wired by hand (aria-invalid, aria-describedby). -->
+  <div class="contents">
+    <!-- Morphing Q/A region: its real height animates to the measured
+         natural height of the content, so the card border and the footer
+         reflow with the spring. overflow-hidden clips the swapped content. -->
+    <div #morph class="overflow-hidden">
+      <div #measure [class]="measureClass()">
+        @for (item of view(); track item.key) {
+          <div class="flex flex-col gap-2">
+            <h3
+              [id]="titleId()"
+              class="text-[length:var(--fs-title,16px)] leading-[var(--lh-title,22px)] text-foreground"
+              [style.font-variation-settings]="semibold"
+            >
+              {{ item.q.title }}
+            </h3>
+
+            @if (isFreeText()) {
+              <!-- freeText: one open-ended textarea is the whole answer. The
+                   min-height lives on the box, not the textarea, so the
+                   auto-resize can drive the field's height. -->
+              <div [class]="freeTextBoxClass()" (click)="focusOther()">
+                <textarea
+                  #otherInput
+                  rows="1"
+                  [value]="otherText()"
+                  [placeholder]="item.q.freeTextPlaceholder ?? 'Type your answer…'"
+                  [attr.aria-labelledby]="titleId()"
+                  [attr.aria-invalid]="freeTextError() ? 'true' : null"
+                  [attr.aria-describedby]="freeTextError() ? errorId() : null"
+                  [class]="freeTextFieldClass()"
+                  [style.font-variation-settings]="normal"
+                  (input)="handleOtherChange($any($event.target).value)"
+                  (keydown)="onFreeTextKey($event)"
+                ></textarea>
+              </div>
+            } @else {
+              <!-- Option rows. The container carries the radio group (single)
+                   or group (multi) semantics; each row is the radio/checkbox.
+                   Every keyboard query is scoped to [data-fluid-hover-index],
+                   never a bare role, so the hidden primitives never match. -->
+              <div
+                #rows
+                [attr.role]="isMulti() ? 'group' : 'radiogroup'"
+                [attr.aria-labelledby]="titleId()"
+                class="relative flex flex-col -mx-3"
+                (mouseenter)="hover.onMouseEnter()"
+                (mousemove)="hover.onMouseMove($event)"
+                (mouseleave)="hover.onMouseLeave()"
+                (click)="hover.onClick($event)"
+                (focusin)="groupFocus()?.onFocusIn($event)"
+                (focusout)="groupFocus()?.onFocusOut($event)"
+                (keydown)="handleNavKey($event)"
+              >
+                <!-- Other-row input hint: the empty Other field, focused. -->
+                <ff-fluid-hover-highlight [rect]="hintRect()" [class]="hintClass()" />
+                <!-- The morphing hover indicator, under the selected bg. -->
+                <ff-fluid-hover-highlight [class]="shape().bg" />
+                <!-- Selected-row backgrounds, merged for contiguous rows. -->
+                <ff-selection-backgrounds [blocks]="blocks()" />
+                <!-- The morphing keyboard focus ring. -->
+                <ff-fluid-hover-highlight [rect]="focusRingRect()" [class]="ringClass()" />
+
+                @for (opt of options(); track optionId(opt, i); let i = $index) {
+                  <div
+                    ffAskUserQuestionRow
+                    [ffFluidHoverItem]="i"
+                    [index]="i"
+                    [rowRole]="isMulti() ? 'checkbox' : 'radio'"
+                    [selected]="isSelected(opt, i)"
+                    [checked]="isSelected(opt, i)"
+                    [tabIndex]="rowTabIndex(i)"
+                    [chipContent]="i + 1"
+                    [chipFilled]="isSelected(opt, i)"
+                    [multi]="isMulti()"
+                    [compact]="compact()"
+                    [showArrow]="!isMulti() && activeIndex() === i"
+                    [arrowSize]="14"
+                    [bodyLayout]="layout()"
+                    [topAlign]="layout() === 'stacked'"
+                    [chipPosition]="chipPosition()"
+                    (click)="selectOption(opt, i)"
+                    (keydown)="onRowKey($event, opt, i)"
+                  >
+                    <ng-template #optionTitle>
+                      <span class="inline-grid">
+                        <span
+                          class="col-start-1 row-start-1 invisible"
+                          [style.font-variation-settings]="semibold"
+                          aria-hidden="true"
+                          >{{ opt.title }}</span
+                        >
+                        <span
+                          class="col-start-1 row-start-1 text-foreground transition-[color,font-variation-settings] duration-80"
+                          [style.font-variation-settings]="isSelected(opt, i) ? semibold : normal"
+                          >{{ opt.title }}</span
+                        >
+                      </span>
+                    </ng-template>
+                    @if (layout() === 'stacked') {
+                      <ng-container [ngTemplateOutlet]="optionTitle" />
+                      @if (opt.description) {
+                        <span [class]="captionClass()">{{ opt.description }}</span>
+                      }
+                    } @else {
+                      <span
+                        ><ng-container [ngTemplateOutlet]="optionTitle" />@if (opt.description) {
+                          {{ ' ' }}<span class="text-muted-foreground">{{ opt.description }}</span>
+                        }</span
+                      >
+                    }
+                    <!-- Hidden radio/checkbox primitive (sr-only): out of the
+                         a11y tree and the tab order; the row itself is the
+                         control as far as AT and the keyboard are concerned. -->
+                    <span
+                      ffAuqHiddenControl
+                      class="sr-only"
+                      aria-hidden="true"
+                      tabindex="-1"
+                      [attr.role]="isMulti() ? 'checkbox' : 'radio'"
+                      [attr.aria-checked]="isSelected(opt, i) ? 'true' : 'false'"
+                      [attr.data-checked]="isSelected(opt, i) ? '' : null"
+                      [attr.data-unchecked]="isSelected(opt, i) ? null : ''"
+                      ><input
+                        [type]="isMulti() ? 'checkbox' : 'radio'"
+                        class="sr-only"
+                        aria-hidden="true"
+                        tabindex="-1"
+                        [attr.name]="isMulti() ? optionId(opt, i) : null"
+                        [value]="optionId(opt, i)"
+                        [checked]="isSelected(opt, i)"
+                        (click)="$event.stopPropagation()"
+                        (change)="handleHiddenChange(optionId(opt, i), $any($event.target).checked)"
+                    /></span>
+                  </div>
+                }
+
+                @if (allowOther()) {
+                  <div
+                    ffAskUserQuestionRow
+                    [ffFluidHoverItem]="otherIndex()"
+                    [index]="otherIndex()"
+                    [rowRole]="null"
+                    [selected]="otherText().length > 0"
+                    [tabIndex]="-1"
+                    [chipContent]="otherIndex() + 1"
+                    [chipFilled]="otherText().length > 0"
+                    [multi]="isMulti()"
+                    [compact]="compact()"
+                    [topAlign]="isOtherMultiline()"
+                    [chipPosition]="chipPosition()"
+                    [ariaLabel]="otherLabel()"
+                    [showArrow]="showOtherArrow()"
+                    [arrowClickable]="!isMulti() && otherText().trim().length > 0"
+                    [arrowSize]="compact() ? 12 : 14"
+                    (arrowClick)="handleOtherSubmit()"
+                    (click)="focusOther()"
+                  >
+                    <span class="inline-grid w-full">
+                      <textarea
+                        #otherInput
+                        rows="1"
+                        [value]="otherText()"
+                        [placeholder]="otherPlaceholder()"
+                        [attr.aria-label]="otherLabel()"
+                        [class]="otherFieldClass()"
+                        [style.font-variation-settings]="normal"
+                        (input)="handleOtherChange($any($event.target).value)"
+                        (keydown)="onOtherKey($event)"
+                        (click)="$event.stopPropagation()"
+                      ></textarea>
+                    </span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Footer: outside the morphing region, so the animating height never
+         clips it; it reflows frame by frame with the morph. -->
+    @if (showFooter()) {
+      <div [class]="footerClass()">
+        <div class="flex items-center justify-between gap-2 -mx-2 sm:-mx-3">
+          <!-- Left cluster: Back, then any validation error. -->
+          <div class="relative flex flex-1 min-w-0 items-center gap-2">
+            <div
+              [ffAuqPresence]="showBack()"
+              [presenceFrom]="footerPop"
+              [presenceEnter]="footerEnter"
+              [presenceInitial]="false"
+              [presencePopLayout]="true"
+            >
+              <button
+                ffButton
+                variant="ghost"
+                size="sm"
+                [leadingIcon]="arrowLeftKey"
+                class="pl-3 sm:pl-2"
+                (click)="handleBack()"
+              >
+                Back
+              </button>
+            </div>
+            @if (freeTextError(); as error) {
+              <p
+                [ffAuqPresence]="true"
+                [presenceFrom]="errorFrom"
+                [presenceEnter]="errorEnter"
+                role="alert"
+                [id]="errorId()"
+                class="min-w-0 px-2 sm:px-3 text-left text-[length:var(--fs-caption,12px)] leading-[var(--lh-caption,16px)] text-destructive"
+              >
+                {{ error }}
+              </p>
+            }
+          </div>
+          <div class="relative flex items-center gap-2">
+            <div
+              [ffAuqPresence]="showSkip()"
+              [presenceFrom]="footerPop"
+              [presenceEnter]="footerEnter"
+              [presenceInitial]="false"
+              [presencePopLayout]="true"
+            >
+              <button
+                ffButton
+                variant="ghost"
+                size="sm"
+                [trailingIcon]="arrowRightKey"
+                class="pr-3 sm:pr-2"
+                (click)="handleSkip()"
+              >
+                {{ skipLabel() }}
+              </button>
+            </div>
+            <div
+              [ffAuqPresence]="showSubmit()"
+              [presenceFrom]="footerPop"
+              [presenceEnter]="footerEnter"
+              [presenceInitial]="false"
+              [presencePopLayout]="true"
+            >
+              <button
+                ffButton
+                variant="primary"
+                size="sm"
+                [disabled]="submitDisabled()"
+                class="pr-3 sm:pr-2"
+                (click)="submit()"
+              >
+                <span class="inline-flex items-center gap-1.5"
+                  >{{ submitLabel() }}<span class="hidden sm:contents"
+                    ><kbd
+                      aria-hidden="true"
+                      [class]="'inline-flex items-center justify-center gap-0.5 px-1 min-w-[18px] h-[18px] text-[length:var(--fs-micro,11px)] leading-none font-sans bg-background/15 text-background ' + shape().bg"
+                      >{{ isMac ? '⌘' : '⌃' }}↵</kbd
+                    ></span
+                  ></span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
