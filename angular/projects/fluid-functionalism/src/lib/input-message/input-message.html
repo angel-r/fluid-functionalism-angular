@@ -1,0 +1,158 @@
+@if (supportsFiles()) {
+  <input
+    #fileInput
+    type="file"
+    [accept]="accept()"
+    [multiple]="multiple()"
+    class="hidden"
+    aria-hidden="true"
+    tabindex="-1"
+    (change)="onFileInputChange($event)"
+  />
+}
+
+<!-- Attached files preview row, above the textarea. The region springs its
+     measured height as files appear / disappear; a removed tile pops out of
+     the flow (popLayout) so siblings slide into the gap while it fades. Tiles
+     are keyed by file identity, so removing the first doesn't remount the rest. -->
+@if (filesRegion.mounted()) {
+  <div #filesRegionBox class="overflow-hidden" data-slot="input-message-files">
+    <div #filesRow class="flex flex-wrap gap-2 pb-1">
+      @for (entry of fileTiles.entries(); track entry.key) {
+        <ff-input-message-file-tile
+          [file]="entry.item"
+          [size]="filePreviewSize()"
+          [flipKey]="entry.key"
+          [present]="entry.present"
+          [animateEnter]="filesSettled()"
+          (remove)="removeFile(entry.item)"
+          (exited)="fileTiles.done(entry.key)"
+        />
+      }
+    </div>
+  </div>
+}
+
+<!-- Queued messages: reorderable rows above the textarea (top = next to
+     dispatch). The region collapses when the queue empties. -->
+@if (supportsQueue() && showQueue() && queueRegion.mounted()) {
+  <div #queueRegionBox class="overflow-hidden" data-slot="input-message-queue">
+    <ul #queueList data-im-queue class="flex flex-col gap-1 pb-1">
+      @for (entry of queueRows.entries(); track entry.key) {
+        <li
+          ffInputMessageQueuedRow
+          [item]="entry.item"
+          [index]="queueIndex().get(entry.key) ?? 0"
+          [total]="queueArr().length"
+          [present]="entry.present"
+          [animateEnter]="queueSettled()"
+          (edit)="editQueued($event)"
+          (remove)="removeQueued($event)"
+          (move)="moveQueued(entry.item, $event)"
+          (exited)="queueRows.done(entry.key)"
+        ></li>
+      }
+    </ul>
+  </div>
+}
+
+<div class="relative">
+  <textarea
+    #textarea
+    [value]="value()"
+    [attr.placeholder]="nativePlaceholder()"
+    [disabled]="disabled()"
+    [rows]="minRows()"
+    [attr.aria-label]="textareaLabel()"
+    [attr.aria-describedby]="describedBy()"
+    [attr.aria-activedescendant]="activeDescendant()"
+    [class]="textareaClass()"
+    [style.font-variation-settings]="fontWeight"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)"
+    (focus)="onFocus($event)"
+    (blur)="onBlur($event)"
+  ></textarea>
+  <!-- Ghost placeholder: the suggested prompt with a Tab keycap. A real
+       overlay (not the native placeholder) so the keycap renders inline after
+       the text. One flex line: a long suggestion truncates instead of
+       wrapping into the clip, and the Tab chip never gets cut. -->
+  @if (showGhost()) {
+    <div aria-hidden="true" data-slot="input-message-ghost" [class]="ghostClass()" [style.font-variation-settings]="fontWeight">
+      <span class="flex max-w-full items-center gap-1.5">
+        <span class="min-w-0 truncate">{{ placeholderSuggestion() }}</span>
+        <kbd [class]="kbdClass()">Tab</kbd>
+      </span>
+    </div>
+    <span [id]="ghostHintId" class="sr-only"
+      >Suggested prompt: {{ placeholderSuggestion() }}. Press Tab to fill the composer with it.</span
+    >
+  }
+</div>
+
+<div data-slot="input-message-footer" [class]="footerClass()">
+  <div class="flex items-center gap-1.5 min-w-0">
+    @if (leftSlot(); as left) {
+      <ng-container [ngTemplateOutlet]="left" [ngTemplateOutletContext]="slotContext()" />
+    }
+  </div>
+  <div class="flex items-center gap-1.5 shrink-0">
+    @if (rightSlot(); as right) {
+      <ng-container [ngTemplateOutlet]="right" [ngTemplateOutletContext]="slotContext()" />
+    }
+    <button
+      ffButton
+      type="button"
+      variant="primary"
+      size="icon-sm"
+      [disabled]="buttonDisabled()"
+      [attr.aria-label]="buttonLabel()"
+      (click)="onButtonClick()"
+    >
+      <ff-input-message-send-glyph [mode]="buttonMode() === 'stop' ? 'stop' : 'arrow'" [compact]="compact()" />
+    </button>
+  </div>
+</div>
+
+<!-- Suggested prompts: a listbox under the action bar while the draft is
+     empty. ↓/↑ move the highlight without moving focus (aria-activedescendant
+     tracks it); Enter or click fills the composer. -mx-2 cancels the container
+     padding so the divider runs full width; -mt-1 cancels the gap above and the
+     listbox's mt-2 restores it inside the collapsing area. Pointer and keyboard
+     share one sliding highlight (fluid hover). -->
+@if (suggestionsArr().length > 0 && suggestionsRegion.mounted()) {
+  <div #suggestionsRegionBox class="-mx-2 -mt-1 overflow-hidden" data-slot="input-message-suggestions">
+    <div
+      ffFluidHover
+      role="listbox"
+      [id]="suggestionListId"
+      aria-label="Suggested prompts"
+      class="relative mt-2 flex flex-col border-t border-border/60 px-1.5 pt-1.5"
+    >
+      <ff-fluid-hover-highlight [class]="shape().bg" />
+      @for (s of suggestionsArr(); track $index) {
+        <div
+          [ffFluidHoverItem]="$index"
+          [id]="suggestionListId + '-' + $index"
+          role="option"
+          [attr.aria-selected]="$index === activeSuggestion()"
+          [class]="suggestionClass($index === activeSuggestion())"
+          [style.font-variation-settings]="fontWeight"
+          (click)="acceptSuggestion(s)"
+        >
+          <span class="min-w-0 flex-1 truncate [text-box:trim-both_cap_alphabetic] py-1 -my-1">{{ s }}</span>
+          <!-- One icon slot: ↵ on the highlighted row; on the first row a muted
+               ↓ takes the slot while nothing is highlighted. -->
+          @if ($index === 0 && activeSuggestion() === null) {
+            <ff-icon name="arrow-down" [size]="13" class="shrink-0 text-muted-foreground transition-opacity duration-80" />
+          } @else {
+            <ff-icon name="corner-down-left" [size]="13" [class]="enterIconClass($index === activeSuggestion())" />
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Politely announces auto-dispatch of queued messages. -->
+<span class="sr-only" role="status" aria-live="polite">{{ liveMsg() }}</span>
