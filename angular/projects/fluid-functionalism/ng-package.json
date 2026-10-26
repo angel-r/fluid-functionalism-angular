@@ -11,6 +11,8 @@
     "clsx",
     "tailwind-merge",
     "motion",
-    "lucide"
+    "lucide",
+    "class-variance-authority",
+    "pdfjs-dist"
   ]
 }
