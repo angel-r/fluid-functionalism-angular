@@ -12,7 +12,8 @@ export default defineConfig({
     // three more times against a mismatched React copy, which fails loudly and
     // buries the real result. CI never sees them because .claude is gitignored,
     // so this only bites local runs, which is exactly where the noise misled.
-    exclude: [...configDefaults.exclude, ".claude/**"],
+    // The Angular port lives in its own workspace with its own test runner.
+    exclude: [...configDefaults.exclude, ".claude/**", "angular/**"],
     // The preset suites type-check generated files through a real TypeScript
     // program. Each suite now shares one program, so only the first check in a
     // file pays for parsing the repo and lib.d.ts; on a shared CI runner that

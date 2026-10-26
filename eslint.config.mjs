@@ -163,6 +163,7 @@ export default [
     ignores: [
       ".claude/**",
       ".next/**",
+      "angular/**",
       "dist/**",
       "next-env.d.ts",
       "node_modules/**",
