@@ -5,7 +5,7 @@
   "compilerOptions": {
     "noImplicitOverride": true,
     "paths": {
-      "fluid-functionalism": ["./dist/fluid-functionalism"]
+      "fluid-functionalism": ["./projects/fluid-functionalism/src/public-api.ts"]
     },
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,

@@ -3,5 +3,14 @@
   "dest": "../../dist/fluid-functionalism",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "assets": [
+    "styles/**/*.css"
+  ],
+  "allowedNonPeerDependencies": [
+    "clsx",
+    "tailwind-merge",
+    "motion",
+    "lucide"
+  ]
 }
