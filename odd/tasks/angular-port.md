@@ -31,7 +31,7 @@ Assumptions (not requested, revisit if wrong):
 | T6 | S2,S5,S6 | Tier 2 (banner, dialog, input-copy, thinking-steps, chat-message, dropdown(-sub), select, combobox, calendar, color-picker, ask-user-questions, sidebar-core) | delegated, parallel writers | done | 8c01b8e 9067ca6 31a16c3 8973ea7 8c35927 fb2e85f + dropdown/select, 70aab60 |
 | T7 | S2,S5,S6 | Tier 3 (sidebar-menu, sidebar, command-menu, date-picker, input-message) | delegated, parallel writers | in progress | |
 | T8 | S2,S6 | Blocks (queued-stack, sidebar blocks, sidebar-app, dialog-sidebar) | delegated, parallel writers | todo | |
-| T9 | S2,A2 | Alternative icon packs | inline | done | (this commit) |
+| T9 | S2,A2 | Alternative icon packs | inline | done | 363342a |
 | T10 | S3,S6 | README for `angular/`, showcase index, full test + build seam check | inline | todo | |
 
 Route evidence: T5–T8 delegate writers by the parallelism reason (independent components with disjoint `src/lib/<name>/` and `demos/<name>/` surfaces); the parent owns `public-api.ts`, showcase routes, and git.
