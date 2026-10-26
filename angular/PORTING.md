@@ -62,3 +62,15 @@ The Base UI and Radix flavors share one behavior: port it once.
 - **Outputs as clickability:** to know whether a parent bound an output (React's "has onClick"), build it with `outputFromObservable` over a subscriber-counting Observable (see `card.ts`).
 - **Type-check demos without `ng build`:** `npx ngc -p <scratch tsconfig>` with `noEmit` and `strictTemplates`, listing only your demo files (drop `baseUrl`), keeps parallel workers from colliding on `dist/`.
 - **Reuse ported parts** through relative imports (`../button`, `../tooltip`, `../scroll-area`, `../menu-item`, `../dropdown-search`, `../radio-group`, `../checkbox-group`, `../slider`); never re-implement them.
+
+## Gotchas found in tier 2
+
+- **Output names:** never name an output after a native DOM event (`copy`, `click`, `select`, `toggle` on hosts that contain native inputs): the native event bubbling to the host also fires it. Use `copied`, `cardClick`, etc.
+- **Providers for projected content:** tokens that projected children need (`DROPDOWN_CONTEXT`, `SURFACE_LEVEL`, aria's `MENU_COMPONENT` / `LISTBOX`) must be provided on the component host, e.g. with a factory reading a `viewChild` instance; providers on elements inside the component's own template are invisible to projected content.
+- **@angular/aria limits (22.2.x):** aria/combobox owns and destroys its deferred popup (cannot hold it for an exit spring); aria/menu has no submenu pointer safe-area and closes a submenu when focus/pointer leave its DOM (nested CDK overlays need capture-phase `focusout`/`mouseout` stops). The dropdown uses underscore members (`_pattern`, `_items`, `listBehavior`); keep any new use of them in one place and covered by tests.
+- **Controlled vs model:** where React's controlled-but-ignored state matters (`open` of menus, `value` of select), use `input()` + `output()` instead of `model()` so a bound value always wins.
+- **Template refs shadow members:** `#months` in a template hides a component signal named `months` (TS2349). Pick distinct names.
+- **`viewChild` at first render:** constructor `effect`s run before required `viewChild` queries resolve; use `afterRenderEffect` when opening an overlay from initial state.
+- **`#ref` on `button[ffButton]`** resolves to the `Button` instance; use `viewChild('ref', { read: ElementRef })` for the element.
+- **Timing in specs:** never sleep an exact timer duration with real timers; the full suite runs ~45 files in parallel and timers fire late. Poll with `vi.waitFor(..., { timeout })` or use fake timers.
+- **`KeyboardEvent.cancelBubble`** resets after dispatch; prove `stopPropagation` by counting events at a document listener.
