@@ -1,2 +1,3 @@
-// Placeholder: the dialog port lands here.
-export {};
+export * from './dialog';
+export * from './dialog-content';
+export * from './dialog-parts';
