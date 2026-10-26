@@ -1,2 +1,1 @@
-// Placeholder: the input copy port lands here.
-export {};
+export * from './input-copy';

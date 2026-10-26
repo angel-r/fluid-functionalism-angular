@@ -1,2 +1,1 @@
-// Placeholder: the chat message port lands here.
-export {};
+export * from './chat-message';
