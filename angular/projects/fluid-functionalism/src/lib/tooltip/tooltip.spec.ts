@@ -207,6 +207,9 @@ describe('Tooltip: hover', () => {
 describe('Tooltip: keyboard and press', () => {
   it('opens at once on keyboard focus and closes on blur', () => {
     const { trigger, outside, popup, fixture, flush } = setup();
+    // jsdom grants :focus-visible to a scripted focus only after a keydown,
+    // and that modality leaks between tests: set it explicitly.
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     trigger.focus();
     fixture.detectChanges();
     expect(popup()).not.toBeNull();
