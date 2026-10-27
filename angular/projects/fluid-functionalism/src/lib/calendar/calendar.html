@@ -11,9 +11,11 @@
     #monthsBox
     data-slot="calendar-months"
     [class]="monthsClass()"
+    [style.--calendar-col]="'var(--cell-size)'"
     [attr.data-orientation]="twoMonths() ? resolvedOrientation() : null"
     (keydown)="onMonthsKeyDown($event)"
-    (mousedown)="onMonthsMouseDown()"
+    (mousedown)="onMonthsMouseDown($event)"
+    (mouseup)="onMonthsMouseUp()"
     (mouseenter)="onMonthsMouseEnter()"
     (mousemove)="onMonthsMouseMove($event)"
     (mouseleave)="hover.onMouseLeave()"
@@ -25,7 +27,7 @@
       <!-- Stacked: one weekday row, pinned above both grids. -->
       <div #weekdayRow aria-hidden="true" data-calendar-inert class="sticky top-0 z-[4] flex bg-inherit">
         @if (showWeekNumber()) {
-          <span class="w-[var(--cell-size)] shrink-0"></span>
+          <span class="w-[calc(var(--cell-size)*0.75)] shrink-0"></span>
         }
         @for (weekday of weekdays(); track weekday.key) {
           <span [class]="weekdayClass()">{{ weekday.text }}</span>
@@ -36,7 +38,7 @@
         <!-- The chevrons float over the first caption row, outside the masked strip. -->
         <div
           data-calendar-inert
-          class="absolute right-0 top-[calc(var(--cell-size)*0.8_+_16px)] z-[5] flex h-[var(--cell-size)] items-center supports-[width:round(1px,1px)]:top-[calc(round(down,var(--cell-size)*0.8,1px)_+_16px)]"
+          class="absolute right-0 top-[calc(var(--cell-size)*0.8_+_16px)] z-[3] flex h-[var(--cell-size)] items-center supports-[width:round(1px,1px)]:top-[calc(round(down,var(--cell-size)*0.8,1px)_+_16px)]"
         >
           <ff-calendar-nav [buttons]="['previous', 'next']" />
         </div>
@@ -47,16 +49,34 @@
          under the weekday row when stacked. Its mask makes its own stacking
          layer, so the day numbers stay above the hover fills. -->
     <div #strip [class]="stripClass()" [style]="stripStyle()">
-      <ff-fluid-hover-highlight [hover]="hover" [class]="highlightClass()" [transition]="highlightTransition()" />
+      <ff-fluid-hover-highlight
+        [hover]="hover"
+        [class]="highlightClass()"
+        [from]="pickStart()"
+        [fadeIn]="!pickStart()"
+        [transition]="highlightTransition()"
+      />
       <!-- Over a filled day, an inner ring glides on the highlight's rect. -->
-      <ff-fluid-hover-highlight [hover]="hover" [class]="innerRingClass()" [transition]="highlightTransition()" />
+      <ff-fluid-hover-highlight
+        [hover]="hover"
+        [class]="innerRingClass()"
+        [from]="pickStart()"
+        [fadeIn]="!pickStart()"
+        [transition]="highlightTransition()"
+      />
       <ng-container #ringAnchor />
 
       @for (slot of views(); track slot.index) {
         <div data-slot="calendar-month" [class]="monthClass()">
           <div data-slot="calendar-caption" data-calendar-inert [class]="captionClass()">
             @if (twoUp()) {
-              <div class="absolute left-0 top-1/2 -translate-y-1/2">
+              <div
+                [class]="
+                  showWeekNumber()
+                    ? 'absolute left-[calc(var(--cell-size)*0.75)] top-1/2 -translate-y-1/2'
+                    : 'absolute left-0 top-1/2 -translate-y-1/2'
+                "
+              >
                 @if (navStart(slot.index).length > 0) {
                   <ff-calendar-nav [buttons]="navStart(slot.index)" />
                 }
@@ -96,21 +116,7 @@
             [attr.aria-multiselectable]="mode() === 'range' ? true : null"
             class="flex flex-col rdp-month_grid"
           >
-            @if (showWeekdaysRow()) {
-              <div role="row" aria-hidden="true" data-calendar-inert class="flex rdp-weekdays">
-                @if (showWeekNumber()) {
-                  <div
-                    role="columnheader"
-                    [attr.aria-label]="weekNumberHeaderLabel()"
-                    class="w-[var(--cell-size)] shrink-0 rdp-week_number_header"
-                  ></div>
-                }
-                @for (weekday of weekdays(); track weekday.key) {
-                  <div role="columnheader" [attr.aria-label]="weekday.label" [class]="weekdayClass() + ' rdp-weekday'">{{ weekday.text }}</div>
-                }
-              </div>
-            }
-            <div data-slot="calendar-weeks" [ffCalendarWeeks]="slideConfig().offset === 0" #weeksBox="ffCalendarWeeks">
+            <div data-slot="calendar-weeks" [ffCalendarWeeks]="slideConfig().offset === 0" [ffCalendarWeeksStacked]="stacked()" #weeksBox="ffCalendarWeeks">
               @for (view of slot.panels; track view.panel.key) {
                 <div
                   role="rowgroup"
@@ -120,7 +126,7 @@
                   [ffCalendarSlideConfig]="slideConfig()"
                   [ffCalendarSlideEnter]="view.panel.enter"
                   [ffCalendarSlideMeasure]="true"
-                  (ffCalendarSlideHeight)="weeksBox.onHeight($event)"
+                  (ffCalendarSlideHeight)="weeksBox.onHeight($event, view.panel.key)"
                   (ffCalendarSlideExited)="onPanelExited(slot.index, view.panel.key)"
                 >
                   @if (sideHeader()) {
@@ -130,7 +136,7 @@
                         <span
                           role="columnheader"
                           [attr.aria-label]="weekNumberHeaderLabel()"
-                          class="w-[var(--cell-size)] shrink-0"
+                          class="w-[calc(var(--cell-size)*0.75)] shrink-0"
                         ></span>
                       }
                       @for (weekday of weekdays(); track weekday.key) {
@@ -194,6 +200,31 @@
           [attr.data-hidden]="d.hidden || null"
           [class]="d.cellClass"
         >
+          @if (d.ghost; as g) {
+            <!-- The range a new pick replaced: its band slice and filled ends
+                 fade out together on the moderate exit, under everything live. -->
+            <span
+              aria-hidden="true"
+              data-slot="calendar-range-ghost"
+              [ffCalendarGhost]="g.id"
+              class="pointer-events-none absolute inset-0 flex items-center justify-center"
+            >
+              @if (g.band; as gb) {
+                <span
+                  class="pointer-events-none absolute inset-y-0 bg-hover"
+                  [style.left]="gb.left"
+                  [style.right]="gb.right"
+                  [style.border-top-left-radius]="gb.tl"
+                  [style.border-bottom-left-radius]="gb.bl"
+                  [style.border-top-right-radius]="gb.tr"
+                  [style.border-bottom-right-radius]="gb.br"
+                ></span>
+              }
+              @if (g.end) {
+                <span [class]="g.end"></span>
+              }
+            </span>
+          }
           @if (d.band; as b) {
             <!-- The hover fill: a long band reads heavier than a small one,
                  so it takes the lightest token. -->

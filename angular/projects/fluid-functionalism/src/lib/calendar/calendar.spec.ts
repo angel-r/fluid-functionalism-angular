@@ -5,11 +5,14 @@
  * grid keeps DayPicker's ARIA, roving tab stop and keys. Ported from
  * tests/calendar.test.tsx (component cases) plus one test per rule.
  */
-import { Component, signal } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Calendar, type CalendarValue } from './calendar';
 import type { DateRange, Matcher, WeekStartsOn } from './calendar-dates';
 import { dayNumber } from './calendar-dates';
+import { CalendarWeeksBox } from './calendar-slide';
+import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
 import { fontWeights } from '../core/font-weight';
 
 // Never on screen, so no day label gains "Today, " by accident.
@@ -27,6 +30,8 @@ const NOV = new Date(2026, 10, 1);
       [disabled]="disabled()"
       [required]="required()"
       [numberOfMonths]="numberOfMonths()"
+      [orientation]="orientation()"
+      [fill]="fill()"
       [weekStartsOn]="weekStartsOn()"
       [showWeekNumber]="showWeekNumber()"
       [cellSize]="cellSize()"
@@ -47,6 +52,8 @@ class Host {
   readonly disabled = signal<Matcher | Matcher[] | undefined>(undefined);
   readonly required = signal(false);
   readonly numberOfMonths = signal<1 | 2>(1);
+  readonly orientation = signal<'auto' | 'horizontal' | 'vertical'>('auto');
+  readonly fill = signal(false);
   readonly weekStartsOn = signal<WeekStartsOn | undefined>(undefined);
   readonly showWeekNumber = signal(false);
   readonly cellSize = signal<number | undefined>(undefined);
@@ -494,6 +501,250 @@ describe('Calendar navigation', () => {
     const previous = el.querySelector<HTMLButtonElement>('[data-calendar-nav=previous]')!;
     expect(previous.disabled).toBe(true);
     expect(previous.getAttribute('aria-disabled')).toBe('true');
+  });
+});
+
+describe('Calendar columns', () => {
+  it('sizes the week-number column at three quarters of a day cell', () => {
+    const { el } = render((h) => {
+      h.showWeekNumber.set(true);
+    });
+    const month = el.querySelector<HTMLElement>('[data-slot=calendar-month]')!;
+    const header = month.querySelector<HTMLElement>('[role=columnheader]')!;
+    expect(header.getAttribute('aria-label')).toBe('Week Number');
+    expect(header.classList.contains('w-[calc(var(--cell-size)*0.75)]')).toBe(true);
+    expect(header.classList.contains('w-[var(--cell-size)]')).toBe(false);
+    const rowHeader = month.querySelector<HTMLElement>('[role=rowheader]')!;
+    expect(rowHeader.classList.contains('w-[calc(var(--cell-size)*0.75)]')).toBe(true);
+  });
+
+  it('sizes the stacked weekday spacer at three quarters of a day cell', () => {
+    const { el } = render((h) => {
+      h.numberOfMonths.set(2);
+      h.orientation.set('vertical');
+      h.showWeekNumber.set(true);
+    });
+    const row = el.querySelector<HTMLElement>('.sticky[aria-hidden]')!;
+    const spacer = row.firstElementChild as HTMLElement;
+    expect(spacer.tagName).toBe('SPAN');
+    expect(spacer.classList.contains('w-[calc(var(--cell-size)*0.75)]')).toBe(true);
+  });
+
+  it('seeds the day column at the cell size and sizes the chevrons by it', () => {
+    const { el } = render();
+    const months = el.querySelector<HTMLElement>('[data-slot=calendar-months]')!;
+    expect(months.style.getPropertyValue('--calendar-col')).toBe('var(--cell-size)');
+    const next = el.querySelector<HTMLElement>('[data-calendar-nav=next]')!;
+    expect(next.classList.contains('!size-[min(var(--calendar-col,var(--cell-size)),var(--cell-size))]')).toBe(true);
+    // Each chevron sits in its own day-column wide, centred slot; the hover
+    // item is the button's own box, not the column.
+    const item = next.closest('span.relative')!;
+    expect(item.hasAttribute('data-calendar-index') || item.classList.contains('relative')).toBe(true);
+    const column = item.parentElement!;
+    expect(column.classList.contains('w-[var(--calendar-col,var(--cell-size))]')).toBe(true);
+    expect(column.classList.contains('justify-center')).toBe(true);
+  });
+
+  it('offsets the caption and its fade by the week column when week numbers are on', () => {
+    const one = render((h) => {
+      h.showWeekNumber.set(true);
+    });
+    const caption = one.el.querySelector<HTMLElement>('[data-slot=calendar-caption]')!;
+    expect(caption.classList.contains('pl-[calc(var(--cell-size)*0.75+0.5rem)]')).toBe(true);
+
+    const two = render((h) => {
+      h.showWeekNumber.set(true);
+      h.numberOfMonths.set(2);
+      h.orientation.set('horizontal');
+    });
+    const twoUpCaption = two.el.querySelector<HTMLElement>('[data-slot=calendar-caption]')!;
+    expect(twoUpCaption.classList.contains('pl-[calc(var(--cell-size)*0.75)]')).toBe(true);
+    const layer = Array.from(twoUpCaption.querySelectorAll<HTMLElement>('div')).find((d) =>
+      (d.getAttribute('style') ?? '').includes('mask-image'),
+    )!;
+    expect(layer).toBeDefined();
+    expect(layer.style.maskImage).toContain('calc(var(--cell-size) * 0.75)');
+  });
+
+  it("never renders DayPicker's own weekday row; the month's row is there from the first paint", () => {
+    const one = render();
+    expect(one.el.querySelector('.rdp-weekdays')).toBeNull();
+    expect(one.el.querySelector('.rdp-week_number_header')).toBeNull();
+    const month = one.el.querySelector<HTMLElement>('[data-slot=calendar-month]')!;
+    expect(month.querySelectorAll('[role=row] [role=columnheader]').length).toBe(7);
+
+    const stacked = render((h) => {
+      h.numberOfMonths.set(2);
+      h.orientation.set('vertical');
+    });
+    expect(stacked.el.querySelector('.rdp-weekdays')).toBeNull();
+    expect(stacked.el.querySelectorAll('[role=columnheader]').length).toBe(0);
+    expect(stacked.el.querySelector('.sticky[aria-hidden]')).not.toBeNull();
+  });
+});
+
+/** Waits for the fluid hover's measured rects, then flushes. */
+async function settleHover(flush: () => void) {
+  // The target lib predates Promise.withResolvers.
+  const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  await frame();
+  await frame();
+  flush();
+}
+
+describe('Calendar range picking', () => {
+  it('presses the hover fill on mousedown and releases it on a mouseup anywhere', async () => {
+    const width = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth')!;
+    const height = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight')!;
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, get: () => 36 });
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, get: () => 36 });
+    try {
+      const { el, dayButton, flush } = render();
+      dayButton(/November 10th, 2026/).dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+      flush();
+      await settleHover(flush);
+      const fill = el.querySelector<HTMLElement>('[data-slot=fluid-hover-highlight]')!;
+      expect(fill).not.toBeNull();
+      expect(fill.classList.contains('[--day-press:var(--hover)]')).toBe(true);
+      expect(fill.classList.contains('before:shadow-[0_0_0_1px_var(--day-press)]')).toBe(true);
+
+      el.querySelector('[data-slot=calendar-months]')!.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, button: 0 }),
+      );
+      flush();
+      expect(fill.classList.contains('[--day-press:var(--active)]')).toBe(true);
+      expect(fill.classList.contains('before:shadow-[0_0_0_0px_var(--day-press)]')).toBe(true);
+
+      // A release outside the grid still ends the press.
+      window.dispatchEvent(new MouseEvent('mouseup'));
+      flush();
+      expect(fill.classList.contains('[--day-press:var(--hover)]')).toBe(true);
+      expect(fill.classList.contains('before:shadow-[0_0_0_0px_var(--day-press)]')).toBe(false);
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, 'offsetWidth', width);
+      Object.defineProperty(HTMLElement.prototype, 'offsetHeight', height);
+    }
+  });
+
+  it('starts the gliding fill opaque on the range start while picking', async () => {
+    const width = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth')!;
+    const height = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight')!;
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, get: () => 36 });
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, get: () => 36 });
+    try {
+      const { fixture, dayButton, flush } = render((h) => {
+        h.mode.set('range');
+        h.selected.set(range(new Date(2026, 10, 9)));
+      });
+      const highlights = () =>
+        fixture.debugElement
+          .queryAll(By.directive(FluidHoverHighlight))
+          // The chevron pair has its own highlight inside its nav group.
+          .filter((d) => !(d.nativeElement as HTMLElement).closest('[data-slot=calendar-nav]'))
+          .map((d) => d.componentInstance as FluidHoverHighlight);
+      expect(highlights().map((h) => h.fadeIn())).toEqual([true, true]);
+
+      // Focus proposes another end, so the fill glides from the start.
+      dayButton(/November 13th, 2026/).focus();
+      flush();
+      await settleHover(flush);
+      expect(highlights().map((h) => h.fadeIn())).toEqual([false, false]);
+      for (const highlight of highlights()) expect(highlight.from()).not.toBeNull();
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, 'offsetWidth', width);
+      Object.defineProperty(HTMLElement.prototype, 'offsetHeight', height);
+    }
+  });
+
+  it('fades a replaced range out as a ghost, then removes it', async () => {
+    const { el, dayButton, click, flush } = render((h) => {
+      h.mode.set('range');
+      h.selected.set(range(new Date(2026, 10, 9), new Date(2026, 10, 13)));
+    });
+    expect(el.querySelectorAll('[data-slot=calendar-range-ghost]')).toHaveLength(0);
+
+    // A new pick replaces the committed range: its band and ends stay as a
+    // ghost for the exit.
+    click(dayButton(/November 20th, 2026/));
+    expect(el.querySelectorAll('[data-slot=calendar-range-ghost]')).toHaveLength(5);
+    expect(el.querySelector('[data-slot=calendar-range-ghost]')!.getAttribute('aria-hidden')).toBe('true');
+
+    await vi.waitFor(
+      () => {
+        flush();
+        expect(el.querySelectorAll('[data-slot=calendar-range-ghost]')).toHaveLength(0);
+      },
+      { timeout: 2000 },
+    );
+  });
+});
+
+describe('Calendar stacked strip', () => {
+  it('reaches to the weekday row and past the weeks without taking the pointer', () => {
+    const { el } = render((h) => {
+      h.numberOfMonths.set(2);
+      h.orientation.set('vertical');
+    });
+    const months = el.querySelector<HTMLElement>('[data-slot=calendar-months]')!;
+    expect(months.classList.contains('bg-inherit')).toBe(true);
+    expect(el.querySelector<HTMLElement>('[data-slot=calendar]')!.classList.contains('bg-inherit')).toBe(true);
+
+    const strip = Array.from(months.children).find((c) => c.classList.contains('pointer-events-none')) as HTMLElement;
+    expect(strip).toBeDefined();
+    expect(strip.classList.contains('-mb-6')).toBe(true);
+    expect(strip.classList.contains('-mt-4')).toBe(true);
+    expect(strip.classList.contains('pb-6')).toBe(true);
+    expect(strip.classList.contains('pt-4')).toBe(true);
+    expect(strip.classList.contains('[&>[data-slot=calendar-month]]:pointer-events-auto')).toBe(true);
+    expect(strip.style.getPropertyValue('--strip-clip-top')).toBe('0px');
+    expect(strip.style.getPropertyValue('mask-position')).toContain('16px');
+
+    // Stacked months travel through the weeks box: no clip while they do.
+    const weeks = el.querySelector<HTMLElement>('[data-slot=calendar-weeks]')!;
+    expect(weeks.classList.contains('relative')).toBe(true);
+    expect(weeks.classList.contains('grid')).toBe(true);
+    expect(weeks.classList.contains('[overflow-y:clip]')).toBe(false);
+  });
+
+  it('keeps the stacked chevrons under the sticky weekday row', () => {
+    const { el } = render((h) => {
+      h.numberOfMonths.set(2);
+      h.orientation.set('vertical');
+    });
+    const months = el.querySelector<HTMLElement>('[data-slot=calendar-months]')!;
+    const nav = Array.from(months.children).find((c) => c.hasAttribute('data-calendar-inert') && c.classList.contains('absolute'))!;
+    expect(nav.classList.contains('z-[3]')).toBe(true);
+  });
+
+  it('clips the weeks box while the height springs, but never while stacked', () => {
+    @Component({
+      imports: [CalendarWeeksBox],
+      template: `<div [ffCalendarWeeks]="false" [ffCalendarWeeksStacked]="stacked()" #box="ffCalendarWeeks"></div>`,
+    })
+    class BoxHost {
+      readonly stacked = signal(false);
+      readonly box = viewChild.required<CalendarWeeksBox>('box');
+    }
+    const fixture = TestBed.createComponent(BoxHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+    const el = fixture.nativeElement.querySelector('div') as HTMLElement;
+
+    // A resize within the same month jumps, with no clip.
+    host.box().onHeight(200, 1);
+    host.box().onHeight(210, 1);
+    fixture.detectChanges();
+    expect(el.classList.contains('[overflow-y:clip]')).toBe(false);
+    // A month change springs the height, clipped.
+    host.box().onHeight(300, 2);
+    fixture.detectChanges();
+    expect(el.classList.contains('[overflow-y:clip]')).toBe(true);
+
+    // Stacked, a month change never clips: the strip's mask is the edge.
+    host.stacked.set(true);
+    host.box().onHeight(200, 3);
+    fixture.detectChanges();
+    expect(el.classList.contains('[overflow-y:clip]')).toBe(false);
   });
 });
 

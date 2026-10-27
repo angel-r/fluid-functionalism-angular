@@ -30,23 +30,27 @@ import { CALENDAR_CONTEXT, isDisabledDay, type CalendarNavDirection } from './ca
     >
       <ff-fluid-hover-highlight [class]="highlightClass()" />
       @for (direction of buttons(); track direction; let i = $index) {
-        <span [ffFluidHoverItem]="i" class="relative flex">
-          <ff-tooltip [content]="direction === 'previous' ? 'Previous month' : 'Next month'">
-            <button
-              ffButton
-              type="button"
-              variant="ghost"
-              size="icon-compact"
-              [attr.aria-label]="cal.navLabel(direction)"
-              [attr.aria-disabled]="target(direction) ? null : true"
-              [attr.data-calendar-nav]="direction"
-              [disabled]="!target(direction)"
-              (click)="cal.navigate(direction)"
-              class="relative z-[1] !size-[calc(var(--cell-size)*0.78)] group-hover:[&>span:first-child]:!bg-transparent group-hover:[&>span:first-child]:!shadow-none"
-            >
-              <ff-icon name="chevron-right" [size]="16" [class]="chevronClass(direction)" />
-            </button>
-          </ff-tooltip>
+        <!-- One day column wide, the button centered in it like a day in its
+             cell; the highlight measures the button's box, not the column. -->
+        <span class="flex w-[var(--calendar-col,var(--cell-size))] justify-center">
+          <span [ffFluidHoverItem]="i" class="relative flex">
+            <ff-tooltip [content]="direction === 'previous' ? 'Previous month' : 'Next month'">
+              <button
+                ffButton
+                type="button"
+                variant="ghost"
+                size="icon-compact"
+                [attr.aria-label]="cal.navLabel(direction)"
+                [attr.aria-disabled]="target(direction) ? null : true"
+                [attr.data-calendar-nav]="direction"
+                [disabled]="!target(direction)"
+                (click)="cal.navigate(direction)"
+                class="relative z-[1] !size-[min(var(--calendar-col,var(--cell-size)),var(--cell-size))] group-hover:[&>span:first-child]:!bg-transparent group-hover:[&>span:first-child]:!shadow-none"
+              >
+                <ff-icon name="chevron-right" [size]="16" [class]="chevronClass(direction)" />
+              </button>
+            </ff-tooltip>
+          </span>
         </span>
       }
     </div>

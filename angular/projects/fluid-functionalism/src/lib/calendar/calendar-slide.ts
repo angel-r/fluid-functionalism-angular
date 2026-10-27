@@ -185,25 +185,61 @@ export class CalendarSlide {
 })
 export class CalendarWeeksBox {
   readonly reduced = input(false, { alias: 'ffCalendarWeeks' });
+  /** Stacked months travel vertically through this box: a clip would slice
+   *  them flat, so the strip's soft mask is their only edge. */
+  readonly stacked = input(false, { alias: 'ffCalendarWeeksStacked' });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly clip = signal(false);
-  private measured = false;
+  /** The month the height was last taken from, and the height it settles on. */
+  private measured: { month: number; h: number } | null = null;
   private target: number | null = null;
-  protected readonly hostClass = computed(() => (this.clip() ? 'relative grid [overflow-y:clip]' : 'relative grid'));
+  protected readonly hostClass = computed(() =>
+    this.clip() && !this.stacked() ? 'relative grid [overflow-y:clip]' : 'relative grid',
+  );
 
-  onHeight(h: number) {
-    if (!this.measured || this.reduced()) {
-      this.measured = true;
+  /**
+   * Only a month change springs. A resize within the same month (fonts and
+   * cell sizes settling after mount, a container resize) snaps, so the
+   * calendar never grows on first paint.
+   */
+  onHeight(h: number, monthTime: number) {
+    const last = this.measured;
+    this.measured = { month: monthTime, h };
+    if (!last || this.reduced() || last.month === monthTime) {
+      if (last?.month === monthTime && last.h === h) return;
       this.target = h;
       this.host.style.height = `${h}px`;
+      this.clip.set(false);
       return;
     }
-    if (this.target === h) return;
+    if (last.h === h) return;
     this.target = h;
     this.clip.set(true);
     const done = () => {
       if (this.target === h) this.clip.set(false);
     };
     animate(this.host, { height: `${h}px` }, enterTransition(spring.moderate)).finished.then(done, done);
+  }
+}
+
+/**
+ * A range ghost's fade: mounts opaque under everything live and fades out on
+ * the moderate exit. Its id restarts the fade when a new pick replaces the
+ * range again. The owner removes the element after `exitFallbackMs` even if
+ * the animation stalls. Internal to the calendar.
+ */
+@Directive({ selector: '[ffCalendarGhost]' })
+export class CalendarGhost {
+  readonly id = input.required<number>({ alias: 'ffCalendarGhost' });
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  constructor() {
+    effect(() => {
+      this.id();
+      untracked(() => {
+        this.host.style.opacity = '1';
+        animate(this.host, { opacity: 0 }, exitTransition(spring.moderate));
+      });
+    });
   }
 }

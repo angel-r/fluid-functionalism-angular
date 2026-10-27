@@ -68,7 +68,7 @@ import {
 } from './calendar-locale';
 import { CALENDAR_CONTEXT, INDEX_ATTR, INERT_ATTR, isDisabledDay, type CalendarContext, type CalendarNavDirection } from './calendar-context';
 import { CalendarNav } from './calendar-nav';
-import { CalendarSlide, CalendarWeeksBox, type SlideConfig } from './calendar-slide';
+import { CalendarGhost, CalendarSlide, CalendarWeeksBox, type SlideConfig } from './calendar-slide';
 import { buildWeekViews, type CalendarDayView, type CalendarWeekView, type DayViewState } from './calendar-view';
 
 // ---------------------------------------------------------------------------
@@ -93,24 +93,43 @@ export interface CalendarDayDetailContext {
 
 const MONTH_GAP = 24;
 const CALENDAR_PAD = 8;
+/** One day column: the cell size, or the measured column when the months
+ *  fill their container (see the months box). The chevrons take one each. */
+const COL = 'var(--calendar-col, var(--cell-size))';
+/** The week-number column: narrower than a day, so the numbers sit close to
+ *  the days instead of floating in a full cell. */
+export const WEEK_COL_RATIO = 0.75;
+export const WEEK_COL = `calc(var(--cell-size) * ${WEEK_COL_RATIO})`;
 
 /**
- * The stacked strip's mask, the scroll-fade recipe twice over: content fades
- * out over 16px under the sticky weekday row, and a soft hole sits where the
- * chevrons float, so a month sliding up goes under both instead of showing
- * through. The hole is the left-fade and bottom-fade gradients intersected,
- * subtracted from the top fade.
+ * The stacked strip's mask, the scroll-fade recipe twice over. Top: nothing
+ * shows above the first caption row (the strip reaches up through the 16px
+ * gap to the weekday row, which stays empty), then content fades in over a
+ * quarter cell, ending just above the title's cap height. Bottom: content
+ * fades over the 24px the strip reaches past the last week (only padding at
+ * rest, so nothing on screen dims). A month sliding out either way dissolves
+ * there instead of being cut. The chevrons sit in a hole that hides
+ * everything from their left edge (16px fade beyond it) down to the 4px
+ * margin under their row (faded across it, so the first week stays whole),
+ * so a month sliding up goes under them instead of showing through. The hole
+ * is the left-fade and bottom-fade gradients intersected, subtracted from
+ * the fade.
  */
-const STACKED_NAV_WIDTH = 'calc(var(--cell-size) * 1.56 + 4px)';
+const STACKED_NAV_WIDTH = `calc(${COL} * 2)`;
 const stackedStripMask: Record<string, string> = (() => {
-  const fade = 'linear-gradient(to bottom, transparent var(--strip-clip-top), #000 calc(var(--strip-clip-top) + 16px))';
+  const fade =
+    'linear-gradient(to bottom, transparent calc(var(--strip-clip-top) + 16px), #000 calc(var(--strip-clip-top) + 16px + var(--cell-size) / 4), #000 calc(100% - 24px), transparent)';
   const holeLeft = 'linear-gradient(to left, #000 calc(100% - 16px), transparent)';
-  const holeBottom = 'linear-gradient(to bottom, #000 calc(100% - 8px), transparent)';
+  const holeBottom = 'linear-gradient(to bottom, #000 calc(100% - 4px), transparent)';
+  // The caption row and its 4px margin: the first week below stays whole.
   const holeSize = `calc(${STACKED_NAV_WIDTH} + 16px) calc(var(--cell-size) + 4px)`;
   return {
+    // Seeded here; the effect above keeps it on the weekday row's edge.
+    '--strip-clip-top': '0px',
     maskImage: `${fade}, ${holeLeft}, ${holeBottom}`,
     maskSize: `100% 100%, ${holeSize}, ${holeSize}`,
-    maskPosition: '0 0, right 4px top 0, right 4px top 0',
+    // The hole starts at the first caption row, below the strip's 16px reach.
+    maskPosition: '0 0, right 4px top 16px, right 4px top 16px',
     maskRepeat: 'no-repeat',
     maskComposite: 'subtract, intersect',
   };
@@ -124,16 +143,17 @@ const sideStripMask: Record<string, string> = (() => {
 })();
 
 /** Mask for a side-by-side caption layer: transparent under the chevron
- *  (78% of a cell), then a 24px ramp to opaque, toward `to`. */
-function captionFade(to: 'left' | 'right') {
-  const nav = 'calc(var(--cell-size) * 0.78)';
+ *  (one day column, after the week numbers on the left), then a 24px ramp to
+ *  opaque, toward `to`. */
+function captionFade(to: 'left' | 'right', weekNumbers: boolean) {
+  const nav = to === 'right' && weekNumbers ? `calc(${WEEK_COL} + ${COL})` : COL;
   return `linear-gradient(to ${to}, transparent ${nav}, #000 calc(${nav} + 24px))`;
 }
 
 /** The single-month caption layer's mask: clear past the right edge and
- *  under the chevron pair, then a 24px ramp. */
+ *  under the chevron pair (a day column each), then a 24px ramp. */
 function oneUpCaptionFade(stride: number, noNav: boolean) {
-  const clear = noNav ? `${stride}px` : `calc(${stride}px + var(--cell-size) * 1.56)`;
+  const clear = noNav ? `${stride}px` : `calc(${stride}px + ${COL} * 2)`;
   return `linear-gradient(to left, transparent ${clear}, #000 calc(${clear} + 24px))`;
 }
 
@@ -170,7 +190,7 @@ let nextCalendarId = 0;
 
 @Component({
   selector: 'ff-calendar',
-  imports: [NgTemplateOutlet, FluidHoverHighlight, FluidHoverItem, CalendarNav, CalendarSlide, CalendarWeeksBox],
+  imports: [NgTemplateOutlet, FluidHoverHighlight, FluidHoverItem, CalendarNav, CalendarSlide, CalendarWeeksBox, CalendarGhost],
   templateUrl: './calendar.html',
   host: {
     'data-slot': 'calendar-root',
@@ -360,7 +380,10 @@ export class Calendar implements CalendarContext {
   // otherwise. The width two months need is known from the cell size.
   private readonly fits = signal(true);
   private readonly neededWidth = computed(
-    () => (7 + (this.showWeekNumber() ? 1 : 0)) * this.resolvedCellSize() * 2 + MONTH_GAP + CALENDAR_PAD * 2,
+    () =>
+      (7 + (this.showWeekNumber() ? WEEK_COL_RATIO : 0)) * this.resolvedCellSize() * 2 +
+      MONTH_GAP +
+      CALENDAR_PAD * 2,
   );
   protected readonly resolvedOrientation = computed<'horizontal' | 'vertical'>(() => {
     const orientation = this.orientation();
@@ -528,18 +551,27 @@ export class Calendar implements CalendarContext {
   protected readonly hostClass = computed(() =>
     cn('block rounded-[inherit] bg-inherit', this.fill() ? 'w-full' : 'w-fit'),
   );
-  protected readonly rootClass = computed(() => cn('rdp-root', 'p-2', this.fill() && 'w-full', this.userClass()));
+  protected readonly rootClass = computed(() =>
+    // bg-inherit passes the surface down to the stacked weekday row.
+    cn('rdp-root bg-inherit', 'p-2', this.fill() && 'w-full', this.userClass()),
+  );
   protected readonly monthsClass = computed(() =>
     cn(
       'relative isolate flex',
-      this.stacked() ? 'flex-col gap-4' : 'flex-row flex-wrap gap-x-6 gap-y-4',
+      // Stacked, the surface carries on to the sticky weekday row, which
+      // must hide what scrolls under it.
+      this.stacked() ? 'flex-col gap-4 bg-inherit' : 'flex-row flex-wrap gap-x-6 gap-y-4',
       this.fill() && 'w-full',
       'rdp-months',
     ),
   );
   protected readonly stripClass = computed(() =>
     this.stacked()
-      ? '-mx-1 -mb-2 flex flex-col gap-4 px-1 pb-2'
+      ? // The box reaches 4px past the sides (so the mask never cuts a focus
+        // ring), up through the gap to the weekday row and 24px past the
+        // bottom for the fades, margins undone by padding. Only the months
+        // take the pointer: the reach never covers what sits below.
+        'pointer-events-none -mx-1 -mb-6 -mt-4 flex flex-col gap-4 px-1 pb-6 pt-4 [&>[data-slot=calendar-month]]:pointer-events-auto'
       : cn('-mx-2 -mb-2 flex flex-row gap-x-6 px-2 pb-2', this.fill() && 'min-w-0 flex-1'),
   );
   protected readonly stripStyle = computed(() => (this.stacked() ? stackedStripMask : sideStripMask));
@@ -550,12 +582,20 @@ export class Calendar implements CalendarContext {
       'z-[1]',
       this.cellRadius(),
       // Picking a range end, the highlight is the proposed end: the solid
-      // fill and its inset ring glide to the pointer.
-      this.previewGlides() &&
-        cn(
-          'bg-foreground before:pointer-events-none before:absolute before:inset-px before:border before:border-background',
-          this.innerRingRadius(),
-        ),
+      // fill glides to the pointer like the single-select highlight instead
+      // of jumping from cell to cell. Its ring is the overlay's.
+      this.previewGlides()
+        ? 'bg-foreground'
+        : cn(
+            // Otherwise it's the hover fill, pressed like a ghost Button: a
+            // surface 1px in with a same-color 1px spread at rest, the spread
+            // collapsing on press so the fill shrinks 1px per side and steps
+            // to the active token.
+            'bg-transparent before:pointer-events-none before:absolute before:inset-px before:rounded-[inherit] before:bg-[var(--day-press)] before:transition-[box-shadow,background-color] before:[transition-duration:180ms,80ms] before:[transition-timing-function:cubic-bezier(0.23,1,0.32,1),ease]',
+            this.pressed() && !this.litFilled()
+              ? '[--day-press:var(--active)] before:shadow-[0_0_0_0px_var(--day-press)] before:[transition-duration:80ms,80ms]'
+              : '[--day-press:var(--hover)] before:shadow-[0_0_0_1px_var(--day-press)]',
+          ),
     ),
   );
   protected readonly innerRingClass = computed(() =>
@@ -564,9 +604,26 @@ export class Calendar implements CalendarContext {
       this.cellRadius(),
       'before:pointer-events-none before:absolute before:inset-px before:border before:border-background before:transition-opacity before:duration-80',
       this.innerRingRadius(),
-      this.litFilled() && !this.previewGlides() ? 'before:opacity-40' : 'before:opacity-0',
+      // The highlight sits under a filled start or end, so it brings an
+      // inner ring on top (1px in, concentric radius) at 40%, gliding on the
+      // same rect and spring, shown while the lit day is filled. The proposed
+      // end is a lit filled day too, so the ring stays as it is when the
+      // click commits it. Pressed, it goes solid.
+      !(this.litFilled() || this.previewGlides())
+        ? 'before:opacity-0'
+        : this.pressed()
+          ? 'before:opacity-100'
+          : 'before:opacity-40',
     ),
   );
+  /** Picking an end, a fresh hover session starts the solid end opaque under
+   *  the range start, so it slides out of the first pick instead of fading in
+   *  wherever the pointer lands. */
+  protected readonly pickStart = computed<ItemRect | null>(() => {
+    const from = this.range()?.from;
+    if (!this.previewGlides() || !from || !this.hover.isMeasured()) return null;
+    return this.hover.itemRects()[dayNumber(from) - this.gridStart()] ?? null;
+  });
   protected readonly highlightTransition = computed(() => (this.snap() ? false : undefined));
   private readonly ringClass = computed(() =>
     cn(
@@ -579,13 +636,19 @@ export class Calendar implements CalendarContext {
     cn(
       'relative flex h-[var(--cell-size)] items-center gap-1',
       this.twoUp() ? 'justify-center' : 'justify-between pl-2',
-      this.showWeekNumber() && (this.twoUp() ? 'pl-[var(--cell-size)]' : 'pl-[calc(var(--cell-size)+0.5rem)]'),
+      // With week numbers, the title belongs to the days: it starts at the
+      // Monday column (centered over the 7 days, side by side).
+      this.showWeekNumber() &&
+        (this.twoUp() ? 'pl-[calc(var(--cell-size)*0.75)]' : 'pl-[calc(var(--cell-size)*0.75+0.5rem)]'),
       'mb-1',
       'rdp-month_caption',
     ),
   );
   protected readonly oneUpInnerClass = computed(() =>
-    cn('absolute inset-y-0 flex items-center', this.showWeekNumber() ? 'pl-[calc(var(--cell-size)+0.5rem)]' : 'pl-2'),
+    cn(
+      'absolute inset-y-0 flex items-center',
+      this.showWeekNumber() ? 'pl-[calc(var(--cell-size)*0.75+0.5rem)]' : 'pl-2',
+    ),
   );
   private readonly captionTextBase = computed(() =>
     cn(
@@ -603,7 +666,7 @@ export class Calendar implements CalendarContext {
   );
   protected readonly weekNumberClass = computed(() =>
     cn(
-      'flex w-[var(--cell-size)] shrink-0 items-center justify-center tabular-nums text-muted-foreground opacity-60',
+      'flex w-[calc(var(--cell-size)*0.75)] shrink-0 items-center justify-center tabular-nums text-muted-foreground opacity-60',
       this.fill() ? 'max-h-[var(--cell-size)]' : 'h-[var(--cell-size)]',
       typeClass('caption', this.compact() ? 'compact' : 'default'),
       'rdp-week_number',
@@ -613,11 +676,9 @@ export class Calendar implements CalendarContext {
   protected readonly normalWeight = fontWeights.normal;
   protected readonly inertAttr = INERT_ATTR;
 
-  /** Stacked months show one weekday row above both grids; sliding sideways,
-   *  each month's row travels in its panel instead. */
-  protected readonly showWeekdaysRow = computed(() => this.numberOfMonths() === 1 && this.stride() === null);
-  /** Side by side, the weekday row travels with its days. */
-  protected readonly sideHeader = computed(() => this.stride() !== null && !this.stacked());
+  /** Side by side, the weekday row travels with its days. Known before the
+   *  stride is measured, so the row is there on the first paint. */
+  protected readonly sideHeader = computed(() => !this.stacked());
   protected readonly sharedRows = computed(() =>
     this.twoUp() ? Math.max(...this.months().map((m) => m.weeks.length)) : null,
   );
@@ -640,6 +701,35 @@ export class Calendar implements CalendarContext {
     return new Map<number, unknown>();
   });
 
+  /** Held down on a filled day, its ring goes solid; on an empty one, the
+   *  hover fill presses like a ghost Button. */
+  private readonly pressed = signal(false);
+
+  /** The committed range a new pick replaced, fading out. Its id restarts
+   *  the fade for each replacement. */
+  private readonly committedRange = computed(() => {
+    if (this.mode() !== 'range' || this.picking()) return null;
+    const range = this.range();
+    if (!range?.from || !range.to) return null;
+    return { from: dayNumber(range.from), to: dayNumber(range.to) };
+  });
+  private readonly ghostTrack = linkedSignal<
+    { from: number; to: number } | null,
+    { last: { from: number; to: number } | null; ghost: { from: number; to: number; id: number } | null }
+  >({
+    source: this.committedRange,
+    computation: (committed, prev) => {
+      const last = prev?.value.last ?? null;
+      const lastGhost = prev?.value.ghost ?? null;
+      if (prev && committed?.from === last?.from && committed?.to === last?.to) return prev.value;
+      return {
+        last: committed,
+        ghost: last && !committed ? { ...last, id: (lastGhost?.id ?? 0) + 1 } : lastGhost,
+      };
+    },
+  });
+  protected readonly ghost = computed(() => this.ghostTrack().ghost);
+
   /** The day-cell state every panel shares, resolved once per render. */
   private readonly dayState = computed<Omit<DayViewState, 'idPrefix'>>(() => {
     const { band, previewEnd } = this.preview();
@@ -653,6 +743,7 @@ export class Calendar implements CalendarContext {
       picking: this.picking(),
       selectedDay: this.selectedDay(),
       band,
+      ghost: this.ghost(),
       previewEnd,
       committedEnd: this.committedEnd(),
       disabled: matchers.disabled,
@@ -712,6 +803,53 @@ export class Calendar implements CalendarContext {
       onCleanup(() => clearTimeout(id));
     });
 
+    // A ghost leaves once the moderate exit has had its time, whatever the
+    // animation did.
+    effect((onCleanup) => {
+      if (!this.ghost()) return;
+      const id = setTimeout(() => this.ghostTrack.update((v) => ({ ...v, ghost: null })), exitFallbackMs(spring.moderate));
+      onCleanup(() => clearTimeout(id));
+    });
+
+    // The press reads before the click commits. The window listener catches
+    // a release outside the grid.
+    effect((onCleanup) => {
+      if (!this.pressed()) return;
+      const release = () => this.pressed.set(false);
+      window.addEventListener('mouseup', release);
+      onCleanup(() => window.removeEventListener('mouseup', release));
+    });
+
+    // Filling their container, the day columns outgrow the cell size, so the
+    // chevrons (one column each) read the measured column instead. Read off a
+    // live cell each time: a month change swaps the cells out.
+    afterRenderEffect((onCleanup) => {
+      const container = this.monthsEl()?.nativeElement;
+      if (!container) return;
+      // Week numbers and the month layout change the columns, not the box.
+      this.showWeekNumber();
+      this.numberOfMonths();
+      this.orientation();
+      if (!this.fill()) {
+        container.style.setProperty('--calendar-col', 'var(--cell-size)');
+        return;
+      }
+      const measure = () => {
+        const cell = container.querySelector<HTMLElement>('[role="gridcell"]');
+        if (!cell) return;
+        // Fractional (offsetWidth rounds, which drifts across columns), in
+        // layout pixels: the container's own ratio undoes a scaled ancestor.
+        const box = container.getBoundingClientRect().width;
+        const scale = box ? container.offsetWidth / box : 1;
+        container.style.setProperty('--calendar-col', `${cell.getBoundingClientRect().width * scale}px`);
+      };
+      measure();
+      if (typeof ResizeObserver === 'undefined') return;
+      const ro = new ResizeObserver(measure);
+      ro.observe(container);
+      onCleanup(() => ro.disconnect());
+    });
+
     // Side by side, a month change moves every grid by one month width plus
     // the gap; stacked, by the distance between the two month slots.
     afterRenderEffect((onCleanup) => {
@@ -766,7 +904,6 @@ export class Calendar implements CalendarContext {
       const update = () => {
         if (!frame) frame = requestAnimationFrame(measure);
       };
-      strip.style.setProperty('--strip-clip-top', '0px');
       measure();
       window.addEventListener('scroll', update, { capture: true, passive: true });
       window.addEventListener('resize', update);
@@ -852,7 +989,7 @@ export class Calendar implements CalendarContext {
     const stride = this.stride() ?? 0;
     const first = index === 0;
     const last = index === this.numberOfMonths() - 1;
-    const mask = captionFade(first ? 'right' : 'left');
+    const mask = captionFade(first ? 'right' : 'left', this.showWeekNumber());
     return { left: `${first ? 0 : -stride}px`, right: `${last ? 0 : -stride}px`, maskImage: mask, webkitMaskImage: mask };
   }
 
@@ -935,9 +1072,14 @@ export class Calendar implements CalendarContext {
     if (POPUP_NAV_KEYS.includes(e.key)) this.gate.trackKeyboardNav(e);
   }
 
-  protected onMonthsMouseDown() {
+  protected onMonthsMouseDown(e: MouseEvent) {
     this.gate.keyboardNav.current = false;
     this.focusedIndex.set(null);
+    if (e.button === 0) this.pressed.set(true);
+  }
+
+  protected onMonthsMouseUp() {
+    this.pressed.set(false);
   }
 
   protected onMonthsMouseEnter() {
