@@ -1,0 +1,75 @@
+<div [class]="wrapperClass()">
+  <!-- The frame. `isolate` scopes the frame's internal z ladder (the z-[70]
+       tab bar, the inspect overlay) to its own stacking context, so a
+       portalled dialog's backdrop dims the whole frame instead of sliding
+       under the header. -->
+  <div data-component-preview [class]="frameClass()">
+    @if (!hideHeader()) {
+      <!-- Tab bar: min-height reserves the playback button's height (h-10 +
+           pt-3), so the header doesn't shift when it appears. -->
+      <div
+        class="relative z-[70] flex items-center gap-0 px-3 py-3 min-h-[52px] border-b border-border/60 bg-background"
+        style="border-top-left-radius: inherit; border-top-right-radius: inherit"
+      >
+        @if (title()) {
+          <span class="px-4 py-2.5 text-site-body text-foreground mr-auto" [style.font-variation-settings]="semibold">
+            {{ title() }}
+          </span>
+        }
+        <ff-tabs-subtle [selectedIndex]="tab()" (selectedIndexChange)="tab.set($event)">
+          <button ffTabsSubtleItem [index]="0" label="Preview"></button>
+          <button ffTabsSubtleItem [index]="1" label="Code"></button>
+        </ff-tabs-subtle>
+        <div class="ml-auto flex items-center gap-1">
+          @if (inspectable() && tab() === 0) {
+            <!-- Toggling Inspect must not dismiss whatever the preview has
+                 open (a dropdown, a popover): inspecting THAT state is the
+                 point. Blocking the press at its own wrapper keeps the demos'
+                 document listeners from closing them. -->
+            <span (pointerdown)="blockPointerDown($event)" (mousedown)="blockMouseDown($event)">
+              <ff-switch label="Inspect" [checked]="inspect()" (toggle)="toggleInspect()" class="h-8 px-2 rounded-md" />
+            </span>
+          }
+          @if (showReplay()) {
+            <ff-tooltip side="top" content="Replay animation">
+              <button type="button" (click)="replayOnce()" [class]="replayClass()" aria-label="Replay animation">
+                <ff-icon name="rotate-ccw" [size]="16" [strokeWidth]="1.5" />
+              </button>
+            </ff-tooltip>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- The clipper adopts the outer container's bottom corners so the
+         preview stays inside the shape system's radius; a headerless frame
+         owns all four. -->
+    <div class="overflow-hidden" [style]="contentRadius()">
+      @if (tab() === 0) {
+        <div #preview tabindex="-1" (mousedown)="onPreviewMouseDown($event)" [class]="previewClass()">
+          <ng-container [ngTemplateOutlet]="children" />
+        </div>
+      } @else {
+        <div [class]="codeClass()" [innerHTML]="safeHtml()"></div>
+      }
+    </div>
+
+    <!-- Mounted while the Preview tab is on (not while Inspect is on): the
+         overlay fades itself out, so destroying it with the switch would cut
+         the exit. `active` false renders nothing visible and listens to
+         nothing. Direct child of the frame, after the clipper, because its
+         layers are `absolute inset-0` against the frame's own box. -->
+    @if (inspectable() && tab() === 0) {
+      @if (previewElement(); as content) {
+        <app-inspect-overlay [frame]="content" [active]="inspect()" [rulers]="inspectRulers()" />
+      }
+    }
+  </div>
+
+  @if (caption()) {
+    <p class="pb-2 text-center text-site-caption text-muted-foreground">{{ caption() }}</p>
+  }
+</div>
+
+<!-- Projected content renders once, from here, into whichever tab is on. -->
+<ng-template #children><ng-content /></ng-template>
