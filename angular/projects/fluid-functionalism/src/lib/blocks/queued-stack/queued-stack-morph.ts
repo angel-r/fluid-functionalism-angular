@@ -10,7 +10,7 @@ import {
 import { animate } from 'motion';
 import { exitFallbackMs, spring } from '../../core/springs';
 import { ReducedMotion } from '../../core/environment';
-import { enterTransition } from '../../core/motion';
+import { CHAT_MESSAGE_ENTRANCE_OVERRIDE, type ChatMessageEntranceOverride } from '../../chat-message/entrance';
 
 // ---------------------------------------------------------------------------
 // The queued→sent morph (React: a shared framer `layoutId` between the stack
@@ -88,8 +88,11 @@ export function setInstant(element: HTMLElement, frames: Frames) {
  * `data-queued-morph-text` are counter-scaled so text doesn't stretch. A null
  * id, or no captured card, leaves the element alone.
  */
-@Directive({ selector: '[ffQueuedStackMorph]' })
-export class QueuedStackMorph {
+@Directive({
+  selector: '[ffQueuedStackMorph]',
+  providers: [{ provide: CHAT_MESSAGE_ENTRANCE_OVERRIDE, useExisting: QueuedStackMorph }],
+})
+export class QueuedStackMorph implements ChatMessageEntranceOverride {
   readonly layoutId = input<string | null | undefined>(undefined, { alias: 'ffQueuedStackMorph' });
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
@@ -97,14 +100,24 @@ export class QueuedStackMorph {
   private readonly reduced = inject(ReducedMotion).value;
   private readonly animations: { stop(): void }[] = [];
 
+  private morphed: boolean | null = null;
+
   constructor() {
-    afterNextRender(() => {
-      const key = this.layoutId();
-      if (!key) return;
-      const from = this.registry.claim(key);
-      if (from) this.morphFrom(from);
-    });
+    // A chat message host asks first (its entrance waits on the answer); any
+    // other host morphs on its first render.
+    afterNextRender(() => this.takeOverEntrance());
     inject(DestroyRef).onDestroy(() => this.animations.forEach((a) => a.stop()));
+  }
+
+  /** Claims the card and starts the morph, once; true when it morphed. */
+  takeOverEntrance(): boolean {
+    if (this.morphed === null) {
+      const key = this.layoutId();
+      const from = key ? this.registry.claim(key) : null;
+      this.morphed = !!from;
+      if (from) this.morphFrom(from);
+    }
+    return this.morphed;
   }
 
   private morphFrom(from: DOMRect) {
@@ -117,20 +130,33 @@ export class QueuedStackMorph {
       setInstant(host, { opacity: 1, x: 0, y: 0, scale: 1 });
       return;
     }
+    const dx = from.left - to.left;
+    const dy = from.top - to.top;
     const scaleX = from.width / to.width;
     const scaleY = from.height / to.height;
-    host.style.transformOrigin = '0 0';
-    setInstant(host, { opacity: 1, x: from.left - to.left, y: from.top - to.top, scale: 1, scaleX, scaleY });
     const texts = Array.from(host.querySelectorAll<HTMLElement>('[data-queued-morph-text]'));
-    for (const text of texts) {
-      text.style.transformOrigin = '0 0';
-      setInstant(text, { scaleX: 1 / scaleX, scaleY: 1 / scaleY });
-    }
+    host.style.transformOrigin = '0 0';
+    for (const text of texts) text.style.transformOrigin = '0 0';
+    // One spring drives the whole morph, and the text is counter-scaled from
+    // the box's scale on every frame (framer's layout scale correction), so it
+    // keeps its size throughout. Separate springs on box and text would only
+    // cancel out at both ends.
+    const frame = (p: number) => {
+      const sx = scaleX + (1 - scaleX) * p;
+      const sy = scaleY + (1 - scaleY) * p;
+      host.style.transform = `translateX(${dx * (1 - p)}px) translateY(${dy * (1 - p)}px) scaleX(${sx}) scaleY(${sy})`;
+      for (const text of texts) text.style.transform = `scaleX(${1 / sx}) scaleY(${1 / sy})`;
+    };
+    setInstant(host, { opacity: 1, x: dx, y: dy, scale: 1, scaleX, scaleY });
+    for (const text of texts) setInstant(text, { scaleX: 1 / scaleX, scaleY: 1 / scaleY });
 
-    const transition = enterTransition(spring.moderate);
-    const main = animate(host, { x: 0, y: 0, scaleX: 1, scaleY: 1 }, transition);
-    this.animations.push(main, ...texts.map((t) => animate(t, { scaleX: 1, scaleY: 1 }, transition)));
+    const { type, duration, bounce } = spring.moderate;
+    const main = animate(0 as number, 1, { type, duration, bounce, onUpdate: frame });
+    this.animations.push(main);
+    // Rest pose, written through motion so its value store ends in step.
     const settle = () => {
+      setInstant(host, { x: 0, y: 0, scaleX: 1, scaleY: 1 });
+      for (const text of texts) setInstant(text, { scaleX: 1, scaleY: 1 });
       host.style.transformOrigin = origin;
       for (const text of texts) text.style.transformOrigin = '';
     };
