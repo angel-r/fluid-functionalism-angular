@@ -1,0 +1,41 @@
+name: Publish Angular library
+
+# Publishes @angel-r/fluid-functionalism-angular to npm with trusted publishing
+# (OIDC): no npm token is stored in the repository. Push a tag that matches the
+# library version, for example v0.1.0 for version 0.1.0.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: angular
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          # Trusted publishing needs npm 11.5.1 or later, which Node 24 ships.
+          node-version: 24
+          check-latest: true
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm ci
+      - name: Check the tag matches the library version
+        run: |
+          version=$(node -p "require('./projects/fluid-functionalism/package.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match the library version $version." >&2
+            exit 1
+          fi
+      - run: npx ng test fluid-functionalism --watch=false
+      - run: npx ng build fluid-functionalism
+      - run: npm publish
+        working-directory: angular/dist/fluid-functionalism

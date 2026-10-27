@@ -93,7 +93,7 @@ The per-component differences (and why) are recorded in `odd/tasks/angular-port.
 | One component's tests | `npx ng test fluid-functionalism --watch=false --include='**/select/*.spec.ts'` |
 | Browser motion/layout checks | `node scripts/browser-checks/run.mjs --url http://localhost:4200` (needs the showcase running and a local Chrome; `--only <text>` filters) |
 | Build the library | `npx ng build fluid-functionalism` (output in `dist/fluid-functionalism`) |
-| Publish to npm | bump `version` in `projects/fluid-functionalism/package.json`, build, then `npm publish` from `dist/fluid-functionalism` |
+| Publish to npm | bump `version` in `projects/fluid-functionalism/package.json`, commit, then push a matching tag (`git tag v0.1.0 && git push origin v0.1.0`). The `Publish Angular library` workflow tests, builds and publishes with npm trusted publishing. |
 | Regenerate the icon packs | `node scripts/generate-icon-packs.mjs` |
 
 In the workspace, the `@angel-r/fluid-functionalism-angular` import path points at the library source, so the showcase needs no library build.
