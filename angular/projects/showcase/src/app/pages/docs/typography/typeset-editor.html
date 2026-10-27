@@ -1,0 +1,111 @@
+<!-- The Markdown sample: an editable `.typeset` page with the site's own
+     chrome (a hint row with the Inspect switch), and the inspect bands over
+     the block under the pointer. The editor root is above the bands in paint
+     order, so the highlights sit under the text. -->
+<div
+  class="flex w-full flex-col overflow-hidden border border-border/60 transition-[border-color] duration-150 ease-out focus-within:border-foreground/40"
+  [class]="shape().container"
+>
+  <div class="flex items-center justify-between gap-3 border-b border-border/60 py-1.5 pl-4 pr-2">
+    <p class="hidden min-w-0 text-site-caption text-muted-foreground sm:block">
+      Type <code>#</code> for a heading, <code>-</code> for a list, <code>[]</code> for a to-do,
+      <code>&gt;</code> for a quote.
+    </p>
+    <div class="ml-auto flex shrink-0 items-center gap-1">
+      <ff-switch
+        label="Inspect"
+        [checked]="inspect()"
+        (toggle)="toggleInspect()"
+        class="h-8 px-2 rounded-md"
+      />
+    </div>
+  </div>
+  <div (mousedown)="focusEnd($event)" class="cursor-text bg-background px-5 py-6 sm:px-8 sm:py-8">
+    <div
+      #frame
+      (pointermove)="pick($event)"
+      (pointerleave)="hovered.set(null)"
+      class="relative w-full text-foreground"
+    >
+      <!-- The bands paint under the text (the editor root is positioned and
+           comes later). None of the overlay takes the pointer. -->
+      @if (mark(); as m) {
+        <div
+          aria-hidden
+          class="pointer-events-none absolute"
+          [style.top.px]="m.content.top"
+          [style.left.px]="m.content.left"
+          [style.width.px]="m.content.width"
+          [style.height.px]="m.content.height"
+          [style.backgroundImage]="bandImage(m.lineHeight)"
+          style="outline: 1px solid #6B97FF"
+        ></div>
+      }
+      @for (sp of spacing(); track $index) {
+        <div
+          aria-hidden
+          class="pointer-events-none absolute flex items-center justify-center"
+          [style.top.px]="sp.band.top"
+          [style.left.px]="sp.band.left"
+          [style.width.px]="sp.band.width"
+          [style.height.px]="sp.band.height"
+          [style.background]="tones[sp.tone].fill"
+          [style.outline]="'1px dashed ' + tones[sp.tone].line"
+          [style.outlineOffset.px]="-1"
+        >
+          <span
+            class="font-mono text-[9px] leading-none text-foreground"
+            [style.font-variation-settings]="semibold"
+          >
+            {{ px(sp.value) }}
+          </span>
+        </div>
+      }
+
+      <div
+        #editor
+        class="typeset relative outline-none"
+        [class.typeset-compact]="compact()"
+        contenteditable="true"
+        role="textbox"
+        aria-multiline="true"
+        [attr.aria-label]="label()"
+        spellcheck="false"
+        (input)="onInput()"
+        (keydown)="onKeydown($event)"
+        (click)="onClick($event)"
+        (paste)="onPaste($event)"
+      ></div>
+
+      @if (mark(); as m) {
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute z-40"
+          [style.top.px]="readout().top"
+          [style.left.px]="readout().left"
+          [style.transform]="readout().transform"
+        >
+          <div [class]="readoutClass()">
+            <div
+              class="grid grid-cols-[auto_auto] gap-x-4 font-mono text-[11px] leading-4 tabular-nums"
+              [class.dark]="inverse() === 'dark'"
+              [class.light]="inverse() === 'light'"
+            >
+              <span class="text-muted-foreground">Font size</span>
+              <span class="text-right">{{ px(m.fontSize) }}</span>
+              <span class="text-muted-foreground">Line height</span>
+              <span class="text-right">{{ px(m.lineHeight) }}</span>
+              @for (sp of spacing(); track $index) {
+                <span class="mt-1.5 text-muted-foreground">{{ sp.kind }}</span>
+                <span class="mt-1.5 text-right">{{ px(sp.value) }}</span>
+                <span class="col-span-2 text-muted-foreground">
+                  {{ sp.owner }}{{ sp.rule ? ' · ' + sp.rule : '' }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
