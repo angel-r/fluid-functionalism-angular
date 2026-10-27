@@ -53,7 +53,7 @@ import {
   injectSurface,
   spring,
   surfaceClasses,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { SidebarDemoTopbar } from './sidebar-demo-parts';
 import { AI_WORKSPACE } from './sidebar-demo-data';
 

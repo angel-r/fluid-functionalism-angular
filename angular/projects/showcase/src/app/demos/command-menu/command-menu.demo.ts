@@ -11,7 +11,7 @@ import {
   injectShape,
   type CommandMenuHint,
   type CommandMenuItemData,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 import {
   COMMAND_MENU_COPY,

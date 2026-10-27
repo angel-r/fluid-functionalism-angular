@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { FileThumbnail } from 'fluid-functionalism';
+import { FileThumbnail } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 // A one-page PDF drawn by hand. Its xref table is omitted on purpose: pdfjs

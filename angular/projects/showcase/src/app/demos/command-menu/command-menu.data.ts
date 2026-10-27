@@ -1,4 +1,4 @@
-import type { CommandMenuItemData, IconName } from 'fluid-functionalism';
+import type { CommandMenuItemData, IconName } from '@angel-r/fluid-functionalism-angular';
 
 // The demo actions of the docs page (lib/preset/command-menu-options.ts): a
 // small app's palette, with every field the rows can show.

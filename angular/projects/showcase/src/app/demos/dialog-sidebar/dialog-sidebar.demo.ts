@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { Button, SettingsDialog } from 'fluid-functionalism';
+import { Button, SettingsDialog } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 /** The dialog-sidebar block: an xl dialog, a Sidebar of sections, a scrolling

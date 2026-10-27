@@ -5,7 +5,7 @@
   "compilerOptions": {
     "noImplicitOverride": true,
     "paths": {
-      "fluid-functionalism": ["./projects/fluid-functionalism/src/public-api.ts"]
+      "@angel-r/fluid-functionalism-angular": ["./projects/fluid-functionalism/src/public-api.ts"]
     },
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,

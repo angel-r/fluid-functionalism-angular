@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { Button, ChatMessage, Icon, cn, injectShape } from 'fluid-functionalism';
+import { Button, ChatMessage, Icon, cn, injectShape } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 // A self-contained sample image, wrapped as a File so the attachments demo

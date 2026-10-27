@@ -11,7 +11,7 @@ How a fluid-functionalism component is ported into `projects/fluid-functionalism
 | `tests/<name>*.test.tsx` | `src/lib/<name>/<name>.spec.ts` |
 | docs page demos (`app/docs/<name>/page.tsx`) | `projects/showcase/src/app/demos/<name>/<name>.demo.ts` |
 
-Each `src/lib/<name>/index.ts` re-exports the public pieces; `public-api.ts` already exports every component folder. Import foundations relatively (`../core`, `../fluid-hover`, `../merge-split`), never from `fluid-functionalism`.
+Each `src/lib/<name>/index.ts` re-exports the public pieces; `public-api.ts` already exports every component folder. Import foundations relatively (`../core`, `../fluid-hover`, `../merge-split`), never from `@angel-r/fluid-functionalism-angular`.
 
 The Base UI and Radix flavors share one behavior: port it once.
 

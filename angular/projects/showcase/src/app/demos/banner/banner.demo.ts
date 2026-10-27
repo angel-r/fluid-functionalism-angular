@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { BANNER_PARTS, Button, type BannerContrast, type BannerStatus } from 'fluid-functionalism';
+import { BANNER_PARTS, Button, type BannerContrast, type BannerStatus } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 const STATUSES: { status: BannerStatus; label: string }[] = [

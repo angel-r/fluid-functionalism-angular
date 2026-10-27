@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { animate } from 'motion';
-import { CarouselDots, enterTransition, exitTransition, injectShape, spring } from 'fluid-functionalism';
+import { CarouselDots, enterTransition, exitTransition, injectShape, spring } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 const SLIDES = ['Inbox', 'Drafts', 'Sent', 'Archive'];

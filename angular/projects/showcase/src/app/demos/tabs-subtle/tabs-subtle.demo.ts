@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { TabsSubtle, TabsSubtleItem, TabsSubtlePanel, type IconName } from 'fluid-functionalism';
+import { TabsSubtle, TabsSubtleItem, TabsSubtlePanel, type IconName } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

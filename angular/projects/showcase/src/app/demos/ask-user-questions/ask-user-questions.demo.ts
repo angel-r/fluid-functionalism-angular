@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AskUserQuestions, Button, type AskUserAnswer, type AskUserQuestion } from 'fluid-functionalism';
+import { AskUserQuestions, Button, type AskUserAnswer, type AskUserQuestion } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 import {
   chipLeftQuestions,

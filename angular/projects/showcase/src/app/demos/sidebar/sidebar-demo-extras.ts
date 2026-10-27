@@ -48,7 +48,7 @@ import {
   spring,
   surfaceClasses,
   surfaceHoverClasses,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { SidebarDemoFooterUser, SidebarDemoHeader, SidebarDemoTopbar } from './sidebar-demo-parts';
 import { AI_THREADS, AI_WORKSPACE } from './sidebar-demo-data';
 

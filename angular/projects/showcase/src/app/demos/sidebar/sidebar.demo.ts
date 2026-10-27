@@ -23,7 +23,7 @@ import {
   Tooltip,
   type SidebarPeek,
   type SidebarVariant,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 import {
   SidebarDemoBranches,

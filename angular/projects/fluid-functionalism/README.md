@@ -1,19 +1,23 @@
-# fluid-functionalism (Angular)
+# Fluid Functionalism for Angular
 
-Angular 22 port of [fluid-functionalism](https://github.com/mickadesign/fluid-functionalism): components with fluid hover, merged selections and spring motion. Standalone, signal-based and zoneless.
+An unofficial Angular 22 port of [Fluid Functionalism](https://github.com/mickadesign/fluid-functionalism) by Micka Touillaud: components with fluid hover, merged selections and spring motion. Standalone, signal-based and zoneless.
+
+This port is not affiliated with the original project.
 
 ## Quick path
+
+You need Angular 22 and Tailwind CSS 4.
 
 1. Install with its peers:
 
    ```bash
-   npm i fluid-functionalism @angular/cdk @angular/aria
+   npm i @angel-r/fluid-functionalism-angular @angular/cdk @angular/aria
    ```
 
 2. Register the providers:
 
    ```ts
-   import { provideFluid, provideFluidTheme } from 'fluid-functionalism';
+   import { provideFluid, provideFluidTheme } from '@angel-r/fluid-functionalism-angular';
 
    bootstrapApplication(App, {
      providers: [provideFluid(), provideFluidTheme()],
@@ -24,8 +28,8 @@ Angular 22 port of [fluid-functionalism](https://github.com/mickadesign/fluid-fu
 
    ```css
    @import "tailwindcss";
-   @import "fluid-functionalism/styles/theme.css";
-   @source "../node_modules/fluid-functionalism";
+   @import "@angel-r/fluid-functionalism-angular/styles/theme.css";
+   @source "../node_modules/@angel-r/fluid-functionalism-angular";
    ```
 
    Serve the Inter variable fonts at `/fonts/InterVariable.ttf` and `/fonts/InterVariable-Italic.ttf`.
@@ -44,4 +48,8 @@ Angular 22 port of [fluid-functionalism](https://github.com/mickadesign/fluid-fu
 
 Reduced motion follows the OS setting: transforms jump, fades stay.
 
-See the workspace README (`angular/README.md` in the repository) for the full component list and the React → Angular mapping.
+See the [workspace README](https://github.com/angel-r/fluid-functionalism-angular/tree/main/angular#readme) for the full component list and the React → Angular mapping.
+
+## License
+
+MIT. Fluid Functionalism © Micka Touillaud; Angular port © angel-r.

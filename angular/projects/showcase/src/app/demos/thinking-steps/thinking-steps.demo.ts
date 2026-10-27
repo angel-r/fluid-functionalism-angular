@@ -22,7 +22,7 @@ import {
   ThinkingSteps,
   ThinkingStepsContent,
   ThinkingStepsHeader,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 // The root, header, content and step every demo uses.

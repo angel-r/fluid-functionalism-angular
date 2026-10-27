@@ -11,7 +11,7 @@ import {
   DialogTrigger,
   SettingsDialog,
   type DialogSize,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 const DIALOG_PARTS = [

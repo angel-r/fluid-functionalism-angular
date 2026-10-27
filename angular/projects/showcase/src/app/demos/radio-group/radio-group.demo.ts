@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { RadioGroup, RadioItem } from 'fluid-functionalism';
+import { RadioGroup, RadioItem } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

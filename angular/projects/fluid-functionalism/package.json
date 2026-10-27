@@ -1,6 +1,29 @@
 {
-  "name": "fluid-functionalism",
+  "name": "@angel-r/fluid-functionalism-angular",
   "version": "0.0.1",
+  "description": "Unofficial Angular port of Fluid Functionalism: components with fluid hover, merged selections and spring motion. Standalone, signal-based and zoneless.",
+  "keywords": [
+    "angular",
+    "components",
+    "ui",
+    "tailwindcss",
+    "signals",
+    "fluid-functionalism"
+  ],
+  "license": "MIT",
+  "author": "angel-r",
+  "homepage": "https://github.com/angel-r/fluid-functionalism-angular/tree/main/angular#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angel-r/fluid-functionalism-angular.git",
+    "directory": "angular/projects/fluid-functionalism"
+  },
+  "bugs": {
+    "url": "https://github.com/angel-r/fluid-functionalism-angular/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@angular/common": "^22.2.0",
     "@angular/core": "^22.2.0",
@@ -16,7 +39,6 @@
     "class-variance-authority": "^0.7.1"
   },
   "sideEffects": false,
-  "license": "MIT",
   "peerDependenciesMeta": {
     "pdfjs-dist": {
       "optional": true

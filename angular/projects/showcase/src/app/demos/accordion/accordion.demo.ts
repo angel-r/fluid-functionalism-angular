@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Accordion, AccordionContent, AccordionGroup, AccordionItem, AccordionTrigger } from 'fluid-functionalism';
+import { Accordion, AccordionContent, AccordionGroup, AccordionItem, AccordionTrigger } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 interface Section {

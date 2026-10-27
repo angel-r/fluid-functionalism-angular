@@ -10,7 +10,7 @@ import {
   untitleduiIcons,
   type IconDefinition,
   type IconName,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

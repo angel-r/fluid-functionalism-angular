@@ -9,7 +9,7 @@ import {
   ComboboxList,
   ComboboxRow,
   type IconName,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 interface Option {

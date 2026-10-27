@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FluidHover, FluidHoverHighlight, FluidHoverItem, Icon, injectShape, injectSize, type IconName } from 'fluid-functionalism';
+import { FluidHover, FluidHoverHighlight, FluidHoverItem, Icon, injectShape, injectSize, type IconName } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

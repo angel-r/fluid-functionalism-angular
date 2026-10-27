@@ -1,4 +1,4 @@
-import type { NavSection } from 'fluid-functionalism';
+import type { NavSection } from '@angel-r/fluid-functionalism-angular';
 
 // ---------------------------------------------------------------------------
 // Seed navigation data — replace with your own. Icons are slots of the icon
