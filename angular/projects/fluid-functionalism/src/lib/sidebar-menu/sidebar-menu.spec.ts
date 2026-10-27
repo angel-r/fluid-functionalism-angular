@@ -26,6 +26,14 @@ import {
   type SidebarMenuAnimate,
 } from './index';
 
+// The row-height contract: the row publishes --row-h, trailing parts center
+// on it. Literal class strings, as the upstream tsx writes them.
+const ROW_H_28 = '[--row-h:28px]';
+const ROW_H_32 = '[--row-h:32px]';
+const ROW_H_24 = '[--row-h:24px]';
+const BADGE_TOP_CLASS = 'top-[calc((var(--row-h,32px)_-_20px)/2)]';
+const ACTION_TOP_CLASS = 'top-[calc((var(--row-h,32px)_-_24px)/2)]';
+
 const PARTS = [
   SidebarMenu,
   SidebarMenuItem,
@@ -311,7 +319,7 @@ describe('trailing controls', () => {
     expect(action.getAttribute('data-sidebar')).toBe('menu-action');
     expect(action.getAttribute('type')).toBe('button');
     expect(action.classList).toContain('absolute');
-    expect(action.classList).toContain('top-1');
+    expect(action.classList).toContain(ACTION_TOP_CLASS);
     expect(action.style.getPropertyValue('--icon-size')).toBe('16px');
     expect(byId('hover-action').hasAttribute('data-show-on-hover')).toBe(true);
     expect(byId('hover-action').classList).toContain('peer-hover/menu-button:opacity-100');
@@ -342,6 +350,101 @@ describe('trailing controls', () => {
       expect(badge.classList).toContain('text-foreground');
     });
     expect(badge.style.fontVariationSettings).toBe(fontWeights.semibold);
+  });
+});
+
+// ─── Row height and trailing centering ──────────────────────────────────────
+
+@Component({
+  imports: PARTS,
+  template: `
+    <ul ffSidebarMenu [size]="size()">
+      <li ffSidebarMenuItem data-testid="row">
+        <button ffSidebarMenuButton data-testid="row-button">Row</button>
+        <div ffSidebarMenuBadge data-testid="row-badge">3</div>
+      </li>
+      <li ffSidebarMenuItem data-testid="row-cluster-row">
+        <button ffSidebarMenuButton data-testid="row-cluster-button">Cluster</button>
+        <div ffSidebarMenuActions data-testid="row-cluster"><button ffSidebarMenuAction>1</button></div>
+      </li>
+      <li ffSidebarMenuItem>
+        <button ffSidebarMenuButton size="lg" data-testid="lg-button">Two lines</button>
+      </li>
+      <li ffSidebarMenuItem>
+        <button ffSidebarMenuButton data-testid="parent">Parent</button>
+        <ff-sidebar-menu-sub [open]="true">
+          <li ffSidebarMenuSubItem data-testid="sub">
+            <a ffSidebarMenuSubButton href="#" data-testid="sub-button">Sub</a>
+            <div ffSidebarMenuBadge data-testid="sub-badge">2</div>
+          </li>
+          <li ffSidebarMenuSubItem data-testid="sub-cluster-row">
+            <a ffSidebarMenuSubButton href="#" data-testid="sub-cluster-button">Sub cluster</a>
+            <div ffSidebarMenuActions data-testid="sub-cluster"><button ffSidebarMenuAction>1</button></div>
+          </li>
+          <li ffSidebarMenuSubItem data-testid="sub-sm">
+            <a ffSidebarMenuSubButton href="#" size="sm" data-testid="sub-sm-button">Small</a>
+          </li>
+        </ff-sidebar-menu-sub>
+      </li>
+    </ul>
+  `,
+})
+class RowHeightHost {
+  readonly size = signal<'default' | 'compact'>('default');
+}
+
+describe('row height (--row-h) and trailing centering', () => {
+  it('a top-level row publishes the button height and steps with the size ladder', async () => {
+    const fixture = TestBed.createComponent(RowHeightHost);
+    await settle(fixture);
+    const { byId } = query(fixture);
+    const row = byId('row');
+    const hasSm = 'has-[>[data-size=sm]]:[--row-h:28px]';
+    const hasLg = 'has-[>[data-size=lg]]:[--row-h:48px]';
+    expect(row.classList).toContain(ROW_H_32);
+    expect(row.classList).toContain(hasSm);
+    expect(row.classList).toContain(hasLg);
+    expect(byId('row-button').classList).toContain('h-8');
+
+    fixture.componentInstance.size.set('compact');
+    await settle(fixture);
+    expect(row.classList).toContain(ROW_H_28);
+    expect(row.classList).not.toContain(ROW_H_32);
+    expect(byId('row-button').classList).toContain('h-7');
+  });
+
+  it('a sub row publishes the shorter heights and keeps the sm override', async () => {
+    const fixture = TestBed.createComponent(RowHeightHost);
+    await settle(fixture);
+    const { byId } = query(fixture);
+    const sub = byId('sub');
+    expect(sub.classList).toContain(ROW_H_28);
+    expect(sub.classList).toContain('has-[>[data-size=sm]]:[--row-h:24px]');
+    expect(byId('sub-sm').classList).toContain(ROW_H_28);
+
+    fixture.componentInstance.size.set('compact');
+    await settle(fixture);
+    expect(sub.classList).toContain(ROW_H_24);
+    expect(sub.classList).not.toContain(ROW_H_28);
+  });
+
+  it('badges and actions center on --row-h instead of a fixed top offset', async () => {
+    const fixture = TestBed.createComponent(RowHeightHost);
+    await settle(fixture);
+    const { byId } = query(fixture);
+    for (const id of ['row-badge', 'sub-badge']) {
+      const badge = byId(id);
+      expect(badge.classList).toContain(BADGE_TOP_CLASS);
+      expect(badge.classList).not.toContain('top-1');
+      expect(badge.classList).not.toContain('top-1.5');
+    }
+    for (const id of ['row-cluster', 'sub-cluster']) {
+      const cluster = byId(id);
+      expect(cluster.classList).toContain(ACTION_TOP_CLASS);
+      expect(cluster.classList).not.toContain('top-1');
+    }
+    // An action inside the cluster flows; the wrapper owns the offset.
+    expect(byId('row-cluster').querySelector('[data-sidebar="menu-action"]')!.classList).not.toContain(ACTION_TOP_CLASS);
   });
 });
 
