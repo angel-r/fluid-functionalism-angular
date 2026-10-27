@@ -30,13 +30,13 @@ export interface SystemEntry {
 }
 
 export const systemList: SystemEntry[] = [
-  { slug: 'fluid-hover', name: 'Fluid Hover', description: 'Hover that never blinks and always follows your cursor to the nearest item.', installSlug: 'use-fluid-hover', installNote: 'The useFluidHover hook and its highlight, already in every list and menu.' },
-  { slug: 'motion', name: 'Motion', description: 'Spring tokens, faster exits, fluid hover, and reflow-free weight animation: the motion rules shared by every component.', installSlug: 'springs', installNote: 'Installs the springs lib: the fast / moderate / slow spring presets every component animates with.' },
-  { slug: 'reveal', name: 'Reveal', description: '1 class reveals a whole page, on load and on scroll.', installNote: "Installs the 4 preset classes, reveal-landing, reveal-product, and their -subtle steps, plus shadcn's Skeleton for slow data." },
-  { slug: 'scrollbars', name: 'Scrollbars', description: "A scrollbar that stays out of the way but never disappears, over shadcn's scroll-fade baseline: restyled to the shape system, native scroll on touch.", installSlug: 'scroll-area', installNote: 'Installs the ScrollArea component with the shape-system scrollbar and the scroll-fade edge treatment.' },
-  { slug: 'sizes', name: 'Sizes', description: 'A two-step size ladder: a 36px default and a 28px compact, shared by buttons, inputs, selects, tabs, and rows.', installSlug: 'size-context', installNote: 'Installs the size-context lib: SizeProvider, the useSize and useTypeScale hooks, the token maps behind both steps, and the type-scale tokens.' },
-  { slug: 'surfaces', name: 'Surfaces', description: 'Eight-level surface and shadow ladder for elevation in light and dark mode.', installSlug: 'elevated', installNote: 'Installs the Elevated primitive plus the surface-context and surface-classes libs: the elevation ladder as code.' },
-  { slug: 'typography', name: 'Typography', description: 'Bold rules that create consistency across the whole component library.', installSlug: 'typography', installNote: 'The 5 styles for any text, markdown included.' },
+  { slug: 'fluid-hover', name: 'Fluid Hover', description: 'Hover that never blinks and always follows your cursor to the nearest item.', installSlug: 'use-fluid-hover', installNote: 'The [ffFluidHover] directive and its highlight, already in every list and menu.' },
+  { slug: 'motion', name: 'Motion', description: 'Spring tokens, faster exits, fluid hover, and reflow-free weight animation: the motion rules shared by every component.', installSlug: 'springs', installNote: 'The spring tokens, fast / moderate / slow, that every component animates with.' },
+  { slug: 'reveal', name: 'Reveal', description: '1 class reveals a whole page, on load and on scroll.', installNote: 'The 4 preset classes, reveal-landing and reveal-product plus their -subtle steps, in the package theme CSS.' },
+  { slug: 'scrollbars', name: 'Scrollbars', description: "A scrollbar that stays out of the way but never disappears, over shadcn's scroll-fade baseline: restyled to the shape system, native scroll on touch.", installSlug: 'scroll-area', installNote: 'The ff-scroll-area component with the shape-system scrollbar and the scroll-fade edge treatment.' },
+  { slug: 'sizes', name: 'Sizes', description: 'A two-step size ladder: a 36px default and a 28px compact, shared by buttons, inputs, selects, tabs, and rows.', installSlug: 'size-context', installNote: 'The ladder itself: provideFluid({ size }), [ffSizeProvider], injectSize() and injectTypeScale(), and the --fs / --lh tokens.' },
+  { slug: 'surfaces', name: 'Surfaces', description: 'Eight-level surface and shadow ladder for elevation in light and dark mode.', installSlug: 'elevated', installNote: 'The [ffElevated] directive plus the surface ladder and its shadow recipes.' },
+  { slug: 'typography', name: 'Typography', description: 'Bold rules that create consistency across the whole component library.', installSlug: 'typography', installNote: 'The 5 text roles and their tokens, in the package theme CSS.' },
 ];
 
 export const componentList: ComponentEntry[] = [

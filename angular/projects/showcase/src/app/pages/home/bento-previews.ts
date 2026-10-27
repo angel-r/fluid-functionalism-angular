@@ -21,6 +21,7 @@ import {
   computed,
   effect,
   inject,
+  input,
   signal,
   untracked,
   viewChild,
@@ -284,7 +285,7 @@ class AccordionPreview {
       (mouseenter)="hovering.set(true)"
       (mouseleave)="hovering.set(false)"
     ></div>
-    <div (pointerdown.capture)="byHand = true" (keydown.capture)="byHand = true">
+    <div (pointerdown)="byHand = true" (keydown)="byHand = true">
       <ff-carousel-dots
         [count]="slides.length"
         [value]="slide()"
@@ -297,11 +298,14 @@ class AccordionPreview {
   host: { class: 'flex flex-col items-center gap-3' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class CarouselDotsPreview {
+export class CarouselDotsPreview {
+  /** Holds the autoplay: the changelog's page-wide Pause passes its playback
+   *  state in, as the reference's PreviewPlaybackContext does. */
+  readonly paused = input(false);
   protected readonly slides = CAROUSEL_SLIDES;
   protected readonly slide = signal(0);
   protected readonly hovering = signal(false);
-  protected readonly autoplay = computed(() => ({ duration: 2400, paused: this.hovering() }));
+  protected readonly autoplay = computed(() => ({ duration: 2400, paused: this.hovering() || this.paused() }));
   protected readonly label = (i: number) => `Show ${CAROUSEL_SLIDES[i]}`;
   /** A dot picked by hand compares indices, so clicking back goes left. */
   protected byHand = false;
