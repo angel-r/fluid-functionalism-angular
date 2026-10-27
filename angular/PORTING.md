@@ -96,3 +96,13 @@ jsdom has no layout, so FLIP moves, springs, measured centring, popup orientatio
 Checks live in `scripts/browser-checks/checks/*.mjs` (`messages`, `popups`, `layout`); each exports `{ name, path, run(page, h) }` and uses `helpers.mjs` (`section`, `sample` per frame, `assert`, `near`, `frames`). A check must be shown to bite — sabotage the page (reduced motion, instant WAAPI, fast clock, ignored `scrollTop`) and watch it fail — and then pass three runs in a row. Add one whenever a fix touches behaviour only the browser can prove.
 
 - **Reduced motion and FLIP:** `animateFluid`'s reduced path paints its jump on the next frame. A FLIP that re-targets on the next mutation stops that jump unlanded and strands the element on its first keyframe, and the following FLIP compounds the offset. Under reduced motion, skip the FLIP instead: React's `layout` animations are transform-based and instant there, so the element is already on its layout box (`chat-message` `watchLayout`).
+
+## Upstream sync (T19)
+
+The React source stays in place so upstream merges keep working; the port drifts unless it follows them.
+
+`git fetch upstream` → `git diff HEAD..upstream/main -- registry app/globals.css registry.json tests` lists what to port. Then read the full new source with `git show upstream/main:<path>` and map it hunk by hunk (the Angular files mirror the React structure closely: `calories.ts` → `calendar.ts`, `*-core.tsx` → the component, `.html` → the template). Not in scope: `app/docs/**`, `lib/docs/**`, `lib/preset/**` and the generated `public/r/**` (the Next docs site, A4); the theme ranges in `app/globals.css` still feed `styles/theme.css`.
+
+Last sync: `1dd8931..3699f84` (2026-10-27): calendar range picking (measured day column, pressed fill, ghost band, masks, weeks height), date-picker two rows for narrow parents, sidebar `--row-h` centring, `fadeIn` on the hover highlight. The browser checks that guard it live in `scripts/browser-checks/checks/calendar.mjs` (week column, pressed fill, ghost fade, pick-start glide), `popups.mjs` (two-row date picker) and `layout.mjs` (sidebar trailing centring).
+
+After a sync: `npx ng test fluid-functionalism --watch=false`, `npx ng build fluid-functionalism`, `npx ng build showcase`, then the browser checks against the running showcase.
