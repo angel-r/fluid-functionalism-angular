@@ -10,6 +10,8 @@ import {
   signal,
 } from '@angular/core';
 import { cn } from '../core/utils';
+import { injectSize } from '../core/size';
+import { rowHeightClass } from './menu-utils';
 import { SidebarMenu } from './sidebar-menu';
 
 /**
@@ -44,6 +46,8 @@ abstract class MenuRowBase extends SidebarMenuRow {
   readonly userClass = input('', { alias: 'class' });
   readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   protected readonly scope = inject(SidebarMenu, { optional: true });
+  /** The row's height ladder: its button's height, mirrored into --row-h. */
+  protected readonly sizeClasses = injectSize();
 
   readonly isHovered = computed(() => this.scope?.hoveredRow() === this.element);
   readonly isActiveRow = computed(() => this.scope?.activeRows().includes(this.element) ?? false);
@@ -89,7 +93,9 @@ abstract class MenuRowBase extends SidebarMenuRow {
 })
 export class SidebarMenuItem extends MenuRowBase {
   readonly isSubRow = false;
-  protected readonly hostClass = computed(() => cn('group/menu-item relative', this.userClass()));
+  protected readonly hostClass = computed(() =>
+    cn('group/menu-item relative', rowHeightClass(false, this.sizeClasses().variant), this.userClass()),
+  );
 }
 
 /** `<li ffSidebarMenuSubItem>`: a row inside a SidebarMenuSub. */
@@ -100,5 +106,7 @@ export class SidebarMenuItem extends MenuRowBase {
 })
 export class SidebarMenuSubItem extends MenuRowBase {
   readonly isSubRow = true;
-  protected readonly hostClass = computed(() => cn('group/menu-sub-item relative', this.userClass()));
+  protected readonly hostClass = computed(() =>
+    cn('group/menu-sub-item relative', rowHeightClass(true, this.sizeClasses().variant), this.userClass()),
+  );
 }

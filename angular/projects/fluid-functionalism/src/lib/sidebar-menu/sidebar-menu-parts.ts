@@ -19,6 +19,7 @@ import { injectSize } from '../core/size';
 import { typeClass } from '../core/type-scale';
 import { fontWeights } from '../core/font-weight';
 import { SIDEBAR_MENU_ACTIONS_CLUSTER, SidebarMenuRow } from './sidebar-menu-item';
+import { ACTION_TOP, BADGE_TOP } from './menu-utils';
 
 // ─── SidebarMenuAction ───────────────────────────────────────────────────────
 
@@ -73,7 +74,7 @@ export class SidebarMenuAction {
         (sub
           ? 'group-has-[>[data-sidebar=menu-badge]]/menu-sub-item:right-8.5'
           : 'group-has-[>[data-sidebar=menu-badge]]/menu-item:right-8.5'),
-      !inCluster && (sub || this.sizeClasses().variant === 'compact' ? 'top-0.5' : 'top-1'),
+      !inCluster && ACTION_TOP,
       'hover:bg-hover hover:text-foreground transition-[color,background-color,opacity] duration-80',
       'focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]',
       // One icon size across the sidebar: row actions match the leading
@@ -130,7 +131,6 @@ export class SidebarMenuActions {
   readonly userClass = input('', { alias: 'class' });
 
   private readonly row = inject(SidebarMenuRow, { optional: true });
-  private readonly sizeClasses = injectSize();
   private readonly actions = contentChildren(forwardRef(() => SidebarMenuAction), { descendants: true });
 
   protected readonly hostClass = computed(() => {
@@ -141,7 +141,7 @@ export class SidebarMenuActions {
       sub
         ? 'group-has-[>[data-sidebar=menu-badge]]/menu-sub-item:right-8.5'
         : 'group-has-[>[data-sidebar=menu-badge]]/menu-item:right-8.5',
-      sub || this.sizeClasses().variant === 'compact' ? 'top-0.5' : 'top-1',
+      ACTION_TOP,
       this.showOnHover() &&
         (sub
           ? 'opacity-0 transition-opacity duration-80 group-hover/menu-sub-item:opacity-100 group-focus-within/menu-sub-item:opacity-100 has-[[data-state=open]]:opacity-100 has-[[data-popup-open]]:opacity-100'
@@ -185,7 +185,7 @@ export class SidebarMenuBadge {
     const variant = this.sizeClasses().variant;
     return cn(
       'pointer-events-none absolute right-2 z-10 flex h-5 min-w-5 items-center justify-center px-1 tabular-nums',
-      variant === 'compact' ? 'top-1' : 'top-1.5',
+      BADGE_TOP,
       typeClass('micro', variant),
       'transition-[color,font-variation-settings] duration-80',
       this.lit() ? 'text-foreground' : 'text-muted-foreground',

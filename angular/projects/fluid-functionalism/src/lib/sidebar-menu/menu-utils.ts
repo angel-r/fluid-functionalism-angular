@@ -1,5 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import { animate, type AnimationOptions, type DOMKeyframesDefinition } from 'motion';
+import { cn } from '../core/utils';
+import type { SizeVariant } from '../core/size';
 import type { ItemRect } from '../fluid-hover/fluid-hover';
 
 // ─── Motion seam ─────────────────────────────────────────────────────────────
@@ -159,3 +161,27 @@ export function rowGutter(actionCount: number, hasBadge: boolean) {
   const inset = hasBadge ? ROW_BADGE_INSET : ROW_ACTION_INSET;
   return inset + runWidth + ROW_GAP;
 }
+
+// ─── Row height ──────────────────────────────────────────────────────────────
+
+// The row publishes its button's height as --row-h so the absolutely placed
+// badge and actions can center on it. Fixed `top-*` offsets drifted 2px on
+// every height but the one they were tuned for. Read through `:has()` on the
+// button's data-size, so it is right from the server render on, and mirrors
+// SidebarMenuButton / SidebarMenuSubButton's height classes.
+export function rowHeightClass(isSubRow: boolean, variant: SizeVariant) {
+  return isSubRow
+    ? cn(
+        variant === 'compact' ? '[--row-h:24px]' : '[--row-h:28px]',
+        'has-[>[data-size=sm]]:[--row-h:24px]',
+      )
+    : cn(
+        variant === 'compact' ? '[--row-h:28px]' : '[--row-h:32px]',
+        'has-[>[data-size=sm]]:[--row-h:28px] has-[>[data-size=lg]]:[--row-h:48px]',
+      );
+}
+
+// Vertical offsets that center a trailing part on the row: the badge is h-5,
+// actions are size-6.
+export const BADGE_TOP = 'top-[calc((var(--row-h,32px)_-_20px)/2)]';
+export const ACTION_TOP = 'top-[calc((var(--row-h,32px)_-_24px)/2)]';
