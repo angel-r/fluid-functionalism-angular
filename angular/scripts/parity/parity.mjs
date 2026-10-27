@@ -75,7 +75,7 @@ function pageLib() {
   };
   P.portals = () => [...document.body.children].filter(
     (el) => !el.hasAttribute('data-parity-static') && !['SCRIPT', 'STYLE', 'NEXT-ROUTE-ANNOUNCER'].includes(el.tagName),
-  ).concat([...document.querySelectorAll('.cdk-overlay-container')]);
+  ).concat([...document.querySelectorAll('.cdk-overlay-container')]).filter((el, i, all) => all.indexOf(el) === i);
   const ownText = (el) =>
     [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s+/g, ' ').trim().slice(0, 40);
   const cls = (el) => (el.getAttribute('class') ?? '').split(/\s+/).filter((c) => c && !c.startsWith('ng-') && !c.startsWith('cdk-') && !c.startsWith('lucide')).sort().join(' ');
@@ -87,13 +87,26 @@ function pageLib() {
       // Component hosts are transparent unless they carry the styling
       // themselves (e.g. `<ff-badge class="…">` in place of React's `<span>`).
       const host = tag.includes('-') || tag === 'ng-component';
-      if (!host || cls(el)) {
+      // Bare <div>/<span> wrappers (no class, text, role or inline paint)
+      // draw nothing; their children carry the geometry. Radix positioners
+      // and CDK panes are such wrappers, and pairing them only adds noise.
+      const bare = (tag === 'div' || tag === 'span') && !cls(el) && !ownText(el) && !el.getAttribute('role') &&
+        !/background|border|box-shadow/.test(el.getAttribute('style') ?? '');
+      if ((!host || cls(el)) && !bare) {
         const rects = el.getClientRects();
         if (rects.length) {
           const r = el.getBoundingClientRect();
           const cs = getComputedStyle(el);
           const style = {};
           for (const p of props) style[p] = cs[p];
+          if (tag === 'svg') {
+            // what the icon draws: geometry attributes plus the stroke the
+            // first shape actually renders with
+            const shapes = [...el.querySelectorAll('path,circle,rect,line,polyline,polygon,ellipse')];
+            style.glyph = shapes.map((n) => ['d', 'cx', 'cy', 'r', 'x', 'y', 'width', 'height', 'x1', 'y1', 'x2', 'y2', 'points', 'rx', 'ry']
+              .map((a) => n.getAttribute(a) ?? '').join(',')).join('|');
+            style.shapeStroke = shapes[0] ? getComputedStyle(shapes[0]).strokeWidth : '';
+          }
           list.push({
             tag, cls: cls(el), text: ownText(el), role: el.getAttribute('role') ?? '',
             x: r.x - origin.x, y: r.y - origin.y, w: r.width, h: r.height, style,
@@ -109,17 +122,23 @@ function pageLib() {
     return list;
   };
   P.els = [];
+  P.keyOf = (el) => `${cls(el)}|${ownText(el)}`;
   P.register = (el) => {
     let i = P.els.indexOf(el);
     if (i < 0) i = P.els.push(el) - 1;
+    el.__parityKey = P.keyOf(el);
     return i;
   };
   P.origin = (body) => {
-    // top-left of the union of the body's rendered descendants
+    // top-left of the union of the body's rendered descendants; fixed-position
+    // and sub-2px nodes (Base UI hidden inputs, focus guards) sit at the
+    // viewport corner and would drag the origin there
     let x = Infinity, y = Infinity;
     for (const el of body.querySelectorAll('*')) {
       const r = el.getBoundingClientRect();
-      if (r.width || r.height) { x = Math.min(x, r.x); y = Math.min(y, r.y); }
+      if (r.width <= 1.5 && r.height <= 1.5) continue;
+      if (getComputedStyle(el).position === 'fixed') continue;
+      x = Math.min(x, r.x); y = Math.min(y, r.y);
     }
     return { x: isFinite(x) ? x : 0, y: isFinite(y) ? y : 0 };
   };
@@ -135,7 +154,12 @@ function pageLib() {
       P.armed = () => {};
       const tick = (now) => {
         if (t0 !== null) {
-          frames.push({ t: now - t0, els: P.walk([body, ...P.portals()], props, origin) });
+          // Popups and dialogs are measured in the viewport (dialogs, sheets)
+          // and from the target the input went to (anchored popups); the diff
+          // takes whichever frame agrees.
+          const tb = P.target?.isConnected ? P.target.getBoundingClientRect() : origin;
+          const portals = P.walk(P.portals(), props, { x: 0, y: 0 }).map((e) => ({ ...e, ax: e.x - tb.x, ay: e.y - tb.y }));
+          frames.push({ t: now - t0, els: [...P.walk([body], props, origin), ...portals] });
         }
         if (now - start < durationMs + 3000 && (t0 === null || now - t0 < durationMs)) requestAnimationFrame(tick);
         else {
@@ -152,7 +176,9 @@ function pageLib() {
 // ---- node side ----------------------------------------------------------
 
 // Tags are left out: an Angular host element stands in for React's root tag.
-const keyOf = (e) => `${e.cls}|${e.text}`;
+// …unless the element has neither classes nor text: then the tag is all
+// there is to tell an unstyled <svg> from an unstyled <span>.
+const keyOf = (e) => `${e.cls}|${e.text}|${e.cls || e.text ? '' : e.tag}`;
 function pair(a, b) {
   const pairs = [];
   const used = new Set();
@@ -249,12 +275,17 @@ function staticDiff(a, b) {
     if (differs('y', o.ay, o.by)) d.push(`dy ${o.ay.toFixed(1)}→${o.by.toFixed(1)}`);
     for (const p of ['w', 'h']) if (differs(p, ra[p], ng[p])) d.push(`${p} ${ra[p].toFixed(1)}→${ng[p].toFixed(1)}`);
     for (const p of STYLE_PROPS) if (differs(p, ra.style[p], ng.style[p])) d.push(`${p} ${ra.style[p]} → ${ng.style[p]}`);
+    if (ra.tag === 'svg') {
+      if (ra.style.glyph !== ng.style.glyph) d.push('glyph differs');
+      if (differs('shapeStroke', ra.style.shapeStroke, ng.style.shapeStroke)) d.push(`shape strokeWidth ${ra.style.shapeStroke} → ${ng.style.shapeStroke}`);
+    }
     if (d.length) lines.push(`  ~ ${describe(ra)}: ${d.join('; ')}`);
   }
   return { lines, pairs };
 }
 
 function motionDiff(fa, fb) {
+  if (!fa.length || !fb.length) return [`    no frames (React ${fa.length}, Angular ${fb.length}): the input reached no element`];
   // Resample both runs on a 16ms grid and compare every paired element. A
   // value counts as matching when React had it one frame earlier or later:
   // frame-scheduling jitter between the two runtimes is not a motion change.
@@ -288,7 +319,9 @@ function motionDiff(fa, fb) {
         for (const x of shifted) {
           const other = x.byB.get(ng);
           if (!other) continue;
-          const d = delta(p, value(other, p), value(ng, p));
+          let d = delta(p, value(other, p), value(ng, p));
+          const alt = p === 'x' ? 'ax' : p === 'y' ? 'ay' : null;
+          if (alt && alt in other && alt in ng) d = Math.min(d, delta(p, other[alt], ng[alt]));
           if (d < best) { best = d; bestA = other; }
         }
         if (!best) continue;
@@ -358,8 +391,18 @@ async function runMotion(ra, ng, key, pairs, report) {
         const pos = await side.page.evaluate(({ key, s, idx }) => {
           const P = window.__parity;
           const r = P.roots(s).find((x) => x.key === key);
-          r.body.scrollIntoView({ block: 'center' });
-          const b = P.els[idx].getBoundingClientRect();
+          // Targets recreated since the snapshot (month panels, list rows) are
+          // found again by the same classes + own text.
+          let el = P.els[idx];
+          if (!el.isConnected) {
+            const want = el.__parityKey;
+            el = [...r.body.querySelectorAll('*')].find((c) => P.keyOf(c) === want) ?? el;
+          }
+          // Centre the target itself, so both pages put it (and anything
+          // anchored to it or to the viewport) at the same screen position.
+          el.scrollIntoView({ block: 'center', inline: 'center' });
+          P.target = el;
+          const b = el.getBoundingClientRect();
           return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
         }, { key, s: side.side, idx: target.idx });
         if (action === 'hover') { await side.page.mouse.move(2, 2); await side.page.waitForTimeout(400); }
@@ -380,33 +423,49 @@ async function runMotion(ra, ng, key, pairs, report) {
   }
 }
 
-const browser = await chromium.launch({ channel: 'chrome', headless: true });
+// Chrome occasionally closes during startup on Windows; try again.
+async function launch(attempts = 3) {
+  for (let i = 1; ; i++) {
+    try {
+      return await chromium.launch({ channel: 'chrome', headless: true });
+    } catch (error) {
+      if (i >= attempts) throw error;
+    }
+  }
+}
+const browser = await launch();
 mkdirSync(OUT, { recursive: true });
 for (const slug of slugs) {
   const report = [`# ${slug}`];
   const ra = await open(browser, `${REACT}/docs/${REACT_SLUG[slug] ?? slug}`, 'react');
   const ng = await open(browser, `${ANGULAR}/${slug}`, 'angular');
-  const keysA = await ra.page.evaluate(() => window.__parity.roots('react').map((r) => r.key));
-  const keysB = await ng.page.evaluate(() => window.__parity.roots('angular').map((r) => r.key));
-  const shared = keysA.filter((k) => keysB.includes(k) && (!ONLY_SECTION || k.startsWith(ONLY_SECTION)));
-  report.push(`sections: ${shared.length} shared; only React: [${keysA.filter((k) => !keysB.includes(k)).join(', ')}]; only Angular: [${keysB.filter((k) => !keysA.includes(k)).join(', ')}]`);
-  for (const key of shared) {
-    await matchStage(ng, ra, key);
-    const a = await snapshot(ra, key);
-    const b = await snapshot(ng, key);
-    const { lines, pairs } = staticDiff(a, b);
-    report.push(`## ${key} (${a.length} React / ${b.length} Angular elements)`, ...lines);
-    if (SHOTS) {
-      for (const side of [ra, ng]) {
-        const handle = await side.page.evaluateHandle(({ key, s }) => window.__parity.roots(s).find((x) => x.key === key).body, { key, s: side.side });
-        await handle.screenshot({ path: join(OUT, `${slug}--${key.replace(/[^\w-]+/g, '_')}--${side.side}.png`), animations: 'disabled' }).catch(() => {});
+  // A page that reloads mid-run (live reload) loses the injected helpers;
+  // keep what was measured and go on with the next page.
+  try {
+    const keysA = await ra.page.evaluate(() => window.__parity.roots('react').map((r) => r.key));
+    const keysB = await ng.page.evaluate(() => window.__parity.roots('angular').map((r) => r.key));
+    const shared = keysA.filter((k) => keysB.includes(k) && (!ONLY_SECTION || k.startsWith(ONLY_SECTION)));
+    report.push(`sections: ${shared.length} shared; only React: [${keysA.filter((k) => !keysB.includes(k)).join(', ')}]; only Angular: [${keysB.filter((k) => !keysA.includes(k)).join(', ')}]`);
+    for (const key of shared) {
+      await matchStage(ng, ra, key);
+      const a = await snapshot(ra, key);
+      const b = await snapshot(ng, key);
+      const { lines, pairs } = staticDiff(a, b);
+      report.push(`## ${key} (${a.length} React / ${b.length} Angular elements)`, ...lines);
+      if (SHOTS) {
+        for (const side of [ra, ng]) {
+          const handle = await side.page.evaluateHandle(({ key, s }) => window.__parity.roots(s).find((x) => x.key === key).body, { key, s: side.side });
+          await handle.screenshot({ path: join(OUT, `${slug}--${key.replace(/[^\w-]+/g, '_')}--${side.side}.png`), animations: 'disabled' }).catch(() => {});
+        }
       }
+      if (MOTION) await runMotion(ra, ng, key, pairs, report);
+      await ra.page.mouse.move(2, 2);
+      await ng.page.mouse.move(2, 2);
+      await ra.page.keyboard.press('Escape');
+      await ng.page.keyboard.press('Escape');
     }
-    if (MOTION) await runMotion(ra, ng, key, pairs, report);
-    await ra.page.mouse.move(2, 2);
-    await ng.page.mouse.move(2, 2);
-    await ra.page.keyboard.press('Escape');
-    await ng.page.keyboard.press('Escape');
+  } catch (error) {
+    report.push(`aborted: ${String(error).split('\n')[0]}`);
   }
   if (ra.errors.length || ng.errors.length) report.push(`errors: React ${JSON.stringify(ra.errors)} Angular ${JSON.stringify(ng.errors)}`);
   writeFileSync(join(OUT, `${slug}.txt`), report.join('\n') + '\n');
