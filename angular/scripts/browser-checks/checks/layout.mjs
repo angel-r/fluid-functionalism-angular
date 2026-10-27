@@ -419,4 +419,46 @@ const carouselDots = {
   },
 };
 
-export const checks = [sidebarMobileSheet, sidebarPeekHover, sidebarPeekClick, sliderPress, sliderDrag, sliderKeys, carouselDots];
+// ─── Sidebar trailing parts ─────────────────────────────────────────────────
+
+// The row publishes its button height as --row-h; the badge (h-5) and the
+// action cluster (size-6) centre on it with calc offsets instead of tuned
+// top-* values, so they line up on every row height.
+const sidebarTrailing = {
+  name: 'sidebar: badges and action clusters centre on their row at every row height',
+  path: 'sidebar',
+  async run(page, h) {
+    const section = h.section(page, 'Actions & badges');
+    await section.scrollIntoViewIfNeeded();
+    const rows = await section.evaluate((root) => {
+      const out = [];
+      for (const li of root.querySelectorAll('[data-sidebar=menu-item], [data-sidebar=menu-sub-item]')) {
+        const button = [...li.children].find((c) => c.tagName === 'BUTTON' || c.tagName === 'A');
+        const badge = [...li.children].find((c) => c.getAttribute('data-sidebar') === 'menu-badge');
+        const actions = [...li.children].find((c) => c.getAttribute('data-sidebar') === 'menu-actions');
+        const action = [...li.children].find((c) => c.getAttribute('data-sidebar') === 'menu-action');
+        const parts = [badge, actions, action].filter(Boolean);
+        if (!button || parts.length === 0) continue;
+        const b = button.getBoundingClientRect();
+        const centre = b.top + b.height / 2;
+        out.push({
+          row: li.getAttribute('data-sidebar'),
+          rowHeight: getComputedStyle(li).getPropertyValue('--row-h').trim(),
+          buttonHeight: Math.round(b.height),
+          deltas: parts.map((p) => {
+            const r = p.getBoundingClientRect();
+            return Math.round((r.top + r.height / 2 - centre) * 10) / 10;
+          }),
+        });
+      }
+      return out;
+    });
+    h.assert(rows.length >= 5, 'the demo has too few rows with a badge or actions to check', rows.length);
+    for (const row of rows) {
+      h.assert(row.rowHeight !== '', `a ${row.row} row publishes no --row-h`, row);
+      for (const delta of row.deltas) h.near(delta, 0, 1, `a trailing part is off the ${row.rowHeight} row's centre`, row);
+    }
+  },
+};
+
+export const checks = [sidebarMobileSheet, sidebarPeekHover, sidebarPeekClick, sliderPress, sliderDrag, sliderKeys, carouselDots, sidebarTrailing];
