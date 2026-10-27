@@ -33,6 +33,8 @@ import {
   SidebarDemoTopbar,
 } from './sidebar-demo-parts';
 import { AI_THREADS, WIKI_PRIVATE, WIKI_RECENT, WIKI_SHARED } from './sidebar-demo-data';
+import { SidebarDemoCallouts, SidebarDemoHeaderFooter, SidebarDemoSettingsDialog } from './sidebar-demo-extras';
+import { SidebarDemoAlignment, SidebarDemoIconRail } from './sidebar-demo-rail';
 
 /** Every preview runs inside a bounded frame (React `SidebarShellFrame`, which
  *  the docs preview borders): the provider fills it instead
@@ -300,7 +302,19 @@ class SidebarDemoCollapse {
 
 @Component({
   selector: 'app-sidebar-demo',
-  imports: [DemoPage, DemoSection, SidebarDemoShell, SidebarDemoNesting, SidebarDemoActions, SidebarDemoCollapse],
+  imports: [
+    DemoPage,
+    DemoSection,
+    SidebarDemoShell,
+    SidebarDemoNesting,
+    SidebarDemoActions,
+    SidebarDemoHeaderFooter,
+    SidebarDemoCallouts,
+    SidebarDemoCollapse,
+    SidebarDemoSettingsDialog,
+    SidebarDemoIconRail,
+    SidebarDemoAlignment,
+  ],
   template: `
     <app-demo-page
       title="Sidebar"
@@ -338,6 +352,38 @@ class SidebarDemoCollapse {
       </app-demo-section>
 
       <p class="text-site-body text-muted-foreground">
+        Stack the header and footer content <code>vertically</code> or <code>horizontally</code>.
+      </p>
+      <div class="flex flex-col gap-3">
+        <app-demo-section title="Header & footer">
+          <app-sidebar-demo-header-footer stack="vertical" />
+        </app-demo-section>
+        <p class="pb-2 text-center text-site-caption text-muted-foreground">Vertical stacking</p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <app-demo-section title="Header & footer">
+          <app-sidebar-demo-header-footer stack="horizontal" />
+        </app-demo-section>
+        <p class="pb-2 text-center text-site-caption text-muted-foreground">Horizontal stacking</p>
+      </div>
+
+      <p class="text-site-body text-muted-foreground">
+        Elevate &amp; promote news using the callout with stackable <code>Banners</code> or <code>Inlines</code>.
+      </p>
+      <div class="flex flex-col gap-3">
+        <app-demo-section title="Callouts">
+          <app-sidebar-demo-callouts variant="inline" />
+        </app-demo-section>
+        <p class="pb-2 text-center text-site-caption text-muted-foreground">Stacked inlines</p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <app-demo-section title="Callouts">
+          <app-sidebar-demo-callouts variant="banner" />
+        </app-demo-section>
+        <p class="pb-2 text-center text-site-caption text-muted-foreground">Stacked banners</p>
+      </div>
+
+      <p class="text-site-body text-muted-foreground">
         Drag to resize, click to collapse, or press <code>[</code>. Open the collapsed sidebar on
         <code>hover</code> or <code>click</code>.
       </p>
@@ -346,6 +392,38 @@ class SidebarDemoCollapse {
       </app-demo-section>
       <app-demo-section title="Resize, collapse & peek">
         <app-sidebar-demo-collapse peek="click" [defaultOpen]="false" />
+      </app-demo-section>
+
+      <p class="text-site-body text-muted-foreground">
+        A settings dialog with the sidebar inside. 3 props make it fit: <code>collapsible="none"</code> drops the
+        rail and the drawer, <code>persist=false</code> skips the cookie, and <code>h-full</code> pins it to the
+        dialog's height. Below <code>sm</code> a Select takes over.
+      </p>
+      <app-demo-section title="Inside a dialog">
+        <app-sidebar-demo-settings-dialog />
+      </app-demo-section>
+
+      <p class="text-site-body text-muted-foreground">
+        Hot take baked into this component: there's no icon-only collapsed mode. On purpose.
+      </p>
+      <p class="text-site-body text-muted-foreground">
+        Icon rails look tidy in screenshots but fail in use. Six ambiguous glyphs, and you suddenly need to tooltip
+        most of them until you've found the right one.
+      </p>
+      <p class="text-site-body text-muted-foreground">
+        Nesting, section labels and complementary actions are impossible to reflect. It only benefits power users
+        on simple sidebars — and it's your worst way to educate users.
+      </p>
+      <p class="text-site-body text-muted-foreground">Half a sidebar is confusing for everybody. Convert yours now.</p>
+      <app-demo-section title="No icon rail version?">
+        <app-sidebar-demo-icon-rail />
+      </app-demo-section>
+
+      <p class="text-site-body text-muted-foreground">
+        One rhythm everywhere: 24px icon buttons with 16px icons from header to footer.
+      </p>
+      <app-demo-section title="Functional and perfectly aligned">
+        <app-sidebar-demo-alignment />
       </app-demo-section>
     </app-demo-page>
   `,
