@@ -88,6 +88,7 @@ The per-component differences (and why) are recorded in `odd/tasks/angular-port.
 | Showcase dev server | `npx ng serve showcase` |
 | All tests (Vitest, jsdom) | `npx ng test fluid-functionalism --watch=false` |
 | One component's tests | `npx ng test fluid-functionalism --watch=false --include='**/select/*.spec.ts'` |
+| Browser motion/layout checks | `node scripts/browser-checks/run.mjs --url http://localhost:4200` (needs the showcase running and a local Chrome; `--only <text>` filters) |
 | Build the library | `npx ng build fluid-functionalism` (output in `dist/fluid-functionalism`) |
 | Regenerate the icon packs | `node scripts/generate-icon-packs.mjs` |
 
