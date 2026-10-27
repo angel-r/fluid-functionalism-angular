@@ -19,6 +19,7 @@ import { typeClass } from '../core/type-scale';
 import { injectTouchPrimary } from '../core/environment';
 import { type FluidAnimation, enterTransition, injectAnimateFluid } from '../core/motion';
 import { FileThumbnail } from '../file-thumbnail/file-thumbnail';
+import { CHAT_MESSAGE_ENTRANCE_OVERRIDE } from './entrance';
 
 export type ChatMessageFrom = 'user' | 'assistant';
 /** Text, or a template for richer markup (React: `ReactNode`). */
@@ -95,6 +96,7 @@ export class ChatMessage {
   // Hover-reveal is unreachable on touch — keep the meta row visible there.
   private readonly isTouch = injectTouchPrimary();
   private readonly animateFluid = injectAnimateFluid();
+  private readonly entranceOverride = inject(CHAT_MESSAGE_ENTRANCE_OVERRIDE, { self: true, optional: true });
   private readonly body = viewChild.required<ElementRef<HTMLElement>>('body');
 
   protected readonly isUser = computed(() => this.from() === 'user');
@@ -161,6 +163,11 @@ export class ChatMessage {
 
     afterNextRender(() => {
       this.watchBody(destroyRef);
+      // A morph on this element plays the entrance instead (React initial={false}).
+      if (this.entranceOverride?.takeOverEntrance()) {
+        this.watchLayout(destroyRef);
+        return;
+      }
       const entrance = this.animateFluid(
         this.host,
         { opacity: [0, 1], y: [8, 0], scale: [0.96, 1] },
