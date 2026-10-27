@@ -1,5 +1,24 @@
 @import "tailwindcss";
 @import "../../fluid-functionalism/styles/theme.css";
 
+/* The theme points Inter at /fonts/, which breaks when the showcase is served
+   under a sub-path (GitHub Pages). These later rules win and let the build
+   bundle the fonts with relative URLs that work under any base href. */
+@font-face {
+  font-family: "Inter";
+  src: url("../public/fonts/InterVariable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../public/fonts/InterVariable-Italic.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* Tailwind only emits classes it can read in source: scan the library too. */
 @source "../../fluid-functionalism/src";
