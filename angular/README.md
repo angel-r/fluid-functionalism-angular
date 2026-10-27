@@ -5,11 +5,14 @@ The workspace behind [@angel-r/fluid-functionalism-angular](https://www.npmjs.co
 | Project | What it is |
 |---|---|
 | `projects/fluid-functionalism` | The library (ng-packagr), published as `@angel-r/fluid-functionalism-angular`. Components, DI foundations, theme CSS, icon packs. |
-| `projects/showcase` | The demo app, one route per component and block, deployed to [GitHub Pages](https://angel-r.github.io/fluid-functionalism-angular/). |
+| `projects/showcase` | The docs site: the same pages as [fluidfunctionalism.com](https://www.fluidfunctionalism.com/) (home, docs, changelog, demo), built from the library, deployed to [GitHub Pages](https://angel-r.github.io/fluid-functionalism-angular/). |
 
 The React/Next source at the repository root is untouched, so upstream changes can still be merged and compared 1:1.
 
-Not ported: the Next docs site itself (playgrounds, presets, changelog, OG images, evals, skill) and the site-only `nav-item` / `nav-menu`.
+The Next docs site is the reference for `projects/showcase`: `angular/PORTING.md`
+("The docs site") maps its folders onto the Angular ones. Not ported: the
+shadcn registry routes (`/r/*`), OG images, analytics, `/compare`, and the
+site-only `nav-item` / `nav-menu`.
 
 
 ## How React maps to Angular
@@ -34,6 +37,8 @@ The per-component differences (and why) are recorded in `odd/tasks/angular-port.
 | Install the workspace | `npm install` |
 | Showcase dev server | `npx ng serve showcase` |
 | All tests (Vitest, jsdom) | `npx ng test fluid-functionalism --watch=false` |
+| The docs site (tests, then the site) | `npx ng test showcase --watch=false` · `npx ng serve showcase` |
+| Build the deployable site | `npm run build:showcase` (regenerates the changelog data first) |
 | One component's tests | `npx ng test fluid-functionalism --watch=false --include='**/select/*.spec.ts'` |
 | Browser motion/layout checks | `node scripts/browser-checks/run.mjs --url http://localhost:4200` (needs the showcase running and a local Chrome; `--only <text>` filters) |
 | Build the library | `npx ng build fluid-functionalism` (output in `dist/fluid-functionalism`) |
@@ -41,6 +46,10 @@ The per-component differences (and why) are recorded in `odd/tasks/angular-port.
 | Regenerate the icon packs | `node scripts/generate-icon-packs.mjs` |
 
 In the workspace, the `@angel-r/fluid-functionalism-angular` import path points at the library source, so the showcase needs no library build.
+
+## Agent and SEO files
+
+Every build of the site ends with `npm run build:site-files` (as `postbuild:showcase`, and as its own step in the Pages workflow): `scripts/site-files/build.mjs` writes `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, `changelog.md` and one `md/<slug>.md` per docs page into `dist/showcase/browser`. It reads the same data the pages render (`site/nav-data.ts`, `docs-kit/api/<slug>.ts`, the generated changelog), so the files cannot drift, and it fails the build when that data is missing or malformed. Every URL in them uses the deployed base, https://angel-r.github.io/fluid-functionalism-angular/.
 
 ## Checklist for a change
 
