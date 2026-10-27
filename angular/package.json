@@ -7,7 +7,9 @@
     "prestart": "npm run build:changelog",
     "build": "ng build",
     "build:changelog": "node scripts/changelog/build.mjs",
+    "build:site-files": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/site-files/build.mjs",
     "build:showcase": "npm run build:changelog && ng build showcase",
+    "postbuild:showcase": "npm run build:site-files",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
