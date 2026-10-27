@@ -1,0 +1,342 @@
+<app-doc-page
+  title="Combobox"
+  description="Type to filter a list. 1 pick, or chips."
+  slug="combobox"
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Playground">
+    <app-playground-layout [preview]="previewTpl" [controls]="controlsTpl" />
+  </app-doc-section>
+
+  <app-doc-section title="Basic">
+    <p class="text-site-body text-muted-foreground">
+      Items are data on the root, <code>ff-combobox-list</code> renders a row
+      per match. Type, then press Enter to pick the highlighted row.
+    </p>
+    <app-component-preview [code]="basicCode">
+      <ff-combobox [items]="frameworks" [(value)]="framework">
+        <ff-combobox-input placeholder="Select a framework…" />
+        <ff-combobox-content>
+          <ff-combobox-empty>No framework found.</ff-combobox-empty>
+          <ff-combobox-list>
+            <ng-template ffComboboxRow let-value="value" let-label="label">
+              <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+            </ng-template>
+          </ff-combobox-list>
+        </ff-combobox-content>
+      </ff-combobox>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="With icons">
+    <app-component-preview [code]="iconsCode">
+      <ff-combobox [items]="views" [(value)]="view">
+        <ff-combobox-input icon="search" placeholder="Jump to view…" />
+        <ff-combobox-content>
+          <ff-combobox-empty>No view matches.</ff-combobox-empty>
+          <ff-combobox-list>
+            <ng-template ffComboboxRow let-item>
+              <ff-combobox-item [value]="item.value" [icon]="item.icon">
+                {{ item.label }}
+              </ff-combobox-item>
+            </ng-template>
+          </ff-combobox-list>
+        </ff-combobox-content>
+      </ff-combobox>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Multiple selection">
+    <p class="text-site-body text-muted-foreground">
+      <code>multiple</code> plus <code>ff-combobox-chips</code>: 1 chip per
+      pick, touching picks share one background. Press Backspace in an empty
+      field to drop the last chip.
+    </p>
+    <app-component-preview [code]="multipleCode" minHeightClass="min-h-[160px]">
+      <ff-combobox multiple [items]="frameworks" [(value)]="stack">
+        <ff-combobox-chips placeholder="Add frameworks…" class="w-[360px] max-w-full" />
+        <ff-combobox-content>
+          <ff-combobox-empty>No framework found.</ff-combobox-empty>
+          <ff-combobox-list>
+            <ng-template ffComboboxRow let-value="value" let-label="label">
+              <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+            </ng-template>
+          </ff-combobox-list>
+        </ff-combobox-content>
+      </ff-combobox>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Create from the query">
+    <p class="text-site-body text-muted-foreground">
+      <code>onCreate</code> adds a last row whenever the query matches no
+      label exactly. Type a component that is not there, then press Enter.
+    </p>
+    <app-component-preview [code]="creatableCode" minHeightClass="min-h-[160px]">
+      <ff-combobox
+        multiple
+        [items]="components()"
+        [(value)]="picked"
+        [onCreate]="create"
+      >
+        <ff-combobox-chips placeholder="Add components…" class="w-[360px] max-w-full" />
+        <ff-combobox-content>
+          <ff-combobox-empty>No component found.</ff-combobox-empty>
+          <ff-combobox-list>
+            <ng-template ffComboboxRow let-value="value" let-label="label">
+              <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+            </ng-template>
+          </ff-combobox-list>
+        </ff-combobox-content>
+      </ff-combobox>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Hide picked rows">
+    <p class="text-site-body text-muted-foreground">
+      <code>hideSelected</code> takes a pick out of the list, so it reads as
+      what is left to add. Remove a chip to bring its row back.
+    </p>
+    <app-component-preview [code]="hideSelectedCode" minHeightClass="min-h-[160px]">
+      <ff-combobox
+        multiple
+        hideSelected
+        [items]="allComponents"
+        [(value)]="remaining"
+      >
+        <ff-combobox-chips placeholder="Add components…" class="w-[360px] max-w-full" />
+        <ff-combobox-content>
+          <ff-combobox-empty allSelected="Every component is added.">
+            No component found.
+          </ff-combobox-empty>
+          <ff-combobox-list>
+            <ng-template ffComboboxRow let-value="value" let-label="label">
+              <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+            </ng-template>
+          </ff-combobox-list>
+        </ff-combobox-content>
+      </ff-combobox>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Variants">
+    <app-component-preview [code]="variantsCode">
+      <div class="flex flex-wrap items-center gap-3">
+        <ff-combobox [items]="frameworks" [(value)]="bordered">
+          <ff-combobox-input variant="bordered" placeholder="Bordered" />
+          <ff-combobox-content>
+            <ff-combobox-empty>No framework found.</ff-combobox-empty>
+            <ff-combobox-list>
+              <ng-template ffComboboxRow let-value="value" let-label="label">
+                <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+              </ng-template>
+            </ff-combobox-list>
+          </ff-combobox-content>
+        </ff-combobox>
+        <ff-combobox [items]="frameworks" [(value)]="borderless">
+          <ff-combobox-input variant="borderless" placeholder="Borderless" />
+          <ff-combobox-content>
+            <ff-combobox-empty>No framework found.</ff-combobox-empty>
+            <ff-combobox-list>
+              <ng-template ffComboboxRow let-value="value" let-label="label">
+                <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+              </ng-template>
+            </ff-combobox-list>
+          </ff-combobox-content>
+        </ff-combobox>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Long list">
+    <p class="text-site-body text-muted-foreground">
+      String items are their own value and label. The list scrolls past 300px.
+    </p>
+    <app-component-preview [code]="longListCode" minHeightClass="min-h-[160px]">
+      <ff-combobox [items]="timezones" [(value)]="timezone">
+        <ff-combobox-input icon="globe" placeholder="Search timezones…" class="w-[280px]" />
+        <ff-combobox-content>
+          <ff-combobox-empty>No timezone matches.</ff-combobox-empty>
+          <ff-combobox-list>
+            <ng-template ffComboboxRow let-value="value" let-label="label">
+              <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+            </ng-template>
+          </ff-combobox-list>
+        </ff-combobox-content>
+      </ff-combobox>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Error & disabled">
+    <app-component-preview [code]="statesCode">
+      <div class="flex flex-wrap items-start gap-3">
+        <ff-combobox [items]="frameworks" [(value)]="errored">
+          <ff-combobox-input placeholder="Select a framework…" error="Pick a framework to continue." />
+          <ff-combobox-content>
+            <ff-combobox-empty>No framework found.</ff-combobox-empty>
+            <ff-combobox-list>
+              <ng-template ffComboboxRow let-value="value" let-label="label">
+                <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+              </ng-template>
+            </ff-combobox-list>
+          </ff-combobox-content>
+        </ff-combobox>
+        <ff-combobox [items]="frameworks" disabled>
+          <ff-combobox-input placeholder="Disabled" />
+          <ff-combobox-content>
+            <ff-combobox-list>
+              <ng-template ffComboboxRow let-value="value" let-label="label">
+                <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+              </ng-template>
+            </ff-combobox-list>
+          </ff-combobox-content>
+        </ff-combobox>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  @for (table of api; track table.title) {
+    <app-doc-section [title]="'API Reference — ' + table.title">
+      <app-props-table [props]="table.props" />
+    </app-doc-section>
+  }
+</app-doc-page>
+
+<!-- The playground's two template inputs live at the component root, outside
+     the page's content projection. -->
+<ng-template #previewTpl>
+  <app-component-preview [code]="playgroundCode()" minHeightClass="min-h-[360px]" align="top">
+    <div class="pt-6">
+      @if (playground().multiple) {
+        <ff-combobox
+          multiple
+          [items]="playgroundItems()"
+          [(value)]="playgroundValues"
+          [onCreate]="playground().creatable ? playgroundCreate : undefined"
+          [hideSelected]="derived().hideSelected"
+          [disabled]="playground().disabled"
+        >
+          <ff-combobox-chips
+            [placeholder]="copy.placeholderMultiple"
+            [variant]="playground().variant"
+            [icon]="playground().icon ? searchIcon : undefined"
+            [clearable]="playground().clearable"
+            [error]="playground().error ? copy.error : undefined"
+            class="w-[280px] max-w-full"
+          />
+          <ff-combobox-content>
+            @if (derived().hideSelected) {
+              <ff-combobox-empty [allSelected]="copy.allSelected">{{ copy.empty }}</ff-combobox-empty>
+            } @else {
+              <ff-combobox-empty>{{ copy.empty }}</ff-combobox-empty>
+            }
+            <ff-combobox-list>
+              <ng-template ffComboboxRow let-value="value" let-label="label">
+                <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+              </ng-template>
+            </ff-combobox-list>
+          </ff-combobox-content>
+        </ff-combobox>
+      } @else {
+        <ff-combobox
+          [items]="playgroundItems()"
+          [(value)]="playgroundValue"
+          [onCreate]="playground().creatable ? playgroundCreate : undefined"
+          [disabled]="playground().disabled"
+        >
+          <ff-combobox-input
+            [placeholder]="copy.placeholder"
+            [variant]="playground().variant"
+            [icon]="playground().icon ? searchIcon : undefined"
+            [clearable]="playground().clearable"
+            [error]="playground().error ? copy.error : undefined"
+            class="w-[280px] max-w-full"
+          />
+          <ff-combobox-content>
+            <ff-combobox-empty>{{ copy.empty }}</ff-combobox-empty>
+            <ff-combobox-list>
+              <ng-template ffComboboxRow let-value="value" let-label="label">
+                <ff-combobox-item [value]="value">{{ label }}</ff-combobox-item>
+              </ng-template>
+            </ff-combobox-list>
+          </ff-combobox-content>
+        </ff-combobox>
+      }
+    </div>
+  </app-component-preview>
+</ng-template>
+
+<ng-template #controlsTpl>
+  <app-playground-panel (shuffle)="randomize()">
+    <app-play-section label="Combobox" />
+    <div>
+      <ff-switch
+        label="Multiple"
+        [checked]="playground().multiple"
+        (toggle)="set('multiple', !playground().multiple)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Create from query"
+        [checked]="playground().creatable"
+        (toggle)="set('creatable', !playground().creatable)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Hide picked rows"
+        [checked]="derived().hideSelected"
+        [disabled]="!playground().multiple"
+        (toggle)="set('hideSelected', !playground().hideSelected)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <app-play-section label="Field" />
+    <div>
+      <app-play-field label="Variant">
+        <app-play-select
+          [value]="playground().variant"
+          [options]="variants"
+          (valueChange)="set('variant', $any($event))"
+        />
+      </app-play-field>
+      <ff-switch
+        label="Leading icon"
+        [checked]="playground().icon"
+        (toggle)="set('icon', !playground().icon)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Clear button"
+        [checked]="playground().clearable"
+        (toggle)="set('clearable', !playground().clearable)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Error"
+        [checked]="playground().error"
+        (toggle)="set('error', !playground().error)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Disabled"
+        [checked]="playground().disabled"
+        (toggle)="set('disabled', !playground().disabled)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <!-- The exact configuration above, as a stateless code and an Angular
+         install prompt (D5). -->
+    <app-get-code-dialog
+      [def]="presetDef"
+      [code]="presetCode()"
+      [snippet]="promptSnippet()"
+      [props]="presetProps()"
+      description="Type to filter a list. 1 pick, or chips."
+    />
+  </app-playground-panel>
+</ng-template>

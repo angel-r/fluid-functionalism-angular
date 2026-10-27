@@ -1,0 +1,407 @@
+<app-doc-page
+  title="CommandMenu"
+  description="1 field over every action. Type, arrow, Enter."
+  slug="command-menu"
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Playground">
+    <app-playground-layout [preview]="previewTpl" [controls]="controlsTpl" />
+  </app-doc-section>
+
+  <app-doc-section title="Basic">
+    <p class="text-site-body text-muted-foreground">
+      Type to filter, press ↓ ↑ to move, Enter to run. Rows come from
+      <code>items</code>, grouped by <code>group</code>.
+    </p>
+    <app-component-preview [code]="basicCode" minHeightClass="min-h-[400px]">
+      <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+        <ff-command-menu [items]="plain" (itemSelect)="run($event)">
+          <ff-command-menu-input [placeholder]="copy.placeholder" />
+          <ff-command-menu-list>
+            <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+          </ff-command-menu-list>
+        </ff-command-menu>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Descriptions, shortcuts, disabled rows">
+    <p class="text-site-body text-muted-foreground">
+      3 more fields per row: <code>description</code>,
+      <code>shortcut</code> caps, and <code>disabled</code>, which the arrows
+      skip. Type <code>clipboard</code>: keywords match too.
+    </p>
+    <app-component-preview [code]="detailsCode" minHeightClass="min-h-[400px]">
+      <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+        <ff-command-menu [items]="full" (itemSelect)="run($event)">
+          <ff-command-menu-input [placeholder]="copy.placeholder" />
+          <ff-command-menu-list>
+            <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+          </ff-command-menu-list>
+        </ff-command-menu>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Suggestions">
+    <p class="text-site-body text-muted-foreground">
+      3 suggested rows lead until you type 1 letter, then the groups take
+      over.
+    </p>
+    <app-component-preview [code]="suggestionsCode" minHeightClass="min-h-[400px]">
+      <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+        <ff-command-menu
+          [items]="full"
+          [suggestions]="suggestions"
+          suggestionsLabel="Recent"
+          (itemSelect)="run($event)"
+        >
+          <ff-command-menu-input [placeholder]="copy.placeholder" />
+          <ff-command-menu-list>
+            <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+          </ff-command-menu-list>
+        </ff-command-menu>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Tabs">
+    <p class="text-site-body text-muted-foreground">
+      Click a tab or press ← →, then derive <code>items</code> from the value.
+      Children hug the row's end: put <code>ff-command-menu-filters</code>
+      there to share the line.
+    </p>
+    <app-component-preview [code]="tabsCode" minHeightClass="min-h-[400px]">
+      <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+        <ff-command-menu [items]="tabbed()" (itemSelect)="run($event)">
+          <ff-command-menu-input [placeholder]="copy.placeholder" />
+          <ff-command-menu-tabs [tabs]="tabs" [(value)]="tab" />
+          <ff-command-menu-list>
+            <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+          </ff-command-menu-list>
+        </ff-command-menu>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Filters">
+    <p class="text-site-body text-muted-foreground">
+      A frameless compact row under the field: drop borderless selects or
+      ghost buttons in.
+    </p>
+    <app-component-preview [code]="filtersCode" minHeightClass="min-h-[400px]">
+      <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+        <ff-command-menu [items]="filtered()" (itemSelect)="run($event)">
+          <ff-command-menu-input [placeholder]="copy.placeholder" />
+          <ff-command-menu-filters>
+            <ff-select [(value)]="type">
+              <ff-select-trigger variant="borderless" aria-label="Type" />
+              <ff-select-content>
+                @for (option of types; track option.value; let i = $index) {
+                  <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                }
+              </ff-select-content>
+            </ff-select>
+            <ff-select [(value)]="sort">
+              <ff-select-trigger variant="borderless" aria-label="Sort" />
+              <ff-select-content>
+                @for (option of sorts; track option.value; let i = $index) {
+                  <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                }
+              </ff-select-content>
+            </ff-select>
+          </ff-command-menu-filters>
+          <ff-command-menu-list>
+            <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+          </ff-command-menu-list>
+        </ff-command-menu>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Dialog and trigger shortcut">
+    <p class="text-site-body text-muted-foreground">{{ dialogCopy() }}</p>
+    <app-component-preview [code]="dialogCode">
+      <div class="flex flex-wrap items-center gap-3">
+        <button ffButton variant="secondary" class="pr-3" (click)="open.set(true)">Open<kbd ffCommandMenuShortcut keys="mod+p" class="ml-1"></kbd></button>
+        <ff-command-menu-dialog [open]="open()" (openChange)="open.set($event)" shortcut="mod+p">
+          <ff-command-menu [items]="full" [suggestions]="suggestions" (itemSelect)="run($event)">
+            <ff-command-menu-input [placeholder]="copy.placeholder" />
+            <ff-command-menu-list>
+              <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+            </ff-command-menu-list>
+          </ff-command-menu>
+        </ff-command-menu-dialog>
+        <button ffButton variant="ghost" (click)="openNoKey.set(true)">Open, no shortcut</button>
+        <ff-command-menu-dialog [open]="openNoKey()" (openChange)="openNoKey.set($event)" [shortcut]="null">
+          <ff-command-menu [items]="full" (itemSelect)="run($event)">
+            <ff-command-menu-input [placeholder]="copy.placeholder" />
+            <ff-command-menu-list>
+              <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+            </ff-command-menu-list>
+          </ff-command-menu>
+        </ff-command-menu-dialog>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Footer hints">
+    <p class="text-site-body text-muted-foreground">
+      4 hints at most, following the menu: ← → with tabs, Esc in a dialog, and
+      ↵ named after the highlighted row (its <code>action</code>, or its
+      label). Pass <code>hints</code> for your own.
+    </p>
+    <app-component-preview [code]="footerCode" minHeightClass="min-h-[400px]">
+      <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+        <ff-command-menu [items]="full" [suggestions]="suggestions" (itemSelect)="run($event)">
+          <ff-command-menu-input [placeholder]="copy.placeholder" />
+          <ff-command-menu-tabs [tabs]="tabs" [(value)]="footerTab" />
+          <ff-command-menu-list>
+            <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+          </ff-command-menu-list>
+          <ff-command-menu-footer />
+        </ff-command-menu>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Custom rows">
+    <p class="text-site-body text-muted-foreground">
+      1 <code>ff-command-menu-item</code> per row from the row template:
+      children replace the label, the icon and caps stay.
+    </p>
+    <app-component-preview [code]="customRowsCode" minHeightClass="min-h-[400px]">
+      <div [ffElevated]="2" [shadowLevel]="3" [class]="panelClass()">
+        <ff-command-menu [items]="full" (itemSelect)="run($event)">
+          <ff-command-menu-input [placeholder]="copy.placeholder" />
+          <ff-command-menu-list>
+            <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+            <ng-template ffCommandMenuRow let-item>
+              <ff-command-menu-item [value]="item.value" [icon]="item.icon">
+                <span class="flex min-w-0 flex-1 items-baseline gap-2">
+                  <span class="truncate [text-box:trim-both_cap_alphabetic] py-1 -my-1">{{ item.label }}</span>
+                  <span class="truncate text-muted-foreground [text-box:trim-both_cap_alphabetic] py-1 -my-1">{{ item.group }}</span>
+                </span>
+              </ff-command-menu-item>
+            </ng-template>
+          </ff-command-menu-list>
+        </ff-command-menu>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  @for (table of api; track table.title) {
+    <app-doc-section [title]="'API Reference: ' + table.title">
+      <app-props-table [props]="table.props" />
+    </app-doc-section>
+  }
+</app-doc-page>
+
+<!-- The playground's two template inputs live at the component root, outside
+     the page's content projection. The menu is declared inside its dialog as
+     well as inline: projected content resolves DI where it is declared, so
+     each copy keeps its own menu (and the dialog's own shortcut scope). -->
+<ng-template #previewTpl>
+  <app-component-preview [code]="playgroundCode()" minHeightClass="min-h-[480px]" align="top">
+    <div class="w-full pt-2">
+      <div #previewHost class="flex w-full flex-col items-center gap-4">
+        <div [ffElevated]="2" [shadowLevel]="3" [class]="playPanelClass()">
+          <ff-command-menu
+            [items]="playItems()"
+            [suggestions]="playground().suggestions ? suggestions : undefined"
+            (itemSelect)="run($event)"
+          >
+            <ff-command-menu-input [placeholder]="copy.placeholder" />
+            @if (playground().tabs) {
+              <ff-command-menu-tabs [tabs]="tabs" [value]="playTab()" (valueChange)="playTab.set($event)">
+                <div [class]="playground().filters ? 'contents' : 'hidden'">
+                  <ff-command-menu-filters>
+                    <ff-select [(value)]="playType">
+                      <ff-select-trigger variant="borderless" aria-label="Type" />
+                      <ff-select-content>
+                        @for (option of types; track option.value; let i = $index) {
+                          <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                        }
+                      </ff-select-content>
+                    </ff-select>
+                    <ff-select [(value)]="playSort">
+                      <ff-select-trigger variant="borderless" aria-label="Sort" />
+                      <ff-select-content>
+                        @for (option of sorts; track option.value; let i = $index) {
+                          <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                        }
+                      </ff-select-content>
+                    </ff-select>
+                  </ff-command-menu-filters>
+                </div>
+              </ff-command-menu-tabs>
+            } @else if (playground().filters) {
+              <ff-command-menu-filters>
+                <ff-select [(value)]="playType">
+                  <ff-select-trigger variant="borderless" aria-label="Type" />
+                  <ff-select-content>
+                    @for (option of types; track option.value; let i = $index) {
+                      <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                    }
+                  </ff-select-content>
+                </ff-select>
+                <ff-select [(value)]="playSort">
+                  <ff-select-trigger variant="borderless" aria-label="Sort" />
+                  <ff-select-content>
+                    @for (option of sorts; track option.value; let i = $index) {
+                      <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                    }
+                  </ff-select-content>
+                </ff-select>
+              </ff-command-menu-filters>
+            }
+            <ff-command-menu-list>
+              <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+            </ff-command-menu-list>
+            @if (playground().footer) {
+              <ff-command-menu-footer />
+            }
+          </ff-command-menu>
+        </div>
+
+        <button ffButton variant="secondary" class="pr-3" (click)="playOpen.set(true)">Open as a dialog<kbd ffCommandMenuShortcut [keys]="playground().shortcut" class="ml-1"></kbd></button>
+
+        <ff-command-menu-dialog [(open)]="playOpen" [shortcut]="playground().shortcut" [shortcutScope]="previewHost">
+          <ff-command-menu
+            [items]="playItems()"
+            [suggestions]="playground().suggestions ? suggestions : undefined"
+            (itemSelect)="run($event)"
+          >
+            <ff-command-menu-input [placeholder]="copy.placeholder" />
+            @if (playground().tabs) {
+              <ff-command-menu-tabs [tabs]="tabs" [value]="playTab()" (valueChange)="playTab.set($event)">
+                <div [class]="playground().filters ? 'contents' : 'hidden'">
+                  <ff-command-menu-filters>
+                    <ff-select [(value)]="playType">
+                      <ff-select-trigger variant="borderless" aria-label="Type" />
+                      <ff-select-content>
+                        @for (option of types; track option.value; let i = $index) {
+                          <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                        }
+                      </ff-select-content>
+                    </ff-select>
+                    <ff-select [(value)]="playSort">
+                      <ff-select-trigger variant="borderless" aria-label="Sort" />
+                      <ff-select-content>
+                        @for (option of sorts; track option.value; let i = $index) {
+                          <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                        }
+                      </ff-select-content>
+                    </ff-select>
+                  </ff-command-menu-filters>
+                </div>
+              </ff-command-menu-tabs>
+            } @else if (playground().filters) {
+              <ff-command-menu-filters>
+                <ff-select [(value)]="playType">
+                  <ff-select-trigger variant="borderless" aria-label="Type" />
+                  <ff-select-content>
+                    @for (option of types; track option.value; let i = $index) {
+                      <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                    }
+                  </ff-select-content>
+                </ff-select>
+                <ff-select [(value)]="playSort">
+                  <ff-select-trigger variant="borderless" aria-label="Sort" />
+                  <ff-select-content>
+                    @for (option of sorts; track option.value; let i = $index) {
+                      <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+                    }
+                  </ff-select-content>
+                </ff-select>
+              </ff-command-menu-filters>
+            }
+            <ff-command-menu-list>
+              <ff-command-menu-empty>{{ copy.empty }}</ff-command-menu-empty>
+            </ff-command-menu-list>
+            @if (playground().footer) {
+              <ff-command-menu-footer />
+            }
+          </ff-command-menu>
+        </ff-command-menu-dialog>
+      </div>
+    </div>
+  </app-component-preview>
+</ng-template>
+
+<ng-template #controlsTpl>
+  <app-playground-panel (shuffle)="randomize()">
+    <app-play-section label="Dialog" />
+    <app-play-field label="Trigger shortcut">
+      <app-play-select
+        [value]="playground().shortcut"
+        [options]="shortcutOptions()"
+        (valueChange)="set('shortcut', $any($event))"
+      />
+    </app-play-field>
+    <p class="px-1 text-site-caption text-muted-foreground">Fires while the preview has focus.</p>
+
+    <app-play-divider />
+    <app-play-section label="Rows" />
+    <div>
+      <ff-switch
+        label="Descriptions"
+        [checked]="playground().descriptions"
+        (toggle)="set('descriptions', !playground().descriptions)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Shortcut caps"
+        [checked]="playground().shortcuts"
+        (toggle)="set('shortcuts', !playground().shortcuts)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Suggestions first"
+        [checked]="playground().suggestions"
+        (toggle)="set('suggestions', !playground().suggestions)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <app-play-section label="Under the field" />
+    <div>
+      <ff-switch
+        label="Tabs"
+        [checked]="playground().tabs"
+        (toggle)="set('tabs', !playground().tabs)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Filters"
+        [checked]="playground().filters"
+        (toggle)="set('filters', !playground().filters)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <app-play-section label="Under the list" />
+    <div>
+      <ff-switch
+        label="Footer hints"
+        [checked]="playground().footer"
+        (toggle)="set('footer', !playground().footer)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <!-- The exact configuration above, as a stateless code and an Angular
+         install prompt (D5). -->
+    <app-get-code-dialog
+      [def]="presetDef"
+      [code]="presetCode()"
+      [snippet]="promptSnippet()"
+      [props]="presetProps()"
+      description="1 field over every action. Type, arrow, Enter."
+    />
+  </app-playground-panel>
+</ng-template>
