@@ -78,6 +78,10 @@ export class FluidHoverHighlight {
   readonly session = input<number>(0);
   /** Where a fresh session fades in from (a checked row, an active route). */
   readonly from = input<ItemRect | null>(null);
+  /** `false` starts a fresh session opaque instead of fading in: for a
+   *  `from` under a filled item (the calendar's range start), so the
+   *  highlight reads as sliding out of it. */
+  readonly fadeIn = input(true);
   /** The positional spring; `false` snaps with no travel. Fade is always 0.08s. */
   readonly transition = input<AnimationOptions | false | undefined>(undefined);
   readonly userClass = input<string>('', { alias: 'class' });
@@ -136,7 +140,7 @@ export class FluidHoverHighlight {
     animate(
       element,
       {
-        opacity: [0, 1],
+        opacity: [this.fadeIn() ? 0 : 1, 1],
         x: [start.x, target.x],
         y: [start.y, target.y],
         width: [start.width, target.width],
