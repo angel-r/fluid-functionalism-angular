@@ -1,0 +1,19 @@
+<ff-command-menu-dialog
+  [open]="command.open()"
+  (openChange)="command.setOpen($event)"
+  title="Site menu"
+  description="Jump to a page or change a setting."
+>
+  <ff-command-menu
+    [items]="visible()"
+    [suggestions]="command.recent()"
+    suggestionsLabel="Recent"
+  >
+    <ff-command-menu-input placeholder="Go to a page, change a setting…" />
+    <ff-command-menu-tabs [tabs]="tabs" [value]="tab()" (valueChange)="setTab($event)" />
+    <ff-command-menu-list>
+      <ff-command-menu-empty>Nothing matches.</ff-command-menu-empty>
+    </ff-command-menu-list>
+    <ff-command-menu-footer />
+  </ff-command-menu>
+</ff-command-menu-dialog>
