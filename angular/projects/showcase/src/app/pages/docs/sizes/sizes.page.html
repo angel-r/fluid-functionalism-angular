@@ -1,0 +1,271 @@
+<app-doc-page
+  title="Sizes"
+  slug="sizes"
+  [description]="promptDescription"
+  [installUsage]="promptUsage"
+  [installProps]="promptProps"
+>
+  <!-- Inline code chip used throughout the prose. -->
+  <span doc-description
+    >Two component sizes: a 36px default and a 28px compact. Press
+    <code class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground">S</code>
+    to toggle on the website.</span
+  >
+
+  <app-doc-section title="The principle">
+    <p class="text-site-body text-muted-foreground">
+      An interface reads as one product when its controls share a sizing rhythm. A button next to a
+      select next to a tab should land on the same height.
+    </p>
+    <p class="text-site-body text-muted-foreground">
+      Each size scales text, icons, and padding together.
+    </p>
+    <p class="text-site-body text-muted-foreground">
+      Compact is for dense, data-heavy tools; default is the right call for everything else.
+    </p>
+    <app-component-preview [code]="toolbarCode" minHeightClass="min-h-[220px]">
+      <app-sizes-toolbar-demo />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Typography scale">
+    <p class="text-site-body text-muted-foreground">
+      Type follows the ladder. Compact drops each of the six roles one notch, size and leading
+      together, so a dense screen keeps the same hierarchy at a smaller size. The full scale lives on
+      <a routerLink="/docs/typography" class="mx-1 text-foreground underline underline-offset-4">Typography</a>.
+    </p>
+  </app-doc-section>
+
+  <app-doc-section title="Compact regions">
+    <p class="text-site-body text-muted-foreground">
+      Density is a region decision, not a per-control one. Wrap the region in
+      <code class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground">[ffSizeProvider]</code>
+      and everything inside follows — menus included, since the size context crosses overlays.
+    </p>
+
+    <!-- Same stripped frame as the token inspector below: the header holds a
+         Default/Compact toggle instead of the Preview/Code + Inspect chrome. -->
+    <div [class]="frameClass()">
+      <div
+        class="relative flex items-center px-3 py-3 min-h-[52px] border-b border-border/60 bg-background"
+        style="border-top-left-radius: inherit; border-top-right-radius: inherit"
+      >
+        <ff-tabs-subtle [selectedIndex]="regionIndex()" (selectedIndexChange)="regionIndex.set($event)">
+          <button ffTabsSubtleItem [index]="0" label="Default"></button>
+          <button ffTabsSubtleItem [index]="1" label="Compact"></button>
+        </ff-tabs-subtle>
+      </div>
+      <div
+        class="overflow-hidden"
+        style="border-bottom-left-radius: inherit; border-bottom-right-radius: inherit"
+      >
+        <div class="relative flex items-start justify-center min-h-[260px] bg-background px-8 py-12">
+          <!-- Fixed column width + top alignment keep the wrapper's origin
+               stable across steps, so the absolutely-positioned callout doesn't
+               move when the region re-renders at the other size. -->
+          <div class="relative sm:pr-64">
+            <div ffSizeProvider [size]="regionStep()" class="flex flex-col items-start gap-2 sm:w-[272px]">
+              <div [class]="regionRowClass()">
+                <button ffButton variant="tertiary" [active]="true" [trailingIcon]="chevronDown">
+                  {{ sortOptions[regionSort()].label }}
+                </button>
+                <button
+                  ffButton
+                  variant="tertiary"
+                  [size]="regionFilterSize()"
+                  aria-label="Filter"
+                >
+                  <ff-icon [icon]="listFilter" />
+                </button>
+                <button ffButton [leadingIcon]="plus">New</button>
+              </div>
+              <!-- The trigger's menu, frozen open (the inline Dropdown panel —
+                   same trick as the surfaces page) so the inherited step is
+                   visible without fighting a real portal in the docs. -->
+              <!-- inert: the frozen-open menu is an illustration — it should
+                   neither take clicks/focus nor be announced. -->
+              <div inert class="select-none">
+                <ff-dropdown class="w-48" [checkedIndex]="regionSort()">
+                  @for (option of sortOptions; track option.value) {
+                    <ff-menu-item
+                      [index]="$index"
+                      [label]="option.label"
+                      [checked]="regionSort() === $index"
+                      (select)="regionSort.set($index)"
+                    />
+                  }
+                </ff-dropdown>
+              </div>
+            </div>
+
+            <!-- Blue callout — same annotation language as the surfaces page.
+                 The label's top-left corner sits at the arrow's tail.
+                 Annotation is desktop-only; on phones it would collide with
+                 the panel. -->
+            <svg
+              class="absolute pointer-events-none hidden sm:block"
+              style="left: 200px; top: 8px"
+              width="130"
+              height="100"
+              viewBox="0 0 130 100"
+              fill="none"
+              aria-hidden="true"
+            >
+              <defs>
+                <marker
+                  id="ff-sizes-annotation-arrow"
+                  viewBox="0 0 12 12"
+                  markerWidth="12"
+                  markerHeight="12"
+                  refX="8.5"
+                  refY="6"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M3,2.5 L8.5,6 L3,9.5"
+                    fill="none"
+                    stroke="context-stroke"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </marker>
+              </defs>
+              <path
+                d="M112,20 Q70,26 22,66"
+                stroke="#6B97FF"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                marker-end="url(#ff-sizes-annotation-arrow)"
+              />
+            </svg>
+            <span
+              class="absolute text-site-caption text-foreground select-none hidden sm:block"
+              style="left: 318px; top: 18px"
+              [style.font-variation-settings]="semibold"
+            >
+              The menu inherits<br />the region's step
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-doc-section>
+
+  <app-doc-section title="Token reference">
+    <p class="text-site-body text-muted-foreground">
+      The table, measured live: hover a control below and every number in the readout is a token from
+      this table. Flip the step and the element re-measures under your cursor.
+    </p>
+
+    <!-- A stripped-down preview frame: no Preview/Code tabs, no Inspect
+         switch — the overlay is permanently on and the header holds the step
+         toggle instead. The header keeps z-[70] so it sits above the overlay's
+         crosshair layer (z-[60], raised to clear z-50 popups) and stays
+         clickable while the content is frozen — same ladder as
+         ComponentPreview. -->
+    <div [class]="frameClass()">
+      <div
+        class="relative z-[70] flex items-center px-3 py-3 min-h-[52px] border-b border-border/60 bg-background"
+        style="border-top-left-radius: inherit; border-top-right-radius: inherit"
+      >
+        <ff-tabs-subtle [selectedIndex]="inspectorIndex()" (selectedIndexChange)="inspectorIndex.set($event)">
+          <button ffTabsSubtleItem [index]="0" label="Default"></button>
+          <button ffTabsSubtleItem [index]="1" label="Compact"></button>
+        </ff-tabs-subtle>
+      </div>
+      <div
+        class="overflow-hidden"
+        style="border-bottom-left-radius: inherit; border-bottom-right-radius: inherit"
+      >
+        <div
+          #inspectorContent
+          class="relative flex items-center justify-center min-h-[200px] bg-background px-8 py-12"
+        >
+          <div ffSizeProvider [size]="inspectorStep()" class="flex flex-col items-start gap-4">
+            <div [class]="inspectorRowClass()">
+              <button ffButton [leadingIcon]="plus">New project</button>
+              <ff-select [(value)]="inspectorSort">
+                <ff-select-trigger placeholder="Sort by" />
+                <ff-select-content>
+                  @for (option of sortOptions; track option.value) {
+                    <ff-select-item [index]="$index" [value]="option.value">{{ option.label }}</ff-select-item>
+                  }
+                </ff-select-content>
+              </ff-select>
+            </div>
+            <ff-checkbox-group [checkedIndices]="inspectorChecked()" class="w-44">
+              @for (label of inspectorLabels; track label; let i = $index) {
+                <ff-checkbox-item
+                  [index]="i"
+                  [label]="label"
+                  [checked]="inspectorChecked().has(i)"
+                  (toggle)="toggleInspector(i)"
+                />
+              }
+            </ff-checkbox-group>
+          </div>
+        </div>
+      </div>
+      @if (inspectorFrame(); as frame) {
+        <app-inspect-overlay [frame]="frame" [active]="true" [tooltip]="tokenReadout" />
+      }
+    </div>
+
+    <ff-scroll-area orientation="horizontal" viewportClass="scroll-fade-x" class="w-full">
+      <table
+        class="w-full min-w-[560px] text-site-body border-collapse [&_th:first-child]:pl-0 [&_td:first-child]:pl-0"
+      >
+        <thead>
+          <tr class="border-b border-border">
+            @for (heading of tokenHeadings; track heading) {
+              <th class="px-3 py-2 text-left text-foreground" [style.font-variation-settings]="semibold">
+                {{ heading }}
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of tokenRows; track row.token) {
+            <tr class="border-b border-border/50">
+              <td class="px-3 py-2">
+                <code
+                  class="rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground"
+                  >{{ row.token }}</code
+                >
+              </td>
+              <td class="px-3 py-2 text-muted-foreground">{{ row.applies }}</td>
+              <td class="px-3 py-2 text-foreground whitespace-nowrap">{{ row.def }}</td>
+              <td class="px-3 py-2 text-foreground whitespace-nowrap">{{ row.compact }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </ff-scroll-area>
+  </app-doc-section>
+
+  <app-doc-section title="SizeProvider props">
+    <app-props-table [props]="providerProps" />
+  </app-doc-section>
+
+  <app-doc-section title="Component size prop">
+    <app-props-table [props]="consumerProps" />
+  </app-doc-section>
+</app-doc-page>
+
+<!-- The inspector's custom readout: the token table, resolved for the active
+     step, instead of the generic tag/box tooltip. -->
+<ng-template #tokenReadout let-raw>
+  <div class="font-mono text-[11px] leading-4 normal-case tracking-normal">
+    @if (readout(raw).length > 0) {
+      @for (row of readout(raw); track row[0]) {
+        <div>
+          <span [style.font-variation-settings]="semibold">{{ row[0] }}</span> {{ row[1] }}
+        </div>
+      }
+    } @else {
+      <div>outside the ladder · {{ round(raw.width) }} × {{ round(raw.height) }}</div>
+    }
+  </div>
+</ng-template>

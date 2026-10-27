@@ -1,0 +1,101 @@
+<app-doc-page
+  title="Surfaces"
+  slug="surfaces"
+  [description]="promptDescription"
+  [installUsage]="promptUsage"
+  [installProps]="promptProps"
+>
+  <span doc-description
+    >Eight surface levels that nest. Components read their substrate from context and lift relative
+    to it, so popovers, dropdowns, and dialogs stay visible at any depth — in both
+    <button
+      type="button"
+      class="underline decoration-dotted underline-offset-2 hover:text-foreground transition-colors cursor-pointer"
+      (click)="settings.setTheme('light')"
+      >light</button
+    >
+    and
+    <button
+      type="button"
+      class="underline decoration-dotted underline-offset-2 hover:text-foreground transition-colors cursor-pointer"
+      (click)="settings.setTheme('dark')"
+      >dark</button
+    >
+    mode.</span
+  >
+
+  <app-doc-section title="The problem">
+    <div class="flex flex-col gap-3 text-site-body text-muted-foreground">
+      <p>
+        In light mode, we use shadow behind white surfaces to signify elevation. In dark mode, we use
+        progressively lighter backgrounds instead.
+      </p>
+      <p>
+        But traditional components have a fixed background — a dropdown often ends up the same color
+        as the dialog it sits in. That makes your interface look like this:
+      </p>
+    </div>
+    <app-surfaces-problem-demo />
+  </app-doc-section>
+
+  <app-doc-section title="The solution">
+    <div class="flex flex-col gap-3 text-site-body text-muted-foreground">
+      <p>Three pieces: tokens, substrate context, and the primitive.</p>
+    </div>
+
+    <h3 class="text-site-subtitle text-foreground mt-2" [style.font-variation-settings]="semibold">
+      Tokens
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Eight bg/shadow pairs. Light mode flattens to white after step 2 (shadow alone carries
+      elevation). Dark mode keeps adding white-opacity plus a layered shadow recipe.
+    </p>
+    <app-surfaces-tokens-demo />
+
+    <h3 class="text-site-subtitle text-foreground mt-6" [style.font-variation-settings]="semibold">
+      Substrate
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Each container knows its own level and tells whatever opens inside. A popover on the page and
+      the same popover inside a dialog both end up at the right depth, without anything passed
+      between them.
+    </p>
+    <app-surfaces-substrate-demo />
+
+    <h3 class="text-site-subtitle text-foreground mt-6" [style.font-variation-settings]="semibold">
+      Elevated
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Wrap a panel and the background settles at the level it belongs to. The shadow doesn't
+      change, so a popover still reads as a popover three layers down.
+    </p>
+    <app-surfaces-elevated-demo />
+
+    <h3 class="text-site-subtitle text-foreground mt-6" [style.font-variation-settings]="semibold">
+      Move through levels
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Drag both knobs to choose which slice of the ladder to nest. Each layer lifts a single step
+      off the one it sits in — whether you span two levels or all eight.
+    </p>
+    <app-surfaces-elevation-stack-demo />
+  </app-doc-section>
+
+  <app-doc-section title="Examples">
+    <h3 class="text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">
+      Invite dialog
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Dialog at surface 5, role picker at surface 7 — no props passed between them.
+    </p>
+    <app-surfaces-invite-dialog-demo />
+
+    <h3 class="text-site-subtitle text-foreground mt-6" [style.font-variation-settings]="semibold">
+      Color picker
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      The format dropdown sits one level above the picker panel.
+    </p>
+    <app-surfaces-color-picker-demo />
+  </app-doc-section>
+</app-doc-page>
