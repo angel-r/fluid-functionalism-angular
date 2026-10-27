@@ -307,7 +307,10 @@ export class SidebarMenu {
   // hosting an expanded sub-tree is a tall <li>, and hit-testing against that
   // whole box would hand the sub-tree's gaps and gutter to the parent.
   private syncRows() {
-    const sorted = [...this.rows].filter((el) => el.isConnected).sort(byDomOrder);
+    // Rows still inside this menu, not rows in the document: a dialog renders
+    // its content before appending it, and rows dropped while detached would
+    // never register (the row set does not change when the menu is attached).
+    const sorted = [...this.rows].filter((el) => this.host.contains(el)).sort(byDomOrder);
     this.orderedRows.set(sorted);
     const info = new Map<HTMLElement, RowInfo>();
     for (const el of sorted) {
