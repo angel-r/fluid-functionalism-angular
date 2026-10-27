@@ -1,27 +1,24 @@
 # Security
 
-How to report a vulnerability in Fluid Functionalism without making it public.
+How to report a vulnerability in the Angular port of Fluid Functionalism without making it public.
 
 ## Report it privately
 
-Use GitHub's private reporting: [report a vulnerability](https://github.com/mickadesign/fluid-functionalism/security/advisories/new). Only the maintainer sees the report, and the conversation stays in that advisory. Don't open a public issue for a security problem.
+Use GitHub's private reporting: [report a vulnerability](https://github.com/angel-r/fluid-functionalism-angular/security/advisories/new). Only the maintainer sees the report, and the conversation stays in that advisory. Don't open a public issue for a security problem.
 
-Include the component or page, the install command or URL, and the steps that show the problem. A small repo or a screen recording helps.
+Include the component, the package version, and the steps that show the problem. A small repo or a screen recording helps.
 
 ## What's covered
 
-- The code the registry installs into your app: everything under `registry/`, served as `https://www.fluidfunctionalism.com/r/*.json`.
-- The routes that build install payloads on request: `/r/preset`, `/r/setup` and `/r/starter`.
-- The docs site at [fluidfunctionalism.com](https://www.fluidfunctionalism.com).
+- The npm package [`@angel-r/fluid-functionalism-angular`](https://www.npmjs.com/package/@angel-r/fluid-functionalism-angular): everything under `angular/projects/fluid-functionalism/`.
+- The demo at [angel-r.github.io/fluid-functionalism-angular](https://angel-r.github.io/fluid-functionalism-angular/).
 
-A vulnerability in a package the registry installs (Radix, Base UI, Motion, Lucide and the others in `registry.json`) belongs to that project first. Report it there, then here if a component needs a fix or a higher version floor.
+A vulnerability in a package the library depends on (Angular, the Angular CDK, Motion and the others in its `package.json`) belongs to that project first. Report it there, then here if the library needs a fix or a higher version floor. A problem in the original React components goes to the [original project](https://github.com/mickadesign/fluid-functionalism/security/advisories/new).
 
 ## Versions
 
-The registry has no versions yet: every install takes the current `main`. A fix reaches your app the next time you run `npx shadcn@latest add` for that component with `--overwrite`.
+Fixes land in the latest published version only. Update with `npm i @angel-r/fluid-functionalism-angular@latest`.
 
 ## How dependencies stay safe
 
-- Dependabot opens a pull request when a package in the lockfile gets a security advisory.
-- A weekly check upgrades every package the registry installs, runs the site's checks and a fresh install in both flavors, and opens a pull request when something needs a fix. `scripts/deps-watch/README.md` describes it.
-- The weekly check also raises each package's `^` floor in `registry.json` to the version it tested, so an install never gets an older one.
+Dependabot opens a pull request when a package in `angular/package-lock.json` gets a security advisory.

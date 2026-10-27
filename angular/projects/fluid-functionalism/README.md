@@ -48,7 +48,7 @@ You need Angular 22 and Tailwind CSS 4.
 
 Reduced motion follows the OS setting: transforms jump, fades stay.
 
-See the [workspace README](https://github.com/angel-r/fluid-functionalism-angular/tree/main/angular#readme) for the full component list and the React → Angular mapping.
+See the [repository](https://github.com/angel-r/fluid-functionalism-angular#readme) for the full component list and the [live demo](https://angel-r.github.io/fluid-functionalism-angular/) for every component in action.
 
 ## License
 

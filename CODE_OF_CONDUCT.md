@@ -1,6 +1,6 @@
 # Code of conduct
 
-Fluid Functionalism follows the [Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). It applies in issues, pull requests, reviews, and anywhere you speak for the project.
+The Angular port of Fluid Functionalism follows the [Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). It applies in issues, pull requests, reviews, and anywhere you speak for the project.
 
 In short: be kind, assume good intent, critique the work and not the person, and leave harassment of any kind out.
 
