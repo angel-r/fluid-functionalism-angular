@@ -6,7 +6,7 @@ body:
     id: building
     attributes:
       label: What you're building
-      description: The screen or the flow, and where Fluid Functionalism falls short today.
+      description: The screen or the flow, and where the Angular port falls short today.
     validations:
       required: true
   - type: textarea

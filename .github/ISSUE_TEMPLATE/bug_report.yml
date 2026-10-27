@@ -1,5 +1,5 @@
 name: Bug report
-description: A component doesn't behave the way its docs page shows.
+description: A component doesn't behave the way the demo or the original project shows.
 labels: [bug]
 body:
   - type: markdown
@@ -9,26 +9,7 @@ body:
     id: component
     attributes:
       label: Component
-      placeholder: dropdown
-    validations:
-      required: true
-  - type: dropdown
-    id: flavor
-    attributes:
-      label: Flavor
-      options:
-        - Base UI
-        - Radix
-        - Both
-        - Not sure
-    validations:
-      required: true
-  - type: input
-    id: install
-    attributes:
-      label: Install command
-      description: The command you ran, or the Copy prompt you used.
-      placeholder: npx shadcn@latest add @fluid/base/dropdown --overwrite
+      placeholder: select
     validations:
       required: true
   - type: textarea
@@ -42,19 +23,19 @@ body:
     id: expected
     attributes:
       label: What you expected
+      description: A link to the same component in the original project helps when the port differs from it.
     validations:
       required: true
   - type: textarea
     id: versions
     attributes:
       label: Versions
-      description: From your package.json, or `npm ls next react motion @base-ui/react`.
+      description: From your package.json, or `npm ls @angel-r/fluid-functionalism-angular @angular/core @angular/cdk tailwindcss`.
       value: |
-        next:
-        react:
-        motion:
-        @base-ui/react or @radix-ui/react-*:
-        shadcn CLI:
+        @angel-r/fluid-functionalism-angular:
+        @angular/core:
+        @angular/cdk:
+        tailwindcss:
     validations:
       required: true
   - type: input
@@ -66,4 +47,4 @@ body:
     id: reproduction
     attributes:
       label: Reproduction
-      description: A repo or a sandbox link. Optional, and the fastest way to a fix.
+      description: A repo or a StackBlitz link. Optional, and the fastest way to a fix.

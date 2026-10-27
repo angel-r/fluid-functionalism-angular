@@ -6,34 +6,23 @@ on:
   pull_request:
 
 jobs:
-  checks:
+  angular:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: angular
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          check-latest: true
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
-
-      # Rebuild the registry and fail if the committed public/r output has
-      # drifted from the sources — public/r is what users install from.
-      - name: Registry output is up to date
-        run: |
-          npm run registry:build
-          git diff --exit-code -- public/r || {
-            echo "::error::public/r is stale — run 'npm run registry:build' and commit the result"
-            exit 1
-          }
+          cache-dependency-path: angular/package-lock.json
+      - run: npm ci
+      - name: Test the library
+        run: npx ng test fluid-functionalism --watch=false
+      - name: Build the library
+        run: npx ng build fluid-functionalism
+      - name: Build the showcase
+        run: npx ng build showcase
