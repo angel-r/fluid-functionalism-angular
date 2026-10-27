@@ -1,0 +1,201 @@
+<ng-template #banner>
+  <ff-banner
+    [variant]="variant()"
+    [status]="status()"
+    [contrast]="contrast()"
+    [dismissible]="dismissible()"
+    [open]="open()"
+    (dismiss)="open.set(false)"
+  >
+    <p ffBannerTitle>{{ copy().title }}</p>
+    @if (description()) {
+      <p ffBannerDescription>{{ copy().description }}</p>
+    }
+    @if (primary() || secondary() || ghost()) {
+      <div ffBannerActions>
+        @if (primary()) {
+          <ff-banner-action variant="primary">{{ copy().primary }}</ff-banner-action>
+        }
+        @if (secondary()) {
+          <ff-banner-action>{{ copy().secondary }}</ff-banner-action>
+        }
+        @if (ghost()) {
+          <ff-banner-action variant="ghost">{{ copy().ghost }}</ff-banner-action>
+        }
+      </div>
+    }
+  </ff-banner>
+</ng-template>
+
+<ng-template #playgroundPreview>
+  <app-component-preview [code]="code()" (replay)="open.set(true)" minHeightClass="min-h-[340px]">
+    @if (variant() === 'fixed') {
+      <div class="w-full max-w-[560px]">
+        <app-banner-mock-page heightClass="h-[280px]">
+          <ng-container [ngTemplateOutlet]="banner" />
+        </app-banner-mock-page>
+      </div>
+    } @else {
+      <!-- Inline, the banner sits in a page between skeleton lines, so its
+           appear and dismiss move real content: the line above stays put and
+           the ones below slide. The page holds its height between changes. -->
+      <app-banner-inline-page [open]="open()" [resetKey]="resetKey()">
+        <ng-container [ngTemplateOutlet]="banner" />
+      </app-banner-inline-page>
+    }
+    <!-- A dismissed banner leaves a way back, pinned to the bottom of the
+         preview area. -->
+    @if (!open()) {
+      <app-playground-overlay>
+        <button ffButton variant="ghost" size="compact" (click)="open.set(true)">Show banner</button>
+      </app-playground-overlay>
+    }
+  </app-component-preview>
+</ng-template>
+
+<ng-template #playgroundControls>
+  <app-playground-panel (shuffle)="shuffle()">
+    <app-play-section label="Banner" />
+    <div>
+      <app-play-field label="Variant">
+        <app-play-select [value]="variant()" [options]="variantOptions" (valueChange)="setVariant($event)" />
+      </app-play-field>
+      <app-play-field label="Status">
+        <app-play-select [value]="status()" [options]="statusOptions" (valueChange)="setStatus($event)" />
+      </app-play-field>
+      <app-play-field label="Contrast">
+        <app-play-select [value]="contrast()" [options]="contrastOptions" (valueChange)="setContrast($event)" />
+      </app-play-field>
+    </div>
+
+    <app-play-divider />
+    <app-play-section label="Content" />
+    <div>
+      <ff-switch
+        label="Description"
+        [checked]="description()"
+        (checkedChange)="description.set($event)"
+        [class]="playSwitch"
+      />
+      <ff-switch label="Primary action" [checked]="primary()" (checkedChange)="primary.set($event)" [class]="playSwitch" />
+      <ff-switch
+        label="Secondary action"
+        [checked]="secondary()"
+        (checkedChange)="secondary.set($event)"
+        [class]="playSwitch"
+      />
+      <ff-switch label="Ghost action" [checked]="ghost()" (checkedChange)="ghost.set($event)" [class]="playSwitch" />
+      <ff-switch
+        label="Dismissible"
+        [checked]="dismissible()"
+        (checkedChange)="setDismissible($event)"
+        [class]="playSwitch"
+      />
+    </div>
+  </app-playground-panel>
+</ng-template>
+
+<app-doc-page
+  title="Banner"
+  slug="banner"
+  description="A status message: 1 colored icon, a title, an optional description and up to 3 actions."
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Playground">
+    <app-playground-layout [preview]="playgroundPreview" [controls]="playgroundControls" />
+  </app-doc-section>
+
+  <app-doc-section title="Statuses">
+    <p class="text-site-body text-muted-foreground">
+      5 statuses, 2 contrasts. Low colors only the icon; high washes the whole banner.
+    </p>
+    <app-component-preview [code]="statusesCode">
+      <div class="grid w-full max-w-[560px] grid-cols-1 gap-x-3 gap-y-5 sm:grid-cols-2">
+        @for (contrastOption of contrasts; track contrastOption.value) {
+          <div class="flex flex-col gap-2">
+            <span class="px-1 text-site-caption text-muted-foreground">{{ contrastOption.label }}</span>
+            @for (statusOption of statuses; track statusOption.value) {
+              <ff-banner [status]="statusOption.value" [contrast]="contrastOption.value">
+                <p ffBannerTitle>{{ statusOption.label }}</p>
+              </ff-banner>
+            }
+          </div>
+        }
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Actions">
+    <p class="text-site-body text-muted-foreground">
+      3 variants. Primary sits at the edge next to a one-line title, and leads under a description.
+    </p>
+    <app-component-preview [code]="actionsCode">
+      <div class="flex w-full max-w-[520px] flex-col gap-3">
+        <ff-banner status="info">
+          <p ffBannerTitle>Enjoying Fluid Functionalism?</p>
+          <div ffBannerActions>
+            <ff-banner-action variant="primary">Star on GitHub</ff-banner-action>
+            <ff-banner-action>Share</ff-banner-action>
+            <ff-banner-action variant="ghost">Later</ff-banner-action>
+          </div>
+        </ff-banner>
+        <ff-banner status="info">
+          <p ffBannerTitle>The registry has new components</p>
+          <p ffBannerDescription>Run the install command again to pull the latest versions.</p>
+          <div ffBannerActions>
+            <ff-banner-action variant="primary">Copy command</ff-banner-action>
+            <ff-banner-action>What's new</ff-banner-action>
+            <ff-banner-action variant="ghost">Later</ff-banner-action>
+          </div>
+        </ff-banner>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Fixed">
+    <p class="text-site-body text-muted-foreground">
+      <code>variant="fixed"</code> runs edge to edge under your header. Scroll the content: the bar stays put.
+      Press ✕: it closes and the content slides up.
+    </p>
+    <app-component-preview [code]="fixedCode" (replay)="replayFixed()">
+      <div class="w-full max-w-[560px]">
+        @if (fixedShown()) {
+          <app-banner-mock-page heightClass="h-[300px]">
+            <ff-banner variant="fixed" status="warning" dismissible>
+              <p ffBannerTitle>Registry maintenance tonight at 22:00 UTC</p>
+              <div ffBannerActions>
+                <ff-banner-action>Details</ff-banner-action>
+              </div>
+            </ff-banner>
+          </app-banner-mock-page>
+        }
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Custom icon">
+    <p class="text-site-body text-muted-foreground">
+      <code>icon</code> swaps in any icon, drawn in the status color.
+    </p>
+    <app-component-preview [code]="iconCode">
+      <div class="w-full max-w-[520px]">
+        <ff-banner icon="bell">
+          <p ffBannerTitle>3 new components since your last visit</p>
+        </ff-banner>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="API Reference: Banner">
+    <app-props-table [props]="bannerProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference: Parts">
+    <app-props-table [props]="partProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference: BannerAction">
+    <app-props-table [props]="actionProps" />
+  </app-doc-section>
+</app-doc-page>
