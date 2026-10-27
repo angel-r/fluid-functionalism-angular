@@ -116,6 +116,27 @@ describe('SidebarMenu rows', () => {
     expect(inbox.classList).toContain('h-8');
   });
 
+  it('rows rendered before the menu is attached still get the active background', async () => {
+    // A dialog renders its content first and appends it to the overlay after:
+    // the rows register while detached and must not be dropped for good.
+    mockLayout();
+    const fixture = TestBed.createComponent(RowsHost);
+    const host = fixture.nativeElement as HTMLElement;
+    const parent = host.parentNode!;
+    host.remove();
+    await settle(fixture);
+    parent.appendChild(host);
+    const layer = () => query(fixture).one('[data-slot="sidebar-menu-active-layer"]');
+    await vi.waitFor(
+      async () => {
+        await new Promise((r) => requestAnimationFrame(r));
+        fixture.detectChanges();
+        expect(layer().querySelectorAll('.bg-active')).toHaveLength(1);
+      },
+      { timeout: 2000 },
+    );
+  });
+
   it('roving tabindex: the active row is the tab stop, else the first row', async () => {
     const fixture = TestBed.createComponent(RowsHost);
     await settle(fixture);
