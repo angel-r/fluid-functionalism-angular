@@ -314,6 +314,20 @@ describe('date picker trigger', () => {
 });
 
 describe('date picker popover', () => {
+  it('flips above its trigger when the popup does not fit below', async () => {
+    // The side is chosen from the popup's measured height, so the popup must
+    // be rendered when it is measured: an empty one always "fits" below.
+    Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: 900 });
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.querySelector('[data-slot=date-picker-popup]') ? 300 : 0;
+    });
+    const t = setup();
+    vi.spyOn(t.trigger(), 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 830, 200, 30));
+    await t.open();
+    await vi.waitFor(() => expect(t.popup()!.closest('[data-side]')?.getAttribute('data-side')).toBe('top'));
+    vi.restoreAllMocks();
+  });
+
   it('closes on a press outside the picker', async () => {
     const t = setup();
     await t.open();
