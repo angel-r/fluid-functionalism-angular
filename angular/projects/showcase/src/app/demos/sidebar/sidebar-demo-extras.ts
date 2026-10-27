@@ -214,7 +214,7 @@ class SidebarDemoCallout {
   protected readonly callout = AI_CALLOUT;
   protected readonly banner = BANNER;
   /** React links the card to its own docs page; here, this showcase page. */
-  protected readonly href = '/sidebar';
+  protected readonly href = 'sidebar';
   protected readonly label = `${AI_CALLOUT.title} — ${AI_CALLOUT.media}`;
   protected readonly descriptionClass =
     'truncate text-[length:var(--fs-caption,12px)] leading-[var(--lh-caption,16px)]';
@@ -384,7 +384,7 @@ class SidebarDemoCalloutStack {
   private readonly substrate = injectSurface();
   private readonly shape = injectShape();
   private readonly animate = injectAnimateFluid();
-  protected readonly href = '/sidebar';
+  protected readonly href = 'sidebar';
   protected readonly descriptionClass =
     'truncate text-[length:var(--fs-caption,12px)] leading-[var(--lh-caption,16px)]';
   protected readonly surface = computed(() => calloutSurface(this.substrate(), this.shape().container));

@@ -1,0 +1,50 @@
+name: Deploy Angular showcase
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "angular/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: angular
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          check-latest: true
+          cache: npm
+          cache-dependency-path: angular/package-lock.json
+      - run: npm ci
+      - run: npx ng build showcase --base-href "/${{ github.event.repository.name }}/"
+      # GitHub Pages has no SPA fallback: serve the app for unknown paths so deep links work.
+      - run: cp dist/showcase/browser/index.html dist/showcase/browser/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: angular/dist/showcase/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
