@@ -1,4 +1,4 @@
-import { DOCUMENT, DestroyRef, type Signal, computed, effect, inject, untracked } from '@angular/core';
+import { DOCUMENT, DestroyRef, type Signal, afterRenderEffect, computed, effect, inject, untracked } from '@angular/core';
 import { cn } from '../core/utils';
 import { popupMotionClass } from '../core/popup';
 import { createPopupOverlay, type PopupAlign } from '../dropdown/popup-overlay';
@@ -66,8 +66,10 @@ export function createDatePickerPopover(options: DatePickerPopoverOptions) {
   const inPopup = (node: Node | null) => !!node && !!options.positioner()?.contains(node);
 
   // Open and close the overlay; the positioner query can resolve after the
-  // first open (a default open), so the effect waits for it.
-  effect(() => {
+  // first open (a default open), so the effect waits for it. After render:
+  // the content mounts in the same pass as `open`, and the overlay picks its
+  // side from the popup's measured height, which an unrendered popup lacks.
+  afterRenderEffect(() => {
     const open = options.open();
     if (!options.positioner() || !options.anchor()) return;
     untracked(() => (open ? overlay.show() : overlay.hide()));
