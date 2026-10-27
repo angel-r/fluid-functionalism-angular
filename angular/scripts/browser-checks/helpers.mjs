@@ -22,12 +22,13 @@ export function frames(page, count = 2) {
 }
 
 /**
- * The demo section titled `title` (case-insensitive), as a locator. Several
- * sections can share a title; `nth` picks one.
+ * The docs section titled `title` (case-insensitive), as a locator. Every
+ * docs page is built from `app-doc-section`s; several sections can share a
+ * title (or a title can be used twice on one page), so `nth` picks one.
  */
 export function section(page, title, nth = 0) {
   return page
-    .locator('app-demo-section')
+    .locator('app-doc-section')
     .filter({ has: page.locator('h2', { hasText: new RegExp(`^\\s*${escape(title)}\\s*$`, 'i') }) })
     .nth(nth);
 }

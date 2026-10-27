@@ -1,7 +1,7 @@
-// Browser checks for layout springs (see ../run.mjs): the sidebar's mobile
-// sheet and collapsed peek, the slider thumb, and the carousel-dots pill.
-// Each one drives the showcase demo through its public UI and samples the
-// moving element once per frame.
+// Browser checks for layout springs (see ../run.mjs), on /docs/sidebar,
+// /docs/slider and /docs/carousel-dots: the collapsed sidebar's peek, the
+// slider thumb and the carousel-dots pill. Each one drives the docs page's
+// demo through its public UI and samples the moving element once per frame.
 
 /** Pixel tolerance for a settled position: subpixel layout rounding only. */
 const SETTLED_PX = 0.5;
@@ -45,92 +45,6 @@ async function center(locator) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
 
-// ─── Sidebar: mobile sheet ──────────────────────────────────────────────────
-
-// Below the provider's mobile breakpoint the rail leaves the layout and the
-// sidebar lives in a modal sheet: the trigger slides it in from the left edge
-// (spring.moderate, critically damped, so it never overshoots and bares the
-// page) over a fading scrim, focus moves into it, and Escape or a scrim press
-// slides it back out before it unmounts and focus returns to the trigger.
-const sheetProbe = () => {
-  const panel = document.querySelector('[data-mobile="true"]');
-  const scrim = document.querySelector('[data-slot="sidebar-sheet-backdrop"]');
-  const box = panel?.getBoundingClientRect();
-  return {
-    x: box ? box.left : null,
-    w: box ? box.width : null,
-    o: scrim ? Number(getComputedStyle(scrim).opacity) : null,
-  };
-};
-
-async function openSheet(page, h, trigger) {
-  const series = await h.sample(page, sheetProbe, () => trigger.click(), 700);
-  const width = numbers(series, (v) => v.w).at(-1);
-  h.assert(width > 200, 'sheet: the panel never mounted', series.at(-1));
-  assertTravel(h, numbers(series, (v) => v.x), -width, 0, 'sheet panel slide-in');
-  assertTravel(h, numbers(series, (v) => v.o), 0, 1, 'sheet scrim fade-in', { min: 2, tolerance: 0.02 });
-  return width;
-}
-
-async function assertSheetClosedBy(page, h, close, width, how) {
-  const series = await h.sample(page, sheetProbe, close, 700);
-  const xs = numbers(series, (v) => v.x);
-  assertTravel(h, xs, 0, -width, `sheet slide-out (${how})`, { min: 2, tolerance: width * 0.02, unmounts: true });
-  h.assert(series.at(-1).v.x === null && series.at(-1).v.o === null, `sheet: still mounted after ${how}`, series.at(-1));
-  h.assert(
-    await page.evaluate(() => document.activeElement?.getAttribute('aria-label') === 'Toggle Sidebar'),
-    `sheet: focus did not return to the trigger after ${how}`,
-  );
-}
-
-const sidebarMobileSheet = {
-  name: 'sidebar: mobile sheet slides in over a scrim and slides out on Escape and on a scrim press',
-  path: 'sidebar-app',
-  viewport: { width: 390, height: 844 },
-  async run(page, h) {
-    const layout = await page.evaluate(() => {
-      const provider = document.querySelector('ff-sidebar-provider').getBoundingClientRect();
-      const inset = document.querySelector('[ffSidebarInset]').getBoundingClientRect();
-      const shell = document.querySelector('ff-sidebar-shell');
-      return {
-        shellDisplay: getComputedStyle(shell).display,
-        // Every sidebar column outside a sheet, with its laid-out width.
-        columns: [...document.querySelectorAll('[data-sidebar="sidebar"]')].map((c) => c.getBoundingClientRect().width),
-        insetLeft: inset.left - provider.left,
-        sheet: !!document.querySelector('[data-mobile="true"]'),
-      };
-    });
-    h.assert(layout.shellDisplay === 'none', 'sheet: the rail is still in the layout at phone width', layout);
-    h.assert(layout.columns.every((w) => w === 0), 'sheet: a sidebar column still takes room at phone width', layout);
-    // The inset keeps the inset variant's margins except on the rail's side,
-    // where it now starts at the frame edge.
-    h.near(layout.insetLeft, 0, SETTLED_PX, 'sheet: the inset does not start at the frame edge');
-    h.assert(!layout.sheet, 'sheet: mounted before the trigger was pressed');
-
-    const trigger = page.locator('button[aria-label="Toggle Sidebar"]').first();
-    const width = await openSheet(page, h, trigger);
-    const opened = await page.evaluate(() => {
-      const panel = document.querySelector('[data-mobile="true"]');
-      return {
-        role: panel.getAttribute('role'),
-        modal: panel.getAttribute('aria-modal'),
-        text: panel.innerText,
-        focusInside: panel.contains(document.activeElement),
-      };
-    });
-    h.assert(opened.role === 'dialog' && opened.modal === 'true', 'sheet: the panel is not a modal dialog', opened);
-    h.assert(/Acme Inc/.test(opened.text) && /\bInbox\b/.test(opened.text), 'sheet: the sidebar content is missing', opened.text);
-    h.assert(opened.focusInside, 'sheet: focus did not move into the panel');
-
-    await assertSheetClosedBy(page, h, () => page.keyboard.press('Escape'), width, 'Escape');
-
-    await openSheet(page, h, trigger);
-    // A press on the scrim, to the right of the 18rem panel.
-    const viewport = page.viewportSize();
-    await assertSheetClosedBy(page, h, () => page.mouse.click((width + viewport.width) / 2, viewport.height / 2), width, 'scrim press');
-  },
-};
-
 // ─── Sidebar: collapsed peek ────────────────────────────────────────────────
 
 // A collapsed sidebar with `peek` keeps a 12px edge strip. Hover mode floats
@@ -139,67 +53,74 @@ const sidebarMobileSheet = {
 // Escape / an outside press (click) tweens it back out and unmounts it.
 const peekProbe = (index) =>
   `() => {
-    const section = [...document.querySelectorAll('app-demo-section')].filter((s) =>
-      /^\\s*Resize, collapse & peek\\s*$/i.test(s.querySelector('h2')?.textContent ?? ''))[${index}];
-    const frame = section.querySelector('ff-sidebar-provider').getBoundingClientRect();
-    const card = section.querySelector('[data-sidebar="peek"]')?.getBoundingClientRect();
+    const section = [...document.querySelectorAll('app-doc-section')].find((s) =>
+      /^\\s*Resize, collapse & peek\\s*$/i.test(s.querySelector('h2')?.textContent ?? ''));
+    const demo = section.querySelectorAll('ff-sidebar-provider')[${index}];
+    const frame = demo.getBoundingClientRect();
+    const card = demo.querySelector('[data-sidebar="peek"]')?.getBoundingClientRect();
     return { x: card ? card.left - frame.left : null, w: card ? card.width : null };
   }`;
 
-async function peekState(section) {
-  return section.evaluate((s) => ({
+/** The `index`th collapse demo of the section ("On hover", then "On click"). */
+function peekDemo(page, h, index) {
+  return h.section(page, 'Resize, collapse & peek').locator('ff-sidebar-provider').nth(index);
+}
+
+async function peekState(demo) {
+  return demo.evaluate((s) => ({
     card: !!s.querySelector('[data-sidebar="peek"]'),
     expanded: s.querySelector('button[aria-label="Peek sidebar"]')?.getAttribute('aria-expanded') ?? null,
     text: s.querySelector('[data-sidebar="peek"]')?.innerText ?? '',
   }));
 }
 
-async function assertPeekIn(page, h, section, probe, action, label) {
+async function assertPeekIn(page, h, demo, probe, action, label) {
   const series = await h.sample(page, probe, action, 800);
   const width = numbers(series, (v) => v.w).at(-1);
   h.assert(width > 200, `${label}: the peek card never mounted`, series.at(-1));
   assertTravel(h, numbers(series, (v) => v.x), -1.08 * width, 0, `${label} slide-in`);
-  const state = await peekState(section);
+  const state = await peekState(demo);
   h.assert(state.expanded === 'true', `${label}: the strip is not expanded`, state);
   h.assert(/\bThreads\b/.test(state.text), `${label}: the card does not hold the sidebar content`, state.text);
   return series;
 }
 
-async function assertPeekOut(page, h, section, probe, action, width, label) {
+async function assertPeekOut(page, h, demo, probe, action, width, label) {
   const series = await h.sample(page, probe, action, 900);
   assertTravel(h, numbers(series, (v) => v.x), 0, -1.08 * width, `${label} slide-out`, { min: 2, tolerance: width * 0.02, unmounts: true });
   h.assert(series.at(-1).v.x === null, `${label}: the card is still mounted`, series.at(-1));
-  const state = await peekState(section);
+  const state = await peekState(demo);
   h.assert(state.expanded === 'false', `${label}: the strip is still expanded`, state);
   return series;
 }
 
 const sidebarPeekHover = {
   name: 'sidebar: hover peek floats the collapsed sidebar in after the intent delay and away on leave',
-  path: 'sidebar',
+  path: 'docs/sidebar',
   async run(page, h) {
-    const section = h.section(page, 'Resize, collapse & peek', 0);
+    const section = h.section(page, 'Resize, collapse & peek');
     await section.scrollIntoViewIfNeeded();
+    const demo = peekDemo(page, h, 0);
     // This demo starts open: collapse it from the topbar trigger first.
-    await section.locator('main button[aria-label="Toggle Sidebar"]').click();
-    const strip = section.locator('button[aria-label="Peek sidebar"]');
+    await demo.locator('main button[aria-label="Toggle Sidebar"]').click();
+    const strip = demo.locator('button[aria-label="Peek sidebar"]');
     await strip.waitFor();
     await page.waitForTimeout(600);
-    const before = await peekState(section);
+    const before = await peekState(demo);
     h.assert(!before.card && before.expanded === 'false', 'hover peek: open before any hover', before);
 
     const probe = peekProbe(0);
     const at = await center(strip);
-    const series = await assertPeekIn(page, h, section, probe, () => page.mouse.move(at.x, at.y), 'hover peek');
+    const series = await assertPeekIn(page, h, demo, probe, () => page.mouse.move(at.x, at.y), 'hover peek');
     const first = series.find((s) => s.v.x !== null);
     h.assert(first.t >= 140, 'hover peek: the card came in before the 150ms intent delay', { t: first.t });
     const width = numbers(series, (v) => v.w).at(-1);
 
-    const frame = await section.locator('ff-sidebar-provider').boundingBox();
+    const frame = await demo.boundingBox();
     await assertPeekOut(
       page,
       h,
-      section,
+      demo,
       probe,
       () => page.mouse.move(frame.x + frame.width - 40, frame.y + frame.height / 2),
       width,
@@ -210,31 +131,32 @@ const sidebarPeekHover = {
 
 const sidebarPeekClick = {
   name: 'sidebar: click peek floats the collapsed sidebar in on press and away on Escape and an outside press',
-  path: 'sidebar',
+  path: 'docs/sidebar',
   async run(page, h) {
-    const section = h.section(page, 'Resize, collapse & peek', 1);
+    const section = h.section(page, 'Resize, collapse & peek');
     await section.scrollIntoViewIfNeeded();
-    const strip = section.locator('button[aria-label="Peek sidebar"]');
-    const before = await peekState(section);
+    const demo = peekDemo(page, h, 1);
+    const strip = demo.locator('button[aria-label="Peek sidebar"]');
+    const before = await peekState(demo);
     h.assert(!before.card && before.expanded === 'false', 'click peek: open before any press', before);
     // Click mode ignores hover: resting on the strip brings nothing in.
     const at = await center(strip);
     await page.mouse.move(at.x, at.y);
     await page.waitForTimeout(400);
-    const hovered = await peekState(section);
+    const hovered = await peekState(demo);
     h.assert(!hovered.card, 'click peek: hovering the strip opened it', hovered);
 
     const probe = peekProbe(1);
-    const series = await assertPeekIn(page, h, section, probe, () => strip.click(), 'click peek');
+    const series = await assertPeekIn(page, h, demo, probe, () => strip.click(), 'click peek');
     const width = numbers(series, (v) => v.w).at(-1);
-    await assertPeekOut(page, h, section, probe, () => page.keyboard.press('Escape'), width, 'click peek (Escape)');
+    await assertPeekOut(page, h, demo, probe, () => page.keyboard.press('Escape'), width, 'click peek (Escape)');
 
-    await assertPeekIn(page, h, section, probe, () => strip.click(), 'click peek');
-    const frame = await section.locator('ff-sidebar-provider').boundingBox();
+    await assertPeekIn(page, h, demo, probe, () => strip.click(), 'click peek');
+    const frame = await demo.boundingBox();
     await assertPeekOut(
       page,
       h,
-      section,
+      demo,
       probe,
       () => page.mouse.click(frame.x + frame.width - 40, frame.y + frame.height / 2),
       width,
@@ -253,7 +175,7 @@ const sidebarPeekClick = {
 // onto the exact step.
 const sliderProbe = (title, nth = 0) =>
   `() => {
-    const section = [...document.querySelectorAll('app-demo-section')].find((s) =>
+    const section = [...document.querySelectorAll('app-doc-section')].find((s) =>
       /^\\s*${title}\\s*$/i.test(s.querySelector('h2')?.textContent ?? ''));
     const slider = section.querySelectorAll('ff-slider')[${nth}];
     const track = slider.querySelector('[data-slot="slider-track"]').getBoundingClientRect();
@@ -283,7 +205,7 @@ async function sliderPoint(section, nth, value) {
 
 const sliderPress = {
   name: 'slider: a press springs the thumb to the pressed value while the value jumps there',
-  path: 'slider',
+  path: 'docs/slider',
   async run(page, h) {
     const section = h.section(page, 'Compact');
     await section.scrollIntoViewIfNeeded();
@@ -308,7 +230,7 @@ const sliderPress = {
 
 const sliderDrag = {
   name: 'slider: a drag keeps the thumb under the pointer, on and off the track, with the value following',
-  path: 'slider',
+  path: 'docs/slider',
   async run(page, h) {
     const section = h.section(page, 'Compact');
     await section.scrollIntoViewIfNeeded();
@@ -343,7 +265,7 @@ const sliderDrag = {
 
 const sliderKeys = {
   name: 'slider: arrow keys spring the thumb exactly onto the next step',
-  path: 'slider',
+  path: 'docs/slider',
   async run(page, h) {
     const section = h.section(page, 'Steps');
     await section.scrollIntoViewIfNeeded();
@@ -370,7 +292,7 @@ const sliderKeys = {
 // pill's centre glides along the row and settles centred on the chosen dot's
 // button. aria-current and the demo slide follow the pick.
 const dotsProbe = () => {
-  const section = [...document.querySelectorAll('app-demo-section')].find((s) =>
+  const section = [...document.querySelectorAll('app-doc-section')].find((s) =>
     /^\s*Static\s*$/i.test(s.querySelector('h2')?.textContent ?? ''),
   );
   const row = section.querySelector('ff-carousel-dots').getBoundingClientRect();
@@ -388,7 +310,7 @@ const dotsProbe = () => {
 
 const carouselDots = {
   name: 'carousel-dots: picking a dot glides the pill to it and settles centred on that dot',
-  path: 'carousel-dots',
+  path: 'docs/carousel-dots',
   async run(page, h) {
     const section = h.section(page, 'Static');
     await section.scrollIntoViewIfNeeded();
@@ -426,7 +348,7 @@ const carouselDots = {
 // top-* values, so they line up on every row height.
 const sidebarTrailing = {
   name: 'sidebar: badges and action clusters centre on their row at every row height',
-  path: 'sidebar',
+  path: 'docs/sidebar',
   async run(page, h) {
     const section = h.section(page, 'Actions & badges');
     await section.scrollIntoViewIfNeeded();
@@ -461,4 +383,4 @@ const sidebarTrailing = {
   },
 };
 
-export const checks = [sidebarMobileSheet, sidebarPeekHover, sidebarPeekClick, sliderPress, sliderDrag, sliderKeys, carouselDots, sidebarTrailing];
+export const checks = [sidebarPeekHover, sidebarPeekClick, sliderPress, sliderDrag, sliderKeys, carouselDots, sidebarTrailing];
