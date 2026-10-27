@@ -11,7 +11,7 @@ import {
   untracked,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { FF_ICONS, type IconDefinition, type IconFrame, type IconName, type IconNode } from './icons';
+import { FF_ICON_SOURCE, type IconDefinition, type IconFrame, type IconName, type IconNode } from './icons';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -41,14 +41,14 @@ export class Icon {
   readonly strokeWidth = input<number | string | undefined>(undefined);
   readonly userClass = input<string>('', { alias: 'class' });
 
-  private readonly icons = inject(FF_ICONS);
+  private readonly icons = inject(FF_ICON_SOURCE);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly renderer = inject(Renderer2);
   private svg: SVGSVGElement | null = null;
 
   private readonly definition = computed<IconDefinition | undefined>(() => {
     const name = this.name();
-    return this.icon() ?? (name ? this.icons[name] : undefined);
+    return this.icon() ?? (name ? this.icons()[name] : undefined);
   });
 
   protected readonly component = computed(() => {

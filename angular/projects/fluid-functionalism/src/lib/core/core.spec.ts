@@ -11,13 +11,18 @@ import {
   cn,
   createKeyboardNavGate,
   injectShape,
+  injectIcons,
+  injectIconsSource,
   injectSize,
   injectSurface,
   provideFluid,
   provideIcons,
+  provideIconsSource,
   shapeMap,
   surfaceClasses,
+  type IconDefinition,
   type IconFrame,
+  type IconName,
   type IconNode,
 } from './index';
 
@@ -231,6 +236,45 @@ describe('ff-icon', () => {
     fixture.detectChanges();
     const svg = (fixture.nativeElement as HTMLElement).querySelector('svg')!;
     expect(svg.querySelector('circle')!.getAttribute('r')).toBe('4');
+  });
+});
+
+@Component({ selector: 'ff-icon-source-probe', imports: [Icon], template: `<ff-icon name="check" />` })
+class IconSourceHost {}
+
+describe('reactive icon source', () => {
+  const circle = (r: number): IconNode => [['circle', { cx: 12, cy: 12, r }]];
+
+  it('repaints the icons when the source signal changes, without remounting', () => {
+    const pack = signal<Partial<Record<IconName, IconDefinition>>>({ check: circle(4) });
+    TestBed.configureTestingModule({ providers: [provideIconsSource(pack)] });
+    const fixture = TestBed.createComponent(IconSourceHost);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('svg circle')!.getAttribute('r')).toBe('4');
+
+    pack.set({ check: circle(9) });
+    fixture.detectChanges();
+    expect(el.querySelector('svg circle')!.getAttribute('r')).toBe('9');
+  });
+
+  it('merges a partial source over the provided map', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideIcons({ x: circle(3) }),
+        provideIconsSource(() => ({ check: circle(5) })),
+      ],
+    });
+    const map = TestBed.runInInjectionContext(() => injectIconsSource())();
+    expect(map['x']).toEqual(circle(3));
+    expect(map['check']).toEqual(circle(5));
+  });
+
+  it('keeps injectIcons() as the static snapshot and exposes the source', () => {
+    const custom: IconNode = circle(7);
+    TestBed.configureTestingModule({ providers: [provideIcons({ check: custom })] });
+    expect(TestBed.runInInjectionContext(() => injectIcons())['check']).toEqual(custom);
+    expect(TestBed.runInInjectionContext(() => injectIconsSource())()['check']).toEqual(custom);
   });
 });
 

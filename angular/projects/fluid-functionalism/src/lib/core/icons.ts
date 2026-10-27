@@ -1,4 +1,12 @@
-import { InjectionToken, type Provider, type Type, inject } from '@angular/core';
+import {
+  InjectionToken,
+  computed,
+  inject,
+  isSignal,
+  type Provider,
+  type Signal,
+  type Type,
+} from '@angular/core';
 import { lucideIcons } from './lucide-icons';
 
 // ---------------------------------------------------------------------------
@@ -124,21 +132,61 @@ export type IconName =
   | 'sliders-horizontal'
   | 'info';
 
-export const defaultIcons: Record<IconName, IconDefinition> = lucideIcons;
+export type IconMap = Record<IconName, IconDefinition>;
 
-export const FF_ICONS = new InjectionToken<Record<IconName, IconDefinition>>('FF_ICONS', {
+export const defaultIcons: IconMap = lucideIcons;
+
+export const FF_ICONS = new InjectionToken<IconMap>('FF_ICONS', {
   factory: () => defaultIcons,
+});
+
+/** A map to read at render, or a signal (or getter) of one, so icons can
+ *  change while the app runs. */
+export type IconSource = Signal<Partial<IconMap>> | (() => Partial<IconMap>);
+
+/**
+ * The map `<ff-icon>` actually reads. It is a signal so a site can switch
+ * icon packs at runtime: `provideIcons()` installs a constant one,
+ * `provideIconsSource()` installs a live one. The default derives from
+ * `FF_ICONS`, so providers that only call `provideIcons()` keep working.
+ */
+export const FF_ICON_SOURCE = new InjectionToken<Signal<IconMap>>('FF_ICON_SOURCE', {
+  factory: () => {
+    const icons = inject(FF_ICONS);
+    return computed(() => icons);
+  },
 });
 
 /**
  * Swap some or all icons for another library. Names left out keep their
  * default (Lucide) icon, so a partial map never leaves a component without one.
  */
-export function provideIcons(icons: Partial<Record<IconName, IconDefinition>>): Provider {
+export function provideIcons(icons: Partial<IconMap>): Provider {
   return { provide: FF_ICONS, useValue: { ...defaultIcons, ...icons } };
 }
 
-/** The full icon map. Falls back to the default (Lucide) set. */
-export function injectIcons(): Record<IconName, IconDefinition> {
+/**
+ * Icons from a source that can change at runtime (the docs site's pack
+ * switcher). Every `<ff-icon>` repaints when the source emits; names left out
+ * keep whatever `provideIcons()` installed, then Lucide.
+ */
+export function provideIconsSource(source: IconSource): Provider {
+  return {
+    provide: FF_ICON_SOURCE,
+    useFactory: () => {
+      const read = isSignal(source) ? source : computed(source as () => Partial<IconMap>);
+      const base = inject(FF_ICONS);
+      return computed<IconMap>(() => ({ ...base, ...read() }));
+    },
+  };
+}
+
+/** The static icon map. Falls back to the default (Lucide) set. */
+export function injectIcons(): IconMap {
   return inject(FF_ICONS);
+}
+
+/** The map components render from, as a signal. */
+export function injectIconsSource(): Signal<IconMap> {
+  return inject(FF_ICON_SOURCE);
 }
