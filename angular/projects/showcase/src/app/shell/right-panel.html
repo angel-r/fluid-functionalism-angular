@@ -1,0 +1,56 @@
+<!-- Collapsed, the panel leaves a way back in its own top-right spot: the
+     same ghost trigger the sidebar uses, mirrored. -->
+<app-presence [visible]="!open()" [class]="'fixed top-4 right-4 z-40 max-xl:hidden'">
+  <ff-tooltip side="left" [content]="expandTip">
+    <button ffButton variant="ghost" size="icon" aria-label="Expand properties panel" (click)="expand()">
+      <ff-icon name="panel-right" />
+    </button>
+  </ff-tooltip>
+</app-presence>
+
+<!-- Below xl the panel fades out where it stands: xl-fade-block keeps
+     display:block through the fade, so the panel holds its space and never
+     covers the page, and the content widens into it once the fade ends. The
+     "]" toggle animates width/margin (the sidebar-shell technique: the outer
+     collapses while the inner keeps its true width) so the page content
+     reflows into the space instead of snapping. Its fade runs on the inner
+     wrapper. Collapsed is width 0 + opacity 0, still in the DOM, so inert
+     keeps every control inside out of the tab order. -->
+<div
+  #panel
+  class="shrink-0 overflow-hidden sticky top-4 self-start mt-4 xl-fade-block max-xl:pointer-events-none"
+  style="width: 256px; margin-right: 16px"
+  [style.pointer-events]="open() ? null : 'none'"
+  [attr.inert]="open() ? null : ''"
+>
+  <div #inner class="w-64">
+    <!-- Taller stacks (settings + playground controls) scroll within the
+         viewport instead of running past it: the house ScrollArea with its
+         scroll-fade dissolving the clipped edges. -->
+    <ff-scroll-area [viewportClass]="'scroll-fade max-h-[calc(100svh-2rem)]'">
+      <div class="flex flex-col gap-3">
+        @if (showSettings()) {
+          <aside [ffSurface]="2" [class]="asideClass()">
+            <div class="flex items-center justify-between pt-2 pb-2">
+              <h2 class="text-site-title text-foreground leading-none" [style.font-variation-settings]="semibold">
+                Make them yours
+              </h2>
+              <app-github-star-button />
+            </div>
+            <app-settings-content tooltipSide="left" />
+          </aside>
+        }
+
+        <!-- Page-owned slot, e.g. a doc page's Playground controls. -->
+        <div class="contents" appRightRailTarget></div>
+      </div>
+    </ff-scroll-area>
+  </div>
+</div>
+
+<ng-template #expandTip>
+  <span class="flex items-center gap-2">
+    <span class="[text-box:trim-both_cap_alphabetic]">Expand properties panel</span>
+    <kbd [class]="kbdClass">]</kbd>
+  </span>
+</ng-template>
