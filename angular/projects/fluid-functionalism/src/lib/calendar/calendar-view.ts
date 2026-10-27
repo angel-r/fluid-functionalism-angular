@@ -28,6 +28,15 @@ export interface BandStyle {
   bl: string;
 }
 
+/** A committed range that a new pick replaced: its band slice and filled
+ *  ends, fading out. `id` restarts the fade for each replacement. */
+export interface DayGhostView {
+  id: number;
+  band: BandStyle | null;
+  /** The filled end's classes, when this cell is one of the ghost's ends. */
+  end: string | null;
+}
+
 export interface CalendarDayView {
   day: CalendarDay;
   key: string;
@@ -49,6 +58,7 @@ export interface CalendarDayView {
   buttonClass: string;
   weight: string;
   band: BandStyle | null;
+  ghost: DayGhostView | null;
   hasDetail: boolean;
   detail: unknown;
   detailId: string;
@@ -73,6 +83,8 @@ export interface DayViewState {
   selectedDay: number | null;
   /** The band to draw: committed, or start → proposed end while picking. */
   band: { from: number; to: number } | null;
+  /** The committed range a new pick replaced, fading out. */
+  ghost: { from: number; to: number; id: number } | null;
   previewEnd: number | null;
   /** The day a range end was just committed on (no fade). */
   committedEnd: number | null;
@@ -104,17 +116,6 @@ export function buildWeekViews(month: CalendarMonth, s: DayViewState): CalendarW
   const gridLast = lastWeek[lastWeek.length - 1].n;
   const monthIndex = month.date.getMonth();
 
-  // Whether the day `m` is drawn in this grid with band reaching its left or
-  // right edge: the row above or below then touches this corner.
-  const drawn = (m: number, n: number, date: Date) => {
-    if (m < gridFirst || m > gridLast) return false;
-    if (!s.outsideHidden) return true;
-    return addDays(date, m - n).getMonth() === monthIndex;
-  };
-  const bandAtLeft = (m: number, n: number, date: Date) => !!band && drawn(m, n, date) && m > band.from && m <= band.to;
-  const bandAtRight = (m: number, n: number, date: Date) => !!band && drawn(m, n, date) && m >= band.from && m < band.to;
-  const corner = (edge: boolean, touching: boolean) => (edge && !touching ? '2px' : '0px');
-
   return weeks.map((week) => ({
     key: week.days[0].n,
     label: s.labels.labelWeekNumber(week.weekNumber, s.locale),
@@ -126,30 +127,60 @@ export function buildWeekViews(month: CalendarMonth, s: DayViewState): CalendarW
       const booked = s.booked !== false && dateMatchModifiers(date, s.booked);
       const today = n === s.today;
       const selected = s.mode === 'single' ? s.selectedDay === n : !!s.range && rangeIncludesDate(s.range, date);
+      const lastOfMonth = addDays(date, 1).getMonth() !== date.getMonth();
+      const firstOfMonth = date.getDate() === 1;
+      // The column, read off the grid itself: every row starts on the week's
+      // first day, whatever weekStartsOn, locale or ISO decided it is.
+      const weekday = (((n - gridFirst) % 7) + 7) % 7;
 
-      // The band: from the cell's center to the edge facing the rest of the
+      // Whether the day `m` is drawn in this grid with the band reaching its
+      // left or right edge: the row above or below then touches this corner.
+      const drawn = (m: number) => {
+        if (m < gridFirst || m > gridLast) return false;
+        if (!s.outsideHidden) return true;
+        return addDays(date, m - n).getMonth() === monthIndex;
+      };
+      const corner = (edge: boolean, touching: boolean) => (edge && !touching ? '2px' : '0px');
+      // This cell's slice of a band (the live one, or a fading ghost), or
+      // null: from the cell's center to the edge facing the rest of the
       // range, full width in the middle; 2px corners where a week row (or a
       // month, outside days hidden) ends, square on any corner whose row
       // above or below continues the band, so stacked rows read as one block.
-      const inBand = !!band && !hidden && band.from !== band.to && n >= band.from && n <= band.to;
-      let bandStyle: BandStyle | null = null;
-      if (inBand && band) {
-        const lastOfMonth = addDays(date, 1).getMonth() !== date.getMonth();
-        const firstOfMonth = date.getDate() === 1;
-        // The column, read off the grid itself: every row starts on the
-        // week's first day, whatever weekStartsOn, locale or ISO decided.
-        const weekday = (((n - gridFirst) % 7) + 7) % 7;
-        const edgeLeft = n > band.from && (weekday === 0 || (firstOfMonth && s.outsideHidden));
-        const edgeRight = n < band.to && (weekday === 6 || (lastOfMonth && s.outsideHidden));
-        bandStyle = {
-          left: n > band.from ? '0px' : '50%',
-          right: n < band.to ? '0px' : '50%',
-          tl: corner(edgeLeft, bandAtLeft(n - 7, n, date)),
-          bl: corner(edgeLeft, bandAtLeft(n + 7, n, date)),
-          tr: corner(edgeRight, bandAtRight(n - 7, n, date)),
-          br: corner(edgeRight, bandAtRight(n + 7, n, date)),
+      const slice = (b: { from: number; to: number } | null): BandStyle | null => {
+        if (!b || hidden || b.from === b.to || n < b.from || n > b.to) return null;
+        const edgeLeft = n > b.from && (weekday === 0 || (firstOfMonth && s.outsideHidden));
+        const edgeRight = n < b.to && (weekday === 6 || (lastOfMonth && s.outsideHidden));
+        const atLeft = (m: number) => drawn(m) && m > b.from && m <= b.to;
+        const atRight = (m: number) => drawn(m) && m >= b.from && m < b.to;
+        return {
+          left: n > b.from ? '0px' : '50%',
+          right: n < b.to ? '0px' : '50%',
+          tl: corner(edgeLeft, atLeft(n - 7)),
+          bl: corner(edgeLeft, atLeft(n + 7)),
+          tr: corner(edgeRight, atRight(n - 7)),
+          br: corner(edgeRight, atRight(n + 7)),
         };
-      }
+      };
+      const bandStyle = slice(band);
+
+      // The range a new pick replaced: its band slice and filled ends fade
+      // out together on the moderate exit, under everything live.
+      const ghostBand = slice(s.ghost);
+      const ghostEnd = !!s.ghost && !hidden && (n === s.ghost.from || n === s.ghost.to);
+      const ghost: DayGhostView | null =
+        s.ghost && (ghostBand || ghostEnd)
+          ? {
+              id: s.ghost.id,
+              band: ghostBand,
+              end: ghostEnd
+                ? cn(
+                    'relative bg-foreground',
+                    s.fill ? 'aspect-square h-full max-w-full' : 'size-[var(--cell-size)]',
+                    s.pill ? 'rounded-full' : 'rounded-lg',
+                  )
+                : null,
+            }
+          : null;
 
       const isEnd = s.mode === 'single' ? s.selectedDay === n : fromN === n || (toN === n && !s.picking);
       const isPreviewEnd = s.picking && s.previewEnd === n && fromN !== n;
@@ -236,6 +267,7 @@ export function buildWeekViews(month: CalendarMonth, s: DayViewState): CalendarW
         // Selection never changes weight; only today is semibold.
         weight: today ? fontWeights.semibold : fontWeights.normal,
         band: bandStyle,
+        ghost,
         hasDetail,
         detail,
         detailId: `${s.idPrefix}-${day.isoDate}`,
