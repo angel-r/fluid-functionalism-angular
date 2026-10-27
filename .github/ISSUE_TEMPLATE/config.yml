@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Report a security vulnerability
-    url: https://github.com/mickadesign/fluid-functionalism/security/advisories/new
+    url: https://github.com/angel-r/fluid-functionalism-angular/security/advisories/new
     about: A private report, seen only by the maintainer.
-  - name: Docs
-    url: https://www.fluidfunctionalism.com/docs
-    about: Props, demos and the Copy prompt for every component.
+  - name: Live demo
+    url: https://angel-r.github.io/fluid-functionalism-angular/
+    about: Every component and block, running in Angular.

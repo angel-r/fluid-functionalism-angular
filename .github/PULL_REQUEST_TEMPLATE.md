@@ -6,9 +6,9 @@ Closes #
 
 ## Checklist
 
-- [ ] Both flavors changed together (`registry/radix/` and `registry/base/`), or the change is single-source
-- [ ] `npm run registry:build` run and `public/r` committed
-- [ ] New npm dependencies declared in `registry.json` with a `^` floor
-- [ ] `npm run lint` and `npm test` pass
-- [ ] Docs page updated, plus the README row for a new component
+- [ ] Classes, `data-*` attributes, ARIA and keyboard behavior match the React source under `registry/`
+- [ ] Motion uses a spring tier from `core/springs`, no hand-written durations
+- [ ] A spec covers the change through the component's public interface
+- [ ] The showcase demo shows the change, with relative links and assets
+- [ ] `npx ng test fluid-functionalism --watch=false`, `npx ng build fluid-functionalism` and `npx ng build showcase` pass
 - [ ] Copy follows `tone-of-voice.md` (no em dashes)

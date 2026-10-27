@@ -1,10 +1,10 @@
 version: 2
 updates:
-  # Security updates only, grouped into one pull request. Version updates are
-  # the weekly dependency watch's job (scripts/deps-watch), which also checks
-  # what installers get, so the limit of 0 turns Dependabot's off.
+  # Security updates only, grouped into one pull request, for the Angular
+  # workspace. The limit of 0 turns version updates off. The React project at
+  # the root follows upstream and gets its updates through the upstream sync.
   - package-ecosystem: npm
-    directory: /
+    directory: /angular
     schedule:
       interval: weekly
     open-pull-requests-limit: 0
