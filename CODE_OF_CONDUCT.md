@@ -6,4 +6,4 @@ In short: be kind, assume good intent, critique the work and not the person, and
 
 ## Reporting
 
-Send a direct message to [@micka_design](https://x.com/micka_design) on X. Reports stay private. The maintainer reviews each one and responds following the Covenant's enforcement guidelines, from a private reminder up to a ban from the project.
+Send a direct message to [@AngelRomeroDev](https://x.com/AngelRomeroDev) on X. Reports stay private. The maintainer reviews each one and responds following the Covenant's enforcement guidelines, from a private reminder up to a ban from the project.
