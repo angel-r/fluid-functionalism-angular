@@ -1,0 +1,45 @@
+<!-- Horizontal ScrollArea gives narrow viewports the shape-system scrollbar
+     and the scroll-fade-x edge; min-w keeps the columns legible before it
+     scrolls. -->
+<ff-scroll-area orientation="horizontal" viewportClass="scroll-fade-x" class="w-full">
+  <table class="w-full min-w-[520px] text-site-body border-collapse [&_th:first-child]:pl-0 [&_td:first-child]:pl-0">
+    <thead>
+      <tr class="border-b border-border">
+        <th class="px-3 py-2 text-left text-foreground" [style.font-variation-settings]="semibold">Prop</th>
+        <th class="px-3 py-2 text-left text-foreground" [style.font-variation-settings]="semibold">Type</th>
+        @if (showDefault()) {
+          <th class="px-3 py-2 text-left text-foreground" [style.font-variation-settings]="semibold">Default</th>
+        }
+        <th class="px-3 py-2 text-left text-foreground" [style.font-variation-settings]="semibold">Description</th>
+      </tr>
+    </thead>
+    @for (section of sections(); track $index) {
+      <tbody>
+        @if (section.title) {
+          <tr>
+            <th
+              scope="rowgroup"
+              [attr.colspan]="columns()"
+              class="pb-2 pt-6 text-left text-site-subtitle text-foreground"
+              [style.font-variation-settings]="semibold"
+            >
+              {{ section.title }}
+            </th>
+          </tr>
+        }
+        @for (row of section.rows; track row.name) {
+          <tr class="border-b border-border/40">
+            <!-- nowrap: a name like .reveal-landing-subtle stays whole and the
+                 column grows to fit it, instead of breaking at hyphens. -->
+            <td class="px-3 py-2 text-foreground font-mono text-site-caption whitespace-nowrap">{{ row.name }}</td>
+            <td class="px-3 py-2 text-muted-foreground font-mono text-site-caption">{{ row.type }}</td>
+            @if (showDefault()) {
+              <td class="px-3 py-2 text-muted-foreground font-mono text-site-caption">{{ row.default ?? '—' }}</td>
+            }
+            <td class="px-3 py-2 text-muted-foreground">{{ row.description }}</td>
+          </tr>
+        }
+      </tbody>
+    }
+  </table>
+</ff-scroll-area>
