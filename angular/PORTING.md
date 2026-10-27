@@ -74,3 +74,15 @@ The Base UI and Radix flavors share one behavior: port it once.
 - **`#ref` on `button[ffButton]`** resolves to the `Button` instance; use `viewChild('ref', { read: ElementRef })` for the element.
 - **Timing in specs:** never sleep an exact timer duration with real timers; the full suite runs ~45 files in parallel and timers fire late. Poll with `vi.waitFor(..., { timeout })` or use fake timers.
 - **`KeyboardEvent.cancelBubble`** resets after dispatch; prove `stopPropagation` by counting events at a document listener.
+
+## Gotchas found in the parity pass (T12)
+
+Check parity with `node scripts/parity/parity.mjs --slug <slug> [--motion]` against `next dev` (root) and the showcase; reports land in `.parity/`.
+
+- **Presence flags:** read a `linkedSignal` "exiting" flag unconditionally. `computed(() => open() || exiting())` never reads `exiting` while open, so at close it has no previous value and the region unmounts instead of animating out.
+- **Host display:** custom-element hosts are `display: inline`. A host that stands in for React's root `<div>` needs `display: block` (host style, so its class list stays equal to React's) or `display: contents`, or size classes like `h-56` are ignored.
+- **`providers` vs `viewProviders`:** a component's `providers` also reach its own view. Use `viewProviders` when the view must read a different value (e.g. the page surface) than projected content.
+- **Framer origin:** framer rewrites a declared `style.transformOrigin` to `50% 50%` once it renders a transform, so React components with a custom origin actually scale about their centre. Port the observed behaviour.
+- **Flavor per page:** the slider and tooltip docs pages import `registry/radix/*`; flavored pages follow the site setting (default `base`). Match what the page renders.
+- **CDK and `scrollbar-gutter: stable`:** `documentElement.clientWidth` excludes the gutter, so `right`-anchored CDK panes land one gutter width off. Floating UI also rounds to device pixels; CDK keeps fractions.
+- **One-frame start lag:** zoneless change detection runs in a `setTimeout`/rAF race after an event; when rAF wins, `motion` work started there begins one frame after React's event-time start. Curves match; accepted.
