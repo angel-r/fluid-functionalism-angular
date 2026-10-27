@@ -4,7 +4,7 @@
 // change back to localStorage, where index.html's pre-paint script and the
 // next boot read them.
 
-import { DOCUMENT, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
+import { DOCUMENT, Injectable, effect, inject, signal, untracked } from '@angular/core';
 import {
   ThemeService,
   injectShapeContext,

@@ -102,7 +102,10 @@ export class RightRailService {
 
   private detach(): void {
     if (!this.mounted) return;
-    this.mounted.outlet.dispose();
+    // `detach()` destroys the attached view and leaves the target element in
+    // the panel. `dispose()` also does `outletElement.remove()`, which would
+    // delete the rail's target div for the rest of the app's life.
+    this.mounted.outlet.detach();
     this.mounted = null;
   }
 }

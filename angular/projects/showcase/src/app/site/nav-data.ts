@@ -8,13 +8,7 @@
 // page components read it for their own chrome.
 // ---------------------------------------------------------------------------
 
-import type {
-  IconName,
-  ShapeVariant,
-  SizeVariant,
-  Theme,
-  IconDefinition,
-} from '@angel-r/fluid-functionalism-angular';
+import type { IconName, ShapeVariant, SizeVariant, Theme } from '@angel-r/fluid-functionalism-angular';
 
 export interface ComponentEntry {
   slug: string;
