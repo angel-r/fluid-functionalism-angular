@@ -86,3 +86,13 @@ Check parity with `node scripts/parity/parity.mjs --slug <slug> [--motion]` agai
 - **Flavor per page:** the slider and tooltip docs pages import `registry/radix/*`; flavored pages follow the site setting (default `base`). Match what the page renders.
 - **CDK and `scrollbar-gutter: stable`:** `documentElement.clientWidth` excludes the gutter, so `right`-anchored CDK panes land one gutter width off. Floating UI also rounds to device pixels; CDK keeps fractions.
 - **One-frame start lag:** zoneless change detection runs in a `setTimeout`/rAF race after an event; when rAF wins, `motion` work started there begins one frame after React's event-time start. Curves match; accepted.
+
+## Browser checks (T13)
+
+jsdom has no layout, so FLIP moves, springs, measured centring, popup orientation and pointer drag are verified in Chrome against the running showcase:
+
+`node scripts/browser-checks/run.mjs --url http://localhost:4200 [--only <name substring>] [--headed]`
+
+Checks live in `scripts/browser-checks/checks/*.mjs` (`messages`, `popups`, `layout`); each exports `{ name, path, run(page, h) }` and uses `helpers.mjs` (`section`, `sample` per frame, `assert`, `near`, `frames`). A check must be shown to bite — sabotage the page (reduced motion, instant WAAPI, fast clock, ignored `scrollTop`) and watch it fail — and then pass three runs in a row. Add one whenever a fix touches behaviour only the browser can prove.
+
+- **Reduced motion and FLIP:** `animateFluid`'s reduced path paints its jump on the next frame. A FLIP that re-targets on the next mutation stops that jump unlanded and strands the element on its first keyframe, and the following FLIP compounds the offset. Under reduced motion, skip the FLIP instead: React's `layout` animations are transform-based and instant there, so the element is already on its layout box (`chat-message` `watchLayout`).

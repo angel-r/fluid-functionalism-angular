@@ -16,7 +16,7 @@ import { spring } from '../core/springs';
 import { injectShape } from '../core/shape';
 import { type SizeVariant, injectSizeVariant } from '../core/size';
 import { typeClass } from '../core/type-scale';
-import { injectTouchPrimary } from '../core/environment';
+import { injectTouchPrimary, ReducedMotion } from '../core/environment';
 import { type FluidAnimation, enterTransition, injectAnimateFluid } from '../core/motion';
 import { FileThumbnail } from '../file-thumbnail/file-thumbnail';
 import { CHAT_MESSAGE_ENTRANCE_OVERRIDE } from './entrance';
@@ -95,6 +95,7 @@ export class ChatMessage {
   private readonly variant = injectSizeVariant(() => this.size());
   // Hover-reveal is unreachable on touch — keep the meta row visible there.
   private readonly isTouch = injectTouchPrimary();
+  private readonly reduced = inject(ReducedMotion).value;
   private readonly animateFluid = injectAnimateFluid();
   private readonly entranceOverride = inject(CHAT_MESSAGE_ENTRANCE_OVERRIDE, { self: true, optional: true });
   private readonly body = viewChild.required<ElementRef<HTMLElement>>('body');
@@ -213,6 +214,16 @@ export class ChatMessage {
       const dy = last.top - next.top;
       last = next;
       if (dx === 0 && dy === 0) return;
+      // React's `layout="position"` rides on transform, which reduced motion
+      // makes instant: the message is already on its layout box. A reduced
+      // jump would also be painted a frame late, and the next mutation stops
+      // it unlanded — stranding a stale offset that the next FLIP compounds.
+      if (this.reduced()) {
+        animation?.stop();
+        animation = null;
+        this.host.style.translate = '';
+        return;
+      }
       // Re-targeting mid-flight starts from the visual offset still left.
       const [rx, ry] = parseTranslate(this.host.style.translate);
       const from = `${dx + rx}px ${dy + ry}px`;
