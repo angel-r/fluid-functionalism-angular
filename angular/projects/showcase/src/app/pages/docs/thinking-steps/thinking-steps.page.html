@@ -1,0 +1,159 @@
+<!-- The docs column, from app/docs/layout.tsx: every docs page sits in a
+     680px measure. DocPage contributes its own px-6. -->
+<app-doc-page
+  title="ThinkingSteps"
+  description="Chain-of-thought reasoning display with collapsible steps, sequential animation, source badges, and image support."
+  slug="thinking-steps"
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <!-- 1. Basic — static, icons, details -->
+  <app-doc-section title="Basic">
+    <app-component-preview [code]="basicCode">
+      <ff-thinking-steps>
+        <ff-thinking-steps-header />
+        <ff-thinking-steps-content>
+          <ff-thinking-step icon="search" label="Searched the web" />
+          <ff-thinking-step icon="globe" label="Read 3 sources">
+            <ff-thinking-step-details summary="Explored 6 files" [details]="exploredFiles" />
+          </ff-thinking-step>
+          <ff-thinking-step icon="check" label="Done" isLast />
+        </ff-thinking-steps-content>
+      </ff-thinking-steps>
+    </app-component-preview>
+  </app-doc-section>
+
+  <!-- 2. Minimal — two dots, nothing else -->
+  <app-doc-section title="Minimal">
+    <p class="text-site-body text-muted-foreground mb-3">
+      The simplest usage — two dots with no children or extras.
+    </p>
+    <app-component-preview [code]="minimalCode">
+      <ff-thinking-steps>
+        <ff-thinking-steps-header />
+        <ff-thinking-steps-content>
+          <ff-thinking-step [showIcon]="false" label="Ran a command" />
+          <ff-thinking-step [showIcon]="false" label="Done" isLast />
+        </ff-thinking-steps-content>
+      </ff-thinking-steps>
+    </app-component-preview>
+  </app-doc-section>
+
+  <!-- 3. Streaming — icons, sources, sequential animation -->
+  <app-doc-section title="Streaming">
+    <p class="text-site-body text-muted-foreground mb-3">
+      Steps appear sequentially as they stream in. Active steps show a shimmer effect.
+    </p>
+    <app-component-preview [code]="streamingCode">
+      @if (streaming; as demo) {
+        <app-preview-action-button
+          [icon]="demo.control().icon"
+          [tooltip]="demo.control().tooltip"
+          (pressed)="demo.togglePlayback()"
+        />
+      }
+      <app-thinking-steps-streaming-demo #streaming />
+    </app-component-preview>
+  </app-doc-section>
+
+  <!-- 4. Streaming Text — dots, long streaming descriptions -->
+  <app-doc-section title="Streaming Text">
+    <p class="text-site-body text-muted-foreground mb-3">
+      Dots with long descriptions that stream in character by character, simulating LLM output.
+    </p>
+    <app-component-preview [code]="streamingTextCode">
+      @if (streamingText; as demo) {
+        <app-preview-action-button
+          [icon]="demo.control().icon"
+          [tooltip]="demo.control().tooltip"
+          (pressed)="demo.togglePlayback()"
+        />
+      }
+      <app-thinking-steps-streaming-text-demo #streamingText />
+    </app-component-preview>
+  </app-doc-section>
+
+  <!-- 5. With Images — ThinkingStepImage in action -->
+  <app-doc-section title="With Images">
+    <p class="text-site-body text-muted-foreground mb-3">
+      Steps can include inline images with optional captions using ThinkingStepImage.
+    </p>
+    <app-component-preview [code]="withImagesCode">
+      @if (withImages; as demo) {
+        <app-preview-action-button
+          [icon]="demo.control().icon"
+          [tooltip]="demo.control().tooltip"
+          (pressed)="demo.togglePlayback()"
+        />
+      }
+      <app-thinking-steps-images-demo #withImages />
+    </app-component-preview>
+  </app-doc-section>
+
+  <!-- 6. Full Example — kitchen sink -->
+  <app-doc-section title="Full Example">
+    <p class="text-site-body text-muted-foreground mb-3">
+      A 6-step research agent combining sources, details, descriptions, images, and a custom header.
+    </p>
+    <app-component-preview [code]="fullCode">
+      @if (full; as demo) {
+        <app-preview-action-button
+          [icon]="demo.control().icon"
+          [tooltip]="demo.control().tooltip"
+          (pressed)="demo.togglePlayback()"
+        />
+      }
+      <app-thinking-steps-full-demo #full />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="API Reference">
+    <h3
+      class="text-site-subtitle text-foreground mb-2 mt-4"
+      [style.font-variation-settings]="semibold"
+    >
+      ThinkingSteps
+    </h3>
+    <app-props-table [props]="rootProps" />
+
+    <h3
+      class="text-site-subtitle text-foreground mb-2 mt-6"
+      [style.font-variation-settings]="semibold"
+    >
+      ThinkingStepsHeader
+    </h3>
+    <app-props-table [props]="headerProps" />
+
+    <h3
+      class="text-site-subtitle text-foreground mb-2 mt-6"
+      [style.font-variation-settings]="semibold"
+    >
+      ThinkingStep
+    </h3>
+    <app-props-table [props]="stepProps" />
+
+    <h3
+      class="text-site-subtitle text-foreground mb-2 mt-6"
+      [style.font-variation-settings]="semibold"
+    >
+      ThinkingStepDetails
+    </h3>
+    <app-props-table [props]="detailsProps" />
+
+    <h3
+      class="text-site-subtitle text-foreground mb-2 mt-6"
+      [style.font-variation-settings]="semibold"
+    >
+      ThinkingStepSource
+    </h3>
+    <app-props-table [props]="sourceProps" />
+
+    <h3
+      class="text-site-subtitle text-foreground mb-2 mt-6"
+      [style.font-variation-settings]="semibold"
+    >
+      ThinkingStepImage
+    </h3>
+    <app-props-table [props]="imageProps" />
+  </app-doc-section>
+</app-doc-page>
