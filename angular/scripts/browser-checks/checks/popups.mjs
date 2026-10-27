@@ -472,4 +472,65 @@ export const checks = [
       }
     },
   },
+
+  // Too narrow for date + time on one row (a phone, a side panel), the time
+  // moves under the date with a full-width rule between them; the clear sits
+  // after the date it clears, and both rows keep the one-row height. Widening
+  // the parent puts them back on one row.
+  {
+    name: 'date-picker: a narrow parent stacks the time under the date and widening restores one row',
+    path: 'date-picker',
+    async run(page, h) {
+      const section = h.section(page, 'Date and time');
+      const picker = section.locator('ff-date-picker');
+      await picker.scrollIntoViewIfNeeded();
+      const rows = () =>
+        picker.evaluate((el) => {
+          const kids = [...el.children].filter(
+            (c) => c.tagName !== 'FF-FLUID-HOVER-HIGHLIGHT' && c.tagName !== 'INPUT' && c.tagName !== 'DIV',
+          );
+          const box = (c) => {
+            const r = c.getBoundingClientRect();
+            return { top: Math.round(r.top), height: Math.round(r.height), order: getComputedStyle(c).order };
+          };
+          const date = kids.find((c) => c.querySelector('[data-slot=date-picker-trigger]'));
+          const time = kids.find((c) => c.querySelector('ff-date-picker-time-field'));
+          const clear = kids.find((c) => c.getAttribute('data-slot') === 'date-picker-clear');
+          const rule = kids.find((c) => c.classList.contains('basis-full'));
+          return {
+            two: el.getAttribute('data-two-rows') !== null,
+            wrap: getComputedStyle(el).flexWrap,
+            date: date ? box(date) : null,
+            clear: clear ? box(clear) : null,
+            rule: rule ? { ...box(rule), width: Math.round(rule.getBoundingClientRect().width) } : null,
+            time: time ? box(time) : null,
+            width: Math.round(el.getBoundingClientRect().width),
+          };
+        });
+      const oneRow = await rows();
+      h.assert(oneRow.two === false && oneRow.wrap !== 'wrap', 'the wide demo is not on one row', oneRow);
+
+      // Shrink the demo's wrapper: the picker's own box refuses to shrink under
+      // its one-row content, so the parent is what gets tight.
+      await picker.evaluate((el) => {
+        el.parentElement.style.width = '220px';
+      });
+      await page.waitForTimeout(300);
+      const twoRows = await rows();
+      h.assert(twoRows.two && twoRows.wrap === 'wrap', 'the narrow picker did not stack', twoRows);
+      h.assert(twoRows.date && twoRows.rule && twoRows.time, 'a stacked row is missing', twoRows);
+      h.assert(twoRows.date.top < twoRows.rule.top && twoRows.rule.top < twoRows.time.top, 'the rows are not date → rule → time', twoRows);
+      h.near(twoRows.rule.width, twoRows.width, 8, 'the rule does not span the stacked field');
+      h.assert(twoRows.date.height === twoRows.time.height, 'the two rows have different heights', twoRows);
+      if (twoRows.clear) h.assert(twoRows.clear.top === twoRows.date.top, 'the clear is not on the date row', twoRows);
+
+      await picker.evaluate((el) => {
+        el.parentElement.style.width = '';
+      });
+      await page.waitForTimeout(300);
+      const back = await rows();
+      h.assert(back.two === false, 'widening did not restore one row', back);
+      h.assert(back.date.top === back.time.top, 'the segments are not back on one row', back);
+    },
+  },
 ];
