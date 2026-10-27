@@ -1,58 +1,58 @@
 # Contributing
 
-An issue first, then a pull request that follows 5 rules.
+An issue first, then a pull request that follows the rules below.
 
 ## Start with an issue
 
-Open an issue before a pull request, so the direction is agreed before the work starts. There's a form for bugs and one for ideas. A security problem goes to a [private report](https://github.com/mickadesign/fluid-functionalism/security/advisories/new) instead (see [SECURITY.md](SECURITY.md)).
+Open an [issue](https://github.com/angel-r/fluid-functionalism-angular/issues) before a pull request, so the direction is agreed before the work starts. There's a form for bugs and one for ideas. A security problem goes to a [private report](https://github.com/angel-r/fluid-functionalism-angular/security/advisories/new) instead (see [SECURITY.md](SECURITY.md)).
+
+This repository is the Angular port. A question about how a component should look or move belongs to the [original project](https://github.com/mickadesign/fluid-functionalism), since the port follows it.
 
 ## Set up
 
-You need Node 22, the version CI runs.
+You need Node 22.22.3 or later (or Node 24.15.0 or later), the range Angular 22 supports.
 
 ```bash
+cd angular
 npm ci
-npm run dev              # docs site on http://localhost:3000
+npx ng serve showcase    # demo app on http://localhost:4200
 ```
 
 ## Where things live
 
-- `registry/radix/` and `registry/base/`: the 2 flavors of every component that touches a primitive. Same file name, same props, same behavior.
-- `registry/default/`: single-source components, hooks and libs (springs, sizes, surfaces, icons).
-- `registry/blocks/`: compositions built from the components.
-- `registry.json`: what each item installs: its files, its npm dependencies, and the items it pulls in.
-- `public/r/`: the built registry people install from. Generated, and committed.
-- `app/docs/<name>/page.tsx`: each component's docs page. `/compare-bases` shows both flavors side by side.
+- `angular/projects/fluid-functionalism/`: the library. Each component has its folder in `src/lib/<name>/`, with its spec next to it.
+- `angular/projects/showcase/`: the demo app, one route per component and block.
+- `angular/PORTING.md`: how React maps to Angular, the gotchas found so far, the upstream sync and releases.
+- Everything outside `angular/` is the original React project. It stays unchanged so upstream changes can be merged and ported.
 
-## 5 rules
+## Rules
 
-1. **Both flavors change together.** A fix or a new prop in `registry/radix/<name>.tsx` gets the same change in `registry/base/<name>.tsx`.
-2. **Rebuild the registry.** After any change under `registry/` or to `registry.json`, run `npm run registry:build` and commit `public/r`. CI fails when it drifts.
-3. **Registry files install alone.** Each one lands in someone else's app, so it imports only what its `registry.json` item declares, and its comments make sense there (no paths into this repo). A new npm dependency gets a `^` floor at the version you tested, like `@base-ui/react@^1.9.0`.
-4. **Motion comes from the system.** Springs come from `registry/default/lib/springs.ts`, in the 3 speeds [motion-guidelines.md](motion-guidelines.md) describes. No hand-picked durations.
+1. **The React source is the reference.** Class strings, `data-*` attributes, ARIA and keyboard behavior match the matching file under `registry/`.
+2. **Motion comes from the system.** Springs come from `core/springs`, in the 3 speeds [motion-guidelines.md](motion-guidelines.md) describes. No hand-picked durations.
+3. **Tests go through the public interface.** A fix or a new input gets a spec that renders the component and checks what a user sees.
+4. **The showcase shows the change.** Its links and assets stay relative, because the demo is served under a sub-path.
 5. **Copy follows the tone guide.** Docs text, comments and pull request text follow [tone-of-voice.md](tone-of-voice.md): plain words, present tense, no em dashes.
-
-A new component also gets a docs page, a props table, a Copy prompt and a README row: [component-documentation-guidelines.md](component-documentation-guidelines.md) has the checklist.
 
 ## Check your work
 
+From `angular/`:
+
 ```bash
-npm run lint             # 0 errors; registry/ is held to the React Compiler rules
-npm test
-npm run build
-npm run registry:build   # then commit public/r
+npx ng test fluid-functionalism --watch=false
+npx ng build fluid-functionalism
+npx ng build showcase
 ```
 
-When you change a popup (dropdown, select, combobox, dialog, tooltip), also run the close-animation check against your local site, in both flavors:
+When you change motion or layout, also run the browser checks against the running showcase:
 
 ```bash
-npm run deps:popups -- --url http://localhost:3000
+node scripts/browser-checks/run.mjs --url http://localhost:4200
 ```
 
 ## Pull requests
 
 - One change per pull request, linked to its issue.
-- Titles follow the history: `fix(dropdown): …`, `feat(registry): …`, `docs(readme): …`.
+- Titles follow the history: `fix(select): …`, `feat(angular): …`, `docs(readme): …`.
 - The pull request template's checklist repeats the rules above, so tick it before you ask for a review.
 
 By contributing, you agree that your work is released under the [MIT license](LICENSE), and you follow the [code of conduct](CODE_OF_CONDUCT.md).

@@ -105,6 +105,8 @@ The React source stays in place so upstream merges keep working; the port drifts
 
 Last sync: `1dd8931..3699f84` (2026-10-27): calendar range picking (measured day column, pressed fill, ghost band, masks, weeks height), date-picker two rows for narrow parents, sidebar `--row-h` centring, `fadeIn` on the hover highlight. The browser checks that guard it live in `scripts/browser-checks/checks/calendar.mjs` (week column, pressed fill, ghost fade, pick-start glide), `popups.mjs` (two-row date picker) and `layout.mjs` (sidebar trailing centring).
 
+These files at the root belong to the fork and describe the Angular port, so a merge from upstream keeps our side (`git checkout --ours <path>`): `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `LICENSE` and everything under `.github/`. Read upstream's change to them first, in case it carries something the port should copy.
+
 After a sync: `npx ng test fluid-functionalism --watch=false`, `npx ng build fluid-functionalism`, `npx ng build showcase`, then the browser checks against the running showcase.
 
 ## Releasing and deploys
