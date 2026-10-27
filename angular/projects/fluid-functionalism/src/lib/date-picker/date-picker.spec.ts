@@ -13,6 +13,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Calendar } from '../calendar/calendar';
+import { ACTIVE_ATTR } from '../fluid-hover/fluid-hover';
 import { vi } from 'vitest';
 import { DatePicker, type DatePickerCalendarProps, type DatePickerPreset } from './date-picker';
 import type { DateRange } from '../calendar/calendar-dates';
@@ -599,5 +600,202 @@ describe('date picker time field', () => {
     t.type(start, '9');
     t.key(start, 'Enter');
     expect(t.host.timeRanges.at(-1)).toEqual({ start: '09:00', end: '10:00' });
+  });
+});
+
+describe('date picker two rows', () => {
+  /**
+   * jsdom has no layout, so the widths the picker measures are stubbed:
+   * the picker's content (`scrollWidth`) against the parent form's content
+   * box (`clientWidth`; jsdom computes 0 padding, so no style stub). The
+   * picker's own box stays 0 so the hover rects aren't rescaled by a zero
+   * container rect, and the segments get a synthetic layout: the date row on
+   * top, the time row 32px below it.
+   */
+  function stubLayout(content: number, room: number) {
+    const keys = ['scrollWidth', 'clientWidth', 'offsetWidth', 'offsetHeight', 'offsetTop', 'offsetLeft'];
+    const saved = keys.map(
+      (key) => [key, Object.getOwnPropertyDescriptor(HTMLElement.prototype, key)] as const,
+    );
+    const slot = (el: HTMLElement) => el.getAttribute('data-slot');
+    const segment = (el: HTMLElement) => slot(el) === 'date-picker-trigger' || slot(el) === 'date-picker-time';
+    const define = (key: string, read: (el: HTMLElement) => number) =>
+      Object.defineProperty(HTMLElement.prototype, key, {
+        configurable: true,
+        get(this: HTMLElement) {
+          return read(this);
+        },
+      });
+    define('scrollWidth', (el) => (slot(el) === 'date-picker' ? content : 0));
+    define('clientWidth', (el) => (el.tagName === 'FORM' ? room : 0));
+    define('offsetWidth', (el) => (segment(el) ? 100 : 0));
+    define('offsetHeight', (el) => (segment(el) ? 28 : 0));
+    define('offsetTop', (el) => (slot(el) === 'date-picker-time' ? 32 : 0));
+    define('offsetLeft', () => 0);
+    return () => {
+      for (const [key, descriptor] of saved) {
+        if (descriptor) Object.defineProperty(HTMLElement.prototype, key, descriptor);
+        else delete (HTMLElement.prototype as unknown as Record<string, unknown>)[key];
+      }
+    };
+  }
+
+  const dateWrap = (group: HTMLElement) =>
+    group.querySelector<HTMLElement>('[data-slot=date-picker-trigger]')!.parentElement!;
+  const timeWrap = (el: HTMLElement) => el.querySelector('ff-date-picker-time-field')!.parentElement!;
+  const frame = () =>
+    new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
+
+  it('stacks the time under the date when the parent is too narrow', async () => {
+    const restore = stubLayout(300, 200);
+    try {
+      const t = setup((h) => {
+        h.time.set('11:00');
+        h.hourCycle.set(24);
+      });
+      await vi.waitFor(() => expect(t.group().hasAttribute('data-two-rows')).toBe(true));
+      const group = t.group();
+      // The row's own height replaces the one-row control height.
+      expect(group.classList.contains('flex-wrap')).toBe(true);
+      expect(group.classList.contains('h-9')).toBe(false);
+      expect(group.classList.contains('p-1')).toBe(true);
+      expect(group.classList.contains('p-0.5')).toBe(false);
+      // The date takes the first row, at the one-row height (36 - border and
+      // padding), and the compact inset so the time fits a phone.
+      expect(dateWrap(group).classList.contains('order-1')).toBe(true);
+      expect(dateWrap(group).style.height).toBe('30px');
+      expect(t.trigger().classList.contains('px-1.5')).toBe(true);
+      // The divider becomes a full-width line between the rows.
+      const lines = group.querySelectorAll<HTMLElement>('span[aria-hidden][class*=basis-full]');
+      expect(lines).toHaveLength(1);
+      expect(lines[0].classList.contains('order-3')).toBe(true);
+      expect(lines[0].classList.contains('my-1')).toBe(true);
+      expect(lines[0].classList.contains('h-px')).toBe(true);
+      // The time field keeps its row under that line.
+      expect(timeWrap(t.el).classList.contains('order-4')).toBe(true);
+      expect(timeWrap(t.el).style.height).toBe('30px');
+      // The clear follows the date it clears, and no longer pushes right.
+      const clear = t.clear()!;
+      expect(clear.classList.contains('order-2')).toBe(true);
+      expect(clear.classList.contains('ml-0')).toBe(true);
+      expect(clear.classList.contains('ml-auto')).toBe(false);
+      expect(clear.style.height).toBe('30px');
+      expect(dateWrap(group).compareDocumentPosition(clear) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    } finally {
+      restore();
+    }
+  });
+
+  it('keeps one row when the parent has room', async () => {
+    const restore = stubLayout(300, 400);
+    try {
+      const t = setup((h) => {
+        h.time.set('11:00');
+        h.hourCycle.set(24);
+      });
+      await vi.waitFor(() => expect(t.group().classList.contains('h-9')).toBe(true));
+      const group = t.group();
+      expect(group.hasAttribute('data-two-rows')).toBe(false);
+      expect(group.classList.contains('flex-wrap')).toBe(false);
+      expect(group.classList.contains('p-0.5')).toBe(true);
+      expect(dateWrap(group).classList.contains('order-1')).toBe(false);
+      expect(timeWrap(t.el).classList.contains('order-4')).toBe(false);
+      // The vertical rule between the date and the time, and the clear back
+      // at the end of the row.
+      const rule = group.querySelector<HTMLElement>('span[aria-hidden][class*=w-px]')!;
+      expect(rule.classList.contains('h-4')).toBe(true);
+      expect(rule.classList.contains('order-3')).toBe(false);
+      expect(t.clear()!.classList.contains('ml-auto')).toBe(true);
+      expect(t.clear()!.classList.contains('order-2')).toBe(false);
+    } finally {
+      restore();
+    }
+  });
+
+  it('never stacks without a time field', async () => {
+    const restore = stubLayout(300, 100);
+    try {
+      const t = setup();
+      await vi.waitFor(() => expect(t.group().classList.contains('h-9')).toBe(true));
+      expect(t.group().hasAttribute('data-two-rows')).toBe(false);
+    } finally {
+      restore();
+    }
+  });
+
+  it('resolves the segment hover across both rows, and only along the row otherwise', async () => {
+    // The axis isn't readable from outside, so the segments keep one fixed
+    // geometry (stacked) and only the measured room changes: a pointer in
+    // the gap between the rows lands on the date across both rows and on the
+    // last row sharing its column along one.
+    const stacked = async (room: number, active: 'date' | 'time') => {
+      const restore = stubLayout(300, room);
+      try {
+        const t = setup((h) => {
+          h.value.set(undefined);
+          // The clear button would register a third segment; leave it out.
+          h.clearable.set(false);
+          h.time.set('11:00');
+          h.hourCycle.set(24);
+        });
+        await vi.waitFor(() => expect(t.group().hasAttribute('data-two-rows')).toBe(room < 300));
+        // Items register on a frame before the pointer can pick one.
+        await frame();
+        await frame();
+        t.group().dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 60, clientY: 15 }));
+        const trigger = t.trigger();
+        const time = t.el.querySelector<HTMLElement>('[data-slot=date-picker-time]')!;
+        await vi.waitFor(() =>
+          expect(active === 'date' ? trigger.hasAttribute(ACTIVE_ATTR) : time.hasAttribute(ACTIVE_ATTR)).toBe(true),
+        );
+        expect(active === 'date' ? time.hasAttribute(ACTIVE_ATTR) : trigger.hasAttribute(ACTIVE_ATTR)).toBe(false);
+      } finally {
+        restore();
+      }
+    };
+    await stacked(200, 'date');
+    await stacked(400, 'time');
+  });
+});
+
+describe('date picker auto orientation', () => {
+  /** The picker's width comparison uses the 0.75 week column, not a full cell. */
+  const withViewport = async (width: number, run: () => Promise<void>) => {
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth')!;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: width });
+    try {
+      await run();
+    } finally {
+      Object.defineProperty(window, 'innerWidth', descriptor);
+    }
+  };
+
+  it('counts the week column at its ratio, so two months fit where a full column would not', async () => {
+    // 36px cells, week numbers: 606px needed with the 0.75 column, 624px if
+    // it were a full one. 630px of viewport leaves 614px: enough for 606,
+    // not for 624.
+    await withViewport(630, async () => {
+      const t = setup((h) => {
+        h.mode.set('range');
+        h.value.set(undefined);
+        h.calendarProps.set({ showWeekNumber: true });
+      });
+      await t.open();
+      expect(document.querySelector('[data-slot=calendar-months]')!.getAttribute('data-orientation')).toBe('horizontal');
+    });
+  });
+
+  it('stacks two months when even the ratio does not fit', async () => {
+    await withViewport(610, async () => {
+      const t = setup((h) => {
+        h.mode.set('range');
+        h.value.set(undefined);
+        h.calendarProps.set({ showWeekNumber: true });
+      });
+      await t.open();
+      expect(document.querySelector('[data-slot=calendar-months]')!.getAttribute('data-orientation')).toBe('vertical');
+    });
   });
 });

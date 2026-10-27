@@ -27,7 +27,13 @@ import { Icon } from '../core/icon';
 import { enterTransition, exitTransition, injectAnimateFluid, type FluidAnimation } from '../core/motion';
 import { FLUID_HOVER, FluidHoverItem, createFluidHover } from '../fluid-hover/fluid-hover';
 import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { Calendar, type CalendarDayDetailContext, type CalendarOrientation, type CalendarValue } from '../calendar/calendar';
+import {
+  Calendar,
+  WEEK_COL_RATIO,
+  type CalendarDayDetailContext,
+  type CalendarOrientation,
+  type CalendarValue,
+} from '../calendar/calendar';
 import type { DateRange, Matcher, WeekStartsOn } from '../calendar/calendar-dates';
 import type { CalendarFormatters, CalendarLabels } from '../calendar/calendar-locale';
 import { LAST_MINUTE, buildSlots, formatDuration, minutesToTime, resolveHourCycle, shiftEnd, timeToMinutes } from './date-picker-time';
@@ -123,6 +129,7 @@ let nextPickerId = 0;
     role: 'group',
     'data-slot': 'date-picker',
     '[attr.data-variant]': 'variant()',
+    '[attr.data-two-rows]': 'twoRows() ? "" : null',
     '[attr.aria-label]': 'ariaLabel() ?? null',
     // `id` belongs to the date trigger and `name` to the hidden input.
     '[attr.id]': 'null',
@@ -144,46 +151,48 @@ let nextPickerId = 0;
       <input type="hidden" [name]="name()" [value]="formValue()" />
     }
 
-    <button
-      #trigger
-      type="button"
-      data-slot="date-picker-trigger"
-      aria-haspopup="dialog"
-      [ffFluidHoverItem]="0"
-      [attr.id]="id() ?? null"
-      [disabled]="disabled()"
-      [attr.aria-label]="triggerLabel()"
-      [attr.aria-expanded]="isOpen()"
-      [attr.aria-controls]="isOpen() ? popupId : null"
-      [attr.data-popup-open]="isOpen() ? '' : null"
-      [attr.data-placeholder]="hasValue() ? null : ''"
-      [class]="triggerClass()"
-      (click)="setOpen(!isOpen())"
-    >
-      @if (field()) {
-        <ff-icon name="calendar" [size]="sizeClasses().icon" [strokeWidth]="1.5" class="shrink-0 text-muted-foreground" />
-      }
-      <!-- Left-aligned: a button centers its text, which would float the
-           date inside its fixed width. -->
-      <span class="inline-grid text-left tabular-nums">
-        <span class="col-start-1 row-start-1 [text-box:trim-both_cap_alphabetic]">{{ dateLabel() }}</span>
-        <span aria-hidden="true" class="invisible col-start-1 row-start-1 inline-flex whitespace-pre">
-          @for (options of labelSizer(); track $index) {
-            <span class="inline-grid">
-              @for (option of options; track option) {
-                <!-- Trimmed per part: text-box trim skips flex containers. -->
-                <span class="col-start-1 row-start-1 [text-box:trim-both_cap_alphabetic]">{{ option }}</span>
-              }
-            </span>
-          }
+    <span [class]="dateWrapClass()" [style.height]="rowHeight()">
+      <button
+        #trigger
+        type="button"
+        data-slot="date-picker-trigger"
+        aria-haspopup="dialog"
+        [ffFluidHoverItem]="0"
+        [attr.id]="id() ?? null"
+        [disabled]="disabled()"
+        [attr.aria-label]="triggerLabel()"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="isOpen() ? popupId : null"
+        [attr.data-popup-open]="isOpen() ? '' : null"
+        [attr.data-placeholder]="hasValue() ? null : ''"
+        [class]="triggerClass()"
+        (click)="setOpen(!isOpen())"
+      >
+        @if (field()) {
+          <ff-icon name="calendar" [size]="sizeClasses().icon" [strokeWidth]="1.5" class="shrink-0 text-muted-foreground" />
+        }
+        <!-- Left-aligned: a button centers its text, which would float the
+             date inside its fixed width. -->
+        <span class="inline-grid text-left tabular-nums">
+          <span class="col-start-1 row-start-1 [text-box:trim-both_cap_alphabetic]">{{ dateLabel() }}</span>
+          <span aria-hidden="true" class="invisible col-start-1 row-start-1 inline-flex whitespace-pre">
+            @for (options of labelSizer(); track $index) {
+              <span class="inline-grid">
+                @for (option of options; track option) {
+                  <!-- Trimmed per part: text-box trim skips flex containers. -->
+                  <span class="col-start-1 row-start-1 [text-box:trim-both_cap_alphabetic]">{{ option }}</span>
+                }
+              </span>
+            }
+          </span>
+          <span
+            aria-hidden="true"
+            class="invisible col-start-1 row-start-1 whitespace-pre [text-box:trim-both_cap_alphabetic]"
+            >{{ labelPlaceholder() }}</span
+          >
         </span>
-        <span
-          aria-hidden="true"
-          class="invisible col-start-1 row-start-1 whitespace-pre [text-box:trim-both_cap_alphabetic]"
-          >{{ labelPlaceholder() }}</span
-        >
-      </span>
-    </button>
+      </button>
+    </span>
 
     <div #positioner data-slot="date-picker-positioner" [class]="positionerClass" style="display: none">
       <div role="dialog" class="outline-none" [id]="popupId" [attr.aria-label]="ariaLabel() ?? null">
@@ -251,54 +260,62 @@ let nextPickerId = 0;
       </div>
     </ng-template>
 
-    @if (hasTime() || hasTimeRange()) {
+    @if (timed() && !twoRows()) {
       <span aria-hidden="true" class="relative z-[1] mx-0.5 h-4 w-px shrink-0 bg-border"></span>
     }
-    @if (hasTime()) {
-      <ff-date-picker-time-field
-        placeholder="Time"
-        label="Time"
-        prefixIcon="clock"
-        [index]="1"
-        [value]="timeMinutes()"
-        [slots]="daySlots()"
-        [hourCycle]="hourCycle()"
-        [locale]="locale()"
-        [disabled]="disabled()"
-        [segmentClass]="segmentClass()"
-        [fallback]="nowFallback"
-        (commit)="setTime(minutesToTime($event))"
-      />
-    } @else if (hasTimeRange()) {
-      <ff-date-picker-time-field
-        placeholder="Start"
-        label="Start time"
-        prefixIcon="clock"
-        [index]="1"
-        [value]="startMinutes()"
-        [slots]="daySlots()"
-        [hourCycle]="hourCycle()"
-        [locale]="locale()"
-        [disabled]="disabled()"
-        [segmentClass]="segmentClass()"
-        [fallback]="nowFallback"
-        (commit)="onStartCommit($event)"
-      />
-      <ff-date-picker-time-field
-        placeholder="End"
-        label="End time"
-        prefixIcon="arrow-right"
-        [index]="2"
-        [value]="endMinutes()"
-        [slots]="endSlots()"
-        [hourCycle]="hourCycle()"
-        [locale]="locale()"
-        [disabled]="disabled()"
-        [segmentClass]="segmentClass()"
-        [fallback]="endFallback"
-        [duration]="durationNote()"
-        (commit)="onEndCommit($event)"
-      />
+    @if (twoRows()) {
+      <!-- The line between the date row and the time row. -->
+      <span aria-hidden="true" class="order-3 my-1 h-px basis-full bg-border"></span>
+    }
+    @if (timed()) {
+      <span [class]="timeWrapClass()" [style.height]="rowHeight()">
+        @if (hasTime()) {
+          <ff-date-picker-time-field
+            placeholder="Time"
+            label="Time"
+            prefixIcon="clock"
+            [index]="1"
+            [value]="timeMinutes()"
+            [slots]="daySlots()"
+            [hourCycle]="hourCycle()"
+            [locale]="locale()"
+            [disabled]="disabled()"
+            [segmentClass]="segmentClass()"
+            [fallback]="nowFallback"
+            (commit)="setTime(minutesToTime($event))"
+          />
+        } @else if (hasTimeRange()) {
+          <ff-date-picker-time-field
+            placeholder="Start"
+            label="Start time"
+            prefixIcon="clock"
+            [index]="1"
+            [value]="startMinutes()"
+            [slots]="daySlots()"
+            [hourCycle]="hourCycle()"
+            [locale]="locale()"
+            [disabled]="disabled()"
+            [segmentClass]="segmentClass()"
+            [fallback]="nowFallback"
+            (commit)="onStartCommit($event)"
+          />
+          <ff-date-picker-time-field
+            placeholder="End"
+            label="End time"
+            prefixIcon="arrow-right"
+            [index]="2"
+            [value]="endMinutes()"
+            [slots]="endSlots()"
+            [hourCycle]="hourCycle()"
+            [locale]="locale()"
+            [disabled]="disabled()"
+            [segmentClass]="segmentClass()"
+            [fallback]="endFallback"
+            [duration]="durationNote()"
+            (commit)="onEndCommit($event)"
+          />
+        }
+      </span>
     }
 
     @if (clearMounted()) {
@@ -309,6 +326,7 @@ let nextPickerId = 0;
         data-slot="date-picker-clear"
         [ffFluidHoverItem]="9"
         [class]="clearClass()"
+        [style.height]="rowHeight()"
         (click)="onClear()"
       >
         <ff-icon name="x" [size]="sizeClasses().icon" [strokeWidth]="1.5" />
@@ -404,8 +422,18 @@ export class DatePicker {
   private readonly motion = viewChild<ElementRef<HTMLElement>>('motion');
   private readonly clearEl = viewChild<ElementRef<HTMLButtonElement>>('clear');
 
+  /** Too narrow for date and time on one row (a phone, a side panel), the
+   *  time moves to a second row under the date. The one-row width is measured
+   *  while on one row; the segments size to their widest value, so it holds. */
+  protected readonly twoRows = signal(false);
+  /** The picker's one-row content width, measured while it is on one row. */
+  private oneRowWidth = 0;
+
   /** Segment hover scope: date, time(s), clear. */
-  readonly segmentHover = createFluidHover(() => this.host, { axis: 'x', gapClick: false });
+  readonly segmentHover = createFluidHover(() => this.host, () => ({
+    axis: this.twoRows() ? 'xy' : 'x',
+    gapClick: false,
+  }));
 
   // ── State ───────────────────────────────────────────────────
   private readonly openState = linkedSignal(() => this.defaultOpen());
@@ -446,6 +474,8 @@ export class DatePicker {
   protected readonly hasValue = computed(() => (this.mode() === 'range' ? !!this.range()?.from : !!this.single()));
   protected readonly hasTime = computed(() => this.time() !== undefined);
   protected readonly hasTimeRange = computed(() => !this.hasTime() && this.timeRange() !== undefined);
+  /** Whether the trigger carries any time field after the date. */
+  protected readonly timed = computed(() => this.hasTime() || this.hasTimeRange());
   protected readonly calendarSelected = computed<CalendarValue>(() =>
     this.mode() === 'range' ? (this.draft() ?? this.range()) : this.single(),
   );
@@ -511,18 +541,36 @@ export class DatePicker {
       'relative z-[1] inline-flex h-full items-center outline-none',
       'transition-[color] duration-80',
       'focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]',
-      this.compact() ? 'px-1.5' : 'px-2',
+      this.compact() || this.twoRows() ? 'px-1.5' : 'px-2',
       this.innerRadius(),
     ),
+  );
+  /** Stacked, each row keeps the one-row height (inside the field's 1px
+   *  border and 2px padding), so the segments' h-full still resolves. */
+  protected readonly rowHeight = computed(() =>
+    this.twoRows() ? `${this.sizeClasses().controlHeight - (this.field() ? 6 : 0)}px` : null,
+  );
+  protected readonly dateWrapClass = computed(() =>
+    cn(
+      'inline-flex h-full items-center',
+      // A lone date field fills the box, so its hover spans the width.
+      this.field() && !this.timed() && 'flex-1',
+      this.twoRows() && 'order-1',
+    ),
+  );
+  protected readonly timeWrapClass = computed(() =>
+    cn('inline-flex h-full items-center', this.twoRows() && 'order-4'),
   );
   protected readonly hostClass = computed(() =>
     cn(
       'group/date-picker relative inline-flex items-center',
-      this.sizeClasses().control,
+      this.twoRows() ? 'flex-wrap' : this.sizeClasses().control,
       this.sizeClasses().text,
       this.field()
         ? cn(
-            'border border-border bg-transparent p-0.5',
+            'border border-border bg-transparent',
+            // Two rows get more room around them than the one-row field.
+            this.twoRows() ? 'p-1' : 'p-0.5',
             this.shape().input,
             this.compact() ? 'min-w-[128px]' : 'min-w-[160px]',
           )
@@ -546,6 +594,8 @@ export class DatePicker {
   protected readonly clearClass = computed(() =>
     cn(
       'relative z-[1] ml-auto inline-flex h-full shrink-0 cursor-pointer items-center justify-center text-muted-foreground outline-none hover:text-foreground',
+      // Two rows: the clear sits right after the date it clears.
+      this.twoRows() && 'order-2 ml-0',
       'focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]',
       this.compact() ? 'w-6' : 'w-7',
       this.innerRadius(),
@@ -608,6 +658,35 @@ export class DatePicker {
   });
 
   constructor() {
+    // Too narrow for date and time on one row (a phone, a side panel), the
+    // time moves to a second row under the date. The one-row width is
+    // measured while on one row, so the two-row layout can't feed back into
+    // it: the segments size to their widest value, so it holds.
+    afterRenderEffect((onCleanup) => {
+      const el = this.host;
+      const parent = el.parentElement;
+      if (!parent || !this.timed()) {
+        this.twoRows.set(false);
+        return;
+      }
+      const measure = () => {
+        // The content's width, not the box's: the field's min-width lets a
+        // flex parent shrink the box under its content.
+        if (el.dataset['twoRows'] === undefined) {
+          this.oneRowWidth = el.scrollWidth + el.offsetWidth - el.clientWidth;
+        }
+        const cs = getComputedStyle(parent);
+        const room = parent.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        this.twoRows.set(this.oneRowWidth > room + 0.5);
+      };
+      measure();
+      if (typeof ResizeObserver === 'undefined') return;
+      const ro = new ResizeObserver(measure);
+      ro.observe(parent);
+      ro.observe(el);
+      onCleanup(() => ro.disconnect());
+    });
+
     // A bound or default open lands on the value's month too.
     effect(() => {
       if (!this.isOpen()) return;
@@ -695,7 +774,7 @@ export class DatePicker {
     if (this.orientation() === 'auto' && this.resolvedNumberOfMonths() > 1 && typeof window !== 'undefined') {
       const cellSize = this.cal().cellSize ?? (this.compact() ? 32 : 36);
       const needed =
-        (7 + (this.cal().showWeekNumber ? 1 : 0)) * cellSize * 2 +
+        (7 + (this.cal().showWeekNumber ? WEEK_COL_RATIO : 0)) * cellSize * 2 +
         24 +
         24 +
         (this.presets()?.length ? PRESETS_WIDTH : 0);

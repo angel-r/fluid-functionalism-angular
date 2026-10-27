@@ -100,7 +100,7 @@ let nextListId = 0;
            space so the field doesn't shrink under the cursor. -->
       @if (duration(); as note) {
         <span [attr.data-editing]="editing() || null" [class]="editing() ? 'inline-flex invisible' : 'inline-flex'">
-          <span data-slot="date-picker-duration" class="whitespace-nowrap text-muted-foreground">{{ note }}</span>
+          <span data-slot="date-picker-duration" [class]="durationClass()">{{ note }}</span>
         </span>
       }
     </span>
@@ -261,6 +261,11 @@ export class DatePickerTimeField {
       'cursor-text has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-[color:var(--focus-ring,#6B97FF)]',
       this.sizeClasses().field,
     ),
+  );
+  /** The duration is a note, not a field: body size even where the input
+   *  grows on touch, and the smaller size keeps the row on a phone. */
+  protected readonly durationClass = computed(() =>
+    cn('whitespace-nowrap text-muted-foreground', this.sizeClasses().text),
   );
   protected readonly inputClass = computed(() =>
     cn(
