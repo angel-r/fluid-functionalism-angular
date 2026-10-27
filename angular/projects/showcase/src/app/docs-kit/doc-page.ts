@@ -42,7 +42,10 @@ import { docNames, docOrder, systemList } from '../site/nav-data';
 
 /** The note under "Installation" when a page says nothing specific: one brief
  *  instead of a registry item, for pages under no system. */
-const GENERIC_NOTE = 'One prompt for your coding agent: install command, usage, props.';
+// The React page's flavor note ("Same source under both flavors.") has no
+// subject here: D1 removed the primitive choice and the port ships one
+// implementation, so the note says what the command actually adds.
+const GENERIC_NOTE = 'One package: the install command adds every component, not just this one.';
 
 interface DocStep {
   href: string;

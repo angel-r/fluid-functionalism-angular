@@ -2,95 +2,97 @@
      description, the Installation row, then the page's sections). Ported from
      lib/docs/DocPage.tsx. The host is display:contents, so this root div is the
      page's box, exactly where React's was. -->
-<div class="flex flex-col gap-8 px-6">
-  <div>
-    <!-- The title and the arrows share a row, centered on each other; the
-         description runs full width below them. -->
-    <div class="flex items-center justify-between gap-4">
-      <h1
-        class="text-site-display text-foreground leading-none"
-        [style.font-variation-settings]="bold"
-      >
-        {{ title() }}
-      </h1>
-      @if (slug()) {
-        <!-- -my-2: the 36px buttons (28px compact) overhang the title's line
-             box instead of stretching the row, so the description stays 8px
-             under the title at every size. -->
-        <div class="flex items-center gap-1 shrink-0 -my-2">
-          @if (nav().prev; as prev) {
-            <ff-tooltip side="top" [content]="prevTip">
-              <a
-                ffButton
-                variant="ghost"
-                [size]="iconSize()"
-                [routerLink]="prev.href"
-                [attr.aria-label]="'Previous: ' + prev.name"
-              >
-                <ff-icon name="arrow-right" class="rotate-180" />
-              </a>
-            </ff-tooltip>
-          } @else {
-            <button ffButton variant="ghost" [size]="iconSize()" disabled aria-label="No previous component">
-              <ff-icon name="arrow-right" class="rotate-180" />
-            </button>
-          }
-          @if (nav().next; as next) {
-            <ff-tooltip side="top" [content]="nextTip">
-              <a
-                ffButton
-                variant="ghost"
-                [size]="iconSize()"
-                [routerLink]="next.href"
-                [attr.aria-label]="'Next: ' + next.name"
-              >
-                <ff-icon name="arrow-right" />
-              </a>
-            </ff-tooltip>
-          } @else {
-            <button ffButton variant="ghost" [size]="iconSize()" disabled aria-label="No next component">
-              <ff-icon name="arrow-right" />
-            </button>
-          }
-          <ng-template #prevTip>
+<div class="py-20 sm:py-28 w-full max-w-[680px] mx-auto mt-12 lg:mt-0">
+  <div class="flex flex-col gap-8 px-6">
+    <div>
+      <!-- The title and the arrows share a row, centered on each other; the
+           description runs full width below them. -->
+      <div class="flex items-center justify-between gap-4">
+        <h1
+          class="text-site-display text-foreground leading-none"
+          [style.font-variation-settings]="bold"
+        >
+          {{ title() }}
+        </h1>
+        @if (slug()) {
+          <!-- -my-2: the 36px buttons (28px compact) overhang the title's line
+               box instead of stretching the row, so the description stays 8px
+               under the title at every size. -->
+          <div class="flex items-center gap-1 shrink-0 -my-2">
             @if (nav().prev; as prev) {
-              <span>{{ prev.name }} &ensp;<kbd class="font-mono opacity-50">&larr;</kbd></span>
+              <ff-tooltip side="top" [content]="prevTip">
+                <a
+                  ffButton
+                  variant="ghost"
+                  [size]="iconSize()"
+                  [routerLink]="prev.href"
+                  [attr.aria-label]="'Previous: ' + prev.name"
+                >
+                  <ff-icon name="arrow-right" class="rotate-180" />
+                </a>
+              </ff-tooltip>
+            } @else {
+              <button ffButton variant="ghost" [size]="iconSize()" disabled aria-label="No previous component">
+                <ff-icon name="arrow-right" class="rotate-180" />
+              </button>
             }
-          </ng-template>
-          <ng-template #nextTip>
             @if (nav().next; as next) {
-              <span>{{ next.name }} &ensp;<kbd class="font-mono opacity-50">&rarr;</kbd></span>
+              <ff-tooltip side="top" [content]="nextTip">
+                <a
+                  ffButton
+                  variant="ghost"
+                  [size]="iconSize()"
+                  [routerLink]="next.href"
+                  [attr.aria-label]="'Next: ' + next.name"
+                >
+                  <ff-icon name="arrow-right" />
+                </a>
+              </ff-tooltip>
+            } @else {
+              <button ffButton variant="ghost" [size]="iconSize()" disabled aria-label="No next component">
+                <ff-icon name="arrow-right" />
+              </button>
             }
-          </ng-template>
-        </div>
+            <ng-template #prevTip>
+              @if (nav().prev; as prev) {
+                <span>{{ prev.name }} &ensp;<kbd class="font-mono opacity-50">&larr;</kbd></span>
+              }
+            </ng-template>
+            <ng-template #nextTip>
+              @if (nav().next; as next) {
+                <span>{{ next.name }} &ensp;<kbd class="font-mono opacity-50">&rarr;</kbd></span>
+              }
+            </ng-template>
+          </div>
+        }
+      </div>
+      <!-- A page that needs inline markup projects it here (`[doc-description]`);
+           the plain description is the fallback. Inline content only. -->
+      <p class="mt-2 text-site-body text-muted-foreground">
+        <ng-content select="[doc-description]">{{ description() }}</ng-content>
+      </p>
+      @if (intro()) {
+        <p class="mt-4 text-site-body text-muted-foreground">{{ intro() }}</p>
       }
     </div>
-    <!-- A page that needs inline markup projects it here (`[doc-description]`);
-         the plain description is the fallback. Inline content only. -->
-    <p class="mt-2 text-site-body text-muted-foreground">
-      <ng-content select="[doc-description]">{{ description() }}</ng-content>
-    </p>
-    @if (intro()) {
-      <p class="mt-4 text-site-body text-muted-foreground">{{ intro() }}</p>
-    }
-  </div>
 
-  @if (showInstallRow()) {
-    <!-- Two columns: title with its note on the left, the copy button
-         vertically centered on the right. -->
-    <div class="flex items-center justify-between gap-4">
-      <div class="flex min-w-0 flex-col gap-2">
-        <h2
-          class="text-site-title text-foreground leading-none"
-          [style.font-variation-settings]="semibold"
-        >
-          Installation
-        </h2>
-        <p class="text-site-body text-muted-foreground">{{ note() }}</p>
+    @if (showInstallRow()) {
+      <!-- Two columns: title with its note on the left, the copy button
+           vertically centered on the right. -->
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex min-w-0 flex-col gap-2">
+          <h2
+            class="text-site-title text-foreground leading-none"
+            [style.font-variation-settings]="semibold"
+          >
+            Installation
+          </h2>
+          <p class="text-site-body text-muted-foreground">{{ note() }}</p>
+        </div>
+        <app-copy-prompt-button [prompt]="prompt()" />
       </div>
-      <app-copy-prompt-button [prompt]="prompt()" />
-    </div>
-  }
+    }
 
-  <ng-content />
+    <ng-content />
+
 </div>

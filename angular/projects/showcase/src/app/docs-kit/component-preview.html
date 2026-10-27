@@ -30,6 +30,10 @@
               <ff-switch label="Inspect" [checked]="inspect()" (toggle)="toggleInspect()" class="h-8 px-2 rounded-md" />
             </span>
           }
+          <!-- The page's own playback control (React's playbackButton), either
+               the pre-styled action button or any [preview-action] element. It
+               takes the replay button's slot; the default one steps aside. -->
+          <ng-content select="app-preview-action-button, [preview-action]" />
           @if (showReplay()) {
             <ff-tooltip side="top" content="Replay animation">
               <button type="button" (click)="replayOnce()" [class]="replayClass()" aria-label="Replay animation">
