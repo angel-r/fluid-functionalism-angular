@@ -1,0 +1,77 @@
+<!-- Introduction: the /docs column (app/docs/layout.tsx), then DocPage for the
+     title ("Introduction") and the page column; the sections, the hairlines and
+     the Icons section project into it, exactly as app/docs/page.tsx lays them
+     out. `showInstall` is off: the page carries its own numbered install steps
+     below. -->
+<app-doc-page
+  title="Introduction"
+  description="Why these components feel different."
+  [showInstall]="false"
+>
+  <section class="flex flex-col gap-6 text-site-body text-muted-foreground">
+    @for (section of sections; track section.title) {
+      <div class="flex flex-col gap-2">
+        <h3 class="text-site-title text-foreground leading-none" [style.font-variation-settings]="semibold">
+          {{ section.title }}
+        </h3>
+        <p>{{ section.body }}</p>
+      </div>
+    }
+  </section>
+
+  <hr class="border-border/60 my-8" />
+  <div class="flex flex-col gap-3 mb-4">
+    <h2 class="text-site-title text-foreground leading-none" [style.font-variation-settings]="semibold">
+      Installation
+    </h2>
+    <div class="flex flex-col gap-2 mt-2">
+      <p class="text-site-body text-muted-foreground flex items-center gap-2 ml-1">
+        <span
+          class="inline-flex items-center justify-center size-[18px] rounded-full bg-muted text-muted-foreground text-[11px] leading-3.5 shrink-0"
+          [style.font-variation-settings]="normal"
+          >1</span
+        >Install the package:
+      </p>
+      <ff-input-copy [value]="installCommand" align="left" class="w-fit" />
+    </div>
+    <div class="flex flex-col gap-2 mt-2">
+      <p class="text-site-body text-muted-foreground flex items-center gap-2 ml-1">
+        <span
+          class="inline-flex items-center justify-center size-[18px] rounded-full bg-muted text-muted-foreground text-[11px] leading-3.5 shrink-0"
+          [style.font-variation-settings]="normal"
+          >2</span
+        >Import the theme in your stylesheet:
+      </p>
+      <pre
+        class="text-site-caption text-muted-foreground bg-muted/60 rounded-lg px-4 py-3 overflow-x-auto w-fit max-w-full"
+      ><code>{{ themeImport }}</code></pre>
+    </div>
+    <hr class="border-border/60 mt-4" />
+    <p class="text-site-body text-muted-foreground">
+      Or register the library once, in your app config:
+    </p>
+    <pre
+      class="text-site-caption text-muted-foreground bg-muted/60 rounded-lg px-4 py-3 overflow-x-auto w-fit max-w-full"
+    ><code>{{ providerCall }}</code></pre>
+    <p class="text-site-body text-muted-foreground">
+      Dependencies and shared utilities come with the package. Font weight
+      animations require the Inter variable font.
+    </p>
+  </div>
+
+  <hr class="border-border/60 my-8" />
+  <div class="flex flex-col gap-3 mb-4">
+    <h2 class="text-site-title text-foreground leading-none" [style.font-variation-settings]="semibold">
+      Icons
+    </h2>
+    <p class="text-site-body text-muted-foreground">
+      Components render their icons through named slots with Lucide defaults,
+      so the package is the only icon dependency an install adds. To use
+      another icon library, pass its icons to the installed provider and
+      override any slot — names you leave out keep their Lucide default:
+    </p>
+    <pre
+      class="text-site-caption text-muted-foreground bg-muted/60 rounded-lg px-4 py-3 overflow-x-auto w-fit max-w-full"
+    ><code>{{ iconsSnippet }}</code></pre>
+  </div>
+</app-doc-page>

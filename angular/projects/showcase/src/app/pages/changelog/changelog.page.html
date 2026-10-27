@@ -1,0 +1,223 @@
+<!-- Changelog: the page's own max-width column (the /docs layout's, shared by
+     the reference's page.tsx wrapper), the header with its prev/next arrows and
+     the copy-upgrade prompt, then the month timeline. The Releases index is the
+     template at the bottom, parked in the right rail. -->
+<div class="flex flex-col gap-8 px-6">
+  <div>
+    <div class="flex items-center justify-between gap-4">
+      <h1 class="text-site-display text-foreground leading-none" [style.font-variation-settings]="bold">
+        Changelog
+      </h1>
+      <div class="flex items-center gap-1 shrink-0 -my-2">
+        <ff-tooltip side="top" [content]="prevTip">
+          <a
+            ffButton
+            variant="ghost"
+            [size]="iconSize()"
+            routerLink="/docs"
+            aria-label="Previous: Introduction"
+          >
+            <ff-icon name="arrow-right" class="rotate-180" />
+          </a>
+        </ff-tooltip>
+        @if (next) {
+          <ff-tooltip side="top" [content]="nextTip">
+            <a
+              ffButton
+              variant="ghost"
+              [size]="iconSize()"
+              [routerLink]="'/docs/' + next.slug"
+              [attr.aria-label]="'Next: ' + next.name"
+            >
+              <ff-icon name="arrow-right" />
+            </a>
+          </ff-tooltip>
+        }
+      </div>
+    </div>
+    <!-- /changelog.md is the same page as one Markdown file, for an agent. -->
+    <p class="mt-2 text-site-body text-muted-foreground">
+      Every change, month by month. A release lands on the first Friday.
+      <a
+        href="changelog.md"
+        class="rounded-sm text-foreground underline decoration-border underline-offset-4 outline-none transition-[text-decoration-color] duration-80 hover:decoration-foreground focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]"
+        >View as Markdown</a
+      >.
+    </p>
+    <!-- For an agent doing the upgrade: the skill first, then the same job by
+         hand (pages/changelog/prompts.ts). -->
+    <app-copy-prompt-button
+      label="Copy upgrade prompt"
+      variant="secondary"
+      class="mt-4"
+      [prompt]="upgradePrompt"
+    />
+
+    <ng-template #prevTip>
+      <span>Introduction &ensp;<kbd class="font-mono opacity-50">&larr;</kbd></span>
+    </ng-template>
+    <ng-template #nextTip>
+      @if (next) {
+        <span>{{ next.name }} &ensp;<kbd class="font-mono opacity-50">&rarr;</kbd></span>
+      }
+    </ng-template>
+  </div>
+
+  <div class="flex flex-col">
+    @for (release of releases; track release.month; let i = $index) {
+      <div class="relative pl-6">
+        <app-changelog-timeline-mark [first]="i === 0" [active]="release.month === activeMonth()" />
+        <!-- A hairline between months, 64px on each side. Space only goes
+             above a block: pt-16 above the line, and the section's own pt-16
+             below it. -ml-[22px]: back across the 24px gutter to the
+             timeline's line at 2px, so the hairline branches off it. -->
+        @if (i > 0) {
+          <div aria-hidden class="pt-16">
+            <div class="-ml-[22px] border-t border-border"></div>
+          </div>
+        }
+        <section
+          [id]="release.month"
+          [attr.aria-labelledby]="release.month + '-title'"
+          [class]="'scroll-mt-16 xl:scroll-mt-8' + (i > 0 ? ' pt-16' : '')"
+        >
+          <div class="group/month flex items-center gap-2">
+            <h2
+              [id]="release.month + '-title'"
+              class="text-site-title text-foreground"
+              [style.font-variation-settings]="semibold"
+            >
+              <time [attr.datetime]="release.month">{{ monthOf(release.month) }}</time>
+            </h2>
+            <a
+              [href]="'#' + release.month"
+              (click)="copyMonthLink($event, release.month)"
+              [attr.aria-label]="'Copy link to ' + monthOf(release.month)"
+              class="relative grid size-5 place-items-center rounded-md text-muted-foreground opacity-0 outline-none transition-opacity duration-80 hover:text-foreground focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] group-hover/month:opacity-100 max-sm:opacity-100"
+            >
+              <app-changelog-month-glyph [copied]="copiedMonths()[release.month] === true" />
+              <span class="sr-only" aria-live="polite">{{
+                copiedMonths()[release.month] ? 'Link copied' : ''
+              }}</span>
+            </a>
+            @if (release.released) {
+              <span class="ml-auto text-site-caption text-muted-foreground tabular-nums">
+                Released <time [attr.datetime]="release.released">{{ releasedOn(release.released) }}</time>
+              </span>
+            }
+          </div>
+          <h3 class="mt-2 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">
+            {{ release.title }}
+          </h3>
+          @if (release.intro) {
+            <p class="mt-2 text-site-body text-muted-foreground">
+              <app-changelog-inline [inline]="release.intro" />
+            </p>
+          }
+          @for (group of release.groups; track group.kind) {
+            <!-- A hairline above every group, the first one included, so it
+                 also closes the month's header: 40px on each side, inside the
+                 content column so it stays clear of the timeline. -->
+            <div class="pt-10">
+              <div aria-hidden class="border-t border-border"></div>
+              <h4
+                class="flex items-baseline gap-2 pt-10 text-site-subtitle text-foreground"
+                [style.font-variation-settings]="semibold"
+              >
+                {{ kindLabel[group.kind] }}
+                <span
+                  class="text-site-caption text-muted-foreground tabular-nums"
+                  [style.font-variation-settings]="normal"
+                  >{{ group.entries.length }}</span
+                >
+              </h4>
+              <div class="mt-2 flex flex-col">
+                @for (entry of group.entries; track entry.id; let first = $first) {
+                  <!-- Space only goes above a block: 24px between entries,
+                       4px under the name, 12px above a diff or a stage. -->
+                  <article [class]="first ? '' : 'pt-6'">
+                    <div class="flex items-center justify-between gap-4 pt-2">
+                      <h5 class="relative text-site-body text-foreground">
+                        <!-- The kind's color on the timeline, level with the
+                             entry's name. The name line starts 24px right of the
+                             line, so -24px puts this 5px dot's center on it; the
+                             3px ring of page color keeps the line from touching
+                             it. -->
+                        <span
+                          aria-hidden
+                          class="absolute -left-6 top-1/2 size-[5px] -translate-y-1/2 rounded-full bg-background ring-[3px] ring-background"
+                        >
+                          <span [class]="'block size-full rounded-full ' + kindDot[entry.kind]"></span>
+                        </span>
+                        @if (entry.href) {
+                          <a
+                            [routerLink]="entry.href"
+                            class="group/name inline-flex items-center gap-1.5 rounded-md outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]"
+                          >
+                            <span>{{ entry.name }}</span>
+                            <ff-icon
+                              name="arrow-right"
+                              [size]="14"
+                              class="text-muted-foreground transition-[color,translate] duration-80 group-hover/name:translate-x-0.5 group-hover/name:text-foreground"
+                            />
+                          </a>
+                        } @else {
+                          {{ entry.name }}
+                        }
+                      </h5>
+                      <div class="-mr-1.5 flex items-center">
+                        @for (ref of entry.refs; track $index) {
+                          <app-changelog-ref [gitRef]="ref" />
+                        }
+                      </div>
+                    </div>
+                    <p class="mt-1 text-site-body text-muted-foreground">
+                      <app-changelog-inline [inline]="entry.text" />
+                    </p>
+                    @if (entry.diff) {
+                      <div class="mt-3 flex flex-col items-start gap-3">
+                        @if (diffs()[entry.id]; as diffHtml) {
+                          <!-- shiki's dual-theme HTML; styles.css tints the + and
+                               - lines and moves their markers into the gutter. -->
+                          <div
+                            class="changelog-diff w-full overflow-x-auto rounded-lg border border-border text-site-caption"
+                            [innerHTML]="diffHtml"
+                          ></div>
+                        } @else {
+                          <!-- The same lines uncolored until shiki settles, so the
+                               block does not jump when the colors land. -->
+                          <div
+                            class="changelog-diff w-full overflow-x-auto rounded-lg border border-border px-3 text-site-caption"
+                          >
+                            <pre><code>{{ entry.diff }}</code></pre>
+                          </div>
+                        }
+                        <app-copy-prompt-button
+                          label="Copy migration prompt"
+                          variant="ghost"
+                          [prompt]="migrationPrompts[entry.id]"
+                        />
+                      </div>
+                    }
+                    @if (stageByEntry[entry.id]; as slug) {
+                      <app-changelog-stage
+                        [slug]="slug"
+                        [paused]="paused()"
+                        (pauseToggle)="togglePaused()"
+                      />
+                    }
+                  </article>
+                }
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- The Releases index: the right rail's only card on this page. -->
+<ng-template #releaseIndex>
+  <app-changelog-index [releases]="releases" [activeMonth]="activeMonth()" />
+</ng-template>
