@@ -5,7 +5,8 @@
     "entryFile": "src/public-api.ts"
   },
   "assets": [
-    "styles/**/*.css"
+    "styles/**/*.css",
+    "LICENSE"
   ],
   "allowedNonPeerDependencies": [
     "clsx",

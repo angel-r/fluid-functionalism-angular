@@ -1,4 +1,4 @@
-import type { IconName } from 'fluid-functionalism';
+import type { IconName } from '@angel-r/fluid-functionalism-angular';
 
 /**
  * Content for the Sidebar demo — one fictional AI product, shown doing a

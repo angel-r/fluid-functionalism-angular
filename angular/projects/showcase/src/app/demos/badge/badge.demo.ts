@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Badge, badgeColors, type BadgeColor } from 'fluid-functionalism';
+import { Badge, badgeColors, type BadgeColor } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AppSidebar, SidebarInset, SidebarInsetTopbar, SidebarProvider } from 'fluid-functionalism';
+import { AppSidebar, SidebarInset, SidebarInsetTopbar, SidebarProvider } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage } from '../../shared/demo-page';
 import { NAV_SECTIONS } from './nav-data';
 

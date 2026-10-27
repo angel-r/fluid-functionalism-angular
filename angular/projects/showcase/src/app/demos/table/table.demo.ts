@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'fluid-functionalism';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

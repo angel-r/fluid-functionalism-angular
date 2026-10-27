@@ -1,3 +1,6 @@
+> [!NOTE]
+> **This fork adds an unofficial Angular port.** The library, its showcase and the Angular docs live in [`angular/`](angular/README.md). Install it with `npm i @angel-r/fluid-functionalism-angular`. The rest of this README describes the original React project by Micka Touillaud, kept in sync with [upstream](https://github.com/mickadesign/fluid-functionalism).
+
 ```text
 
 

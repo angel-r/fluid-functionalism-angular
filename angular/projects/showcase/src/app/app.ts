@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { ThemeService, injectShapeContext, injectSizeContext } from 'fluid-functionalism';
+import { ThemeService, injectShapeContext, injectSizeContext } from '@angel-r/fluid-functionalism-angular';
 import { demos } from './demos/registry';
 
 @Component({

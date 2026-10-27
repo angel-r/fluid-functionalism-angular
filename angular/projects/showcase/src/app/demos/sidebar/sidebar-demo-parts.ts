@@ -38,7 +38,7 @@ import {
   injectAnimateFluid,
   injectShape,
   spring,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { AI_NAV, AI_WORKSPACE, type WikiBranch } from './sidebar-demo-data';
 
 // ---------------------------------------------------------------------------

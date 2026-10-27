@@ -26,7 +26,7 @@ import {
   collapsedStackHeight,
   createQueueId,
   injectQueueCardHeight,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 import { samplePdf, samplePhoto } from '../input-message/sample-files';
 

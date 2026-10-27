@@ -1,4 +1,4 @@
-import type { AskUserQuestion } from 'fluid-functionalism';
+import type { AskUserQuestion } from '@angel-r/fluid-functionalism-angular';
 
 // The question sets of the React docs page (app/docs/ask-user-questions/page.tsx),
 // copied verbatim so each demo matches its React preview.

@@ -23,7 +23,7 @@ import {
   collapsedStackHeight,
   createQueueId,
   injectQueueCardHeight,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { samplePdf, samplePhoto } from './sample-files';
 
 interface Turn {

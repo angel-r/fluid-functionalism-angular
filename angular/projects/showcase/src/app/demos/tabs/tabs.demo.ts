@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { TabItem, TabPanel, Tabs, TabsList, type IconName } from 'fluid-functionalism';
+import { TabItem, TabPanel, Tabs, TabsList, type IconName } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

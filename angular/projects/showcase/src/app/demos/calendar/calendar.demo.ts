@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { Calendar, type CalendarValue, type DateRange, type Matcher } from 'fluid-functionalism';
+import { Calendar, type CalendarValue, type DateRange, type Matcher } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 /** Taken nights for the booking demo, a few days out from today. */

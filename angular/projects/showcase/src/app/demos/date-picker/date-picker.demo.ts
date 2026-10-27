@@ -6,7 +6,7 @@ import {
   type DatePickerPreset,
   type DatePickerValue,
   type TimeRange,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 function addDays(date: Date, days: number) {

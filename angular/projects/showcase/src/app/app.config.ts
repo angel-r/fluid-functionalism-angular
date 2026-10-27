@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideFluid, provideFluidTheme, untitleduiIcons } from 'fluid-functionalism';
+import { provideFluid, provideFluidTheme, untitleduiIcons } from '@angel-r/fluid-functionalism-angular';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {

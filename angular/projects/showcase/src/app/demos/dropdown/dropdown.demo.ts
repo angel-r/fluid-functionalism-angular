@@ -14,7 +14,7 @@ import {
   DropdownTrigger,
   MenuItem,
   type IconName,
-} from 'fluid-functionalism';
+} from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 const ITEMS: { icon: IconName; label: string }[] = [

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Button, Tooltip, TooltipProvider, fontWeights } from 'fluid-functionalism';
+import { Button, Tooltip, TooltipProvider, fontWeights } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

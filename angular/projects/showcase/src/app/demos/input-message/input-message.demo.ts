@@ -10,7 +10,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { Button, ChatMessage, Icon, InputMessage, type InputMessageSendEvent } from 'fluid-functionalism';
+import { Button, ChatMessage, Icon, InputMessage, type InputMessageSendEvent } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 import { QueuedChatDemo } from './queued-chat';
 import { samplePdf, samplePhoto } from './sample-files';

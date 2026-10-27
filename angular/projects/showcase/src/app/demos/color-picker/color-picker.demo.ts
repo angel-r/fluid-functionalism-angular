@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { ColorPicker, ColorPickerPopover } from 'fluid-functionalism';
+import { ColorPicker, ColorPickerPopover } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 const SWATCHES = ['#000000', '#FFFFFF', '#FF3B30', '#F0F0F0', '#E5E5E5', '#D0D0D0', 'rgba(0,0,0,0.5)'];

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { CheckboxGroup, CheckboxItem } from 'fluid-functionalism';
+import { CheckboxGroup, CheckboxItem } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 @Component({

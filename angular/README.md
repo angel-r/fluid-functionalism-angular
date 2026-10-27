@@ -1,31 +1,33 @@
 # Fluid Functionalism for Angular
 
-An Angular 22 port of [fluid-functionalism](https://github.com/mickadesign/fluid-functionalism): every component, block and theme token of the React library, with the same classes, springs and keyboard behavior, built as standalone, signal-based, zoneless components.
+An unofficial Angular 22 port of [Fluid Functionalism](https://github.com/mickadesign/fluid-functionalism) by Micka Touillaud: every component, block and theme token of the React library, with the same classes, springs and keyboard behavior, built as standalone, signal-based, zoneless components.
+
+This port is not affiliated with the original project. Design, motion system and component behavior come from Fluid Functionalism; the Angular code is maintained here.
 
 This folder is an Angular workspace with two projects:
 
 | Project | What it is |
 |---|---|
-| `projects/fluid-functionalism` | The library (ng-packagr). Components, DI foundations, theme CSS, icon packs. |
+| `projects/fluid-functionalism` | The library (ng-packagr), published as `@angel-r/fluid-functionalism-angular`. Components, DI foundations, theme CSS, icon packs. |
 | `projects/showcase` | A demo app with one route per component and block. |
 
 The React/Next source at the repository root is untouched, so upstream changes can still be merged and compared 1:1.
 
 ## Quick path
 
-1. Install and run the showcase:
+You need Angular 22 and Tailwind CSS 4.
+
+1. Install the package with its peers:
 
    ```bash
-   cd angular
-   npm install
-   npx ng serve showcase
+   npm i @angel-r/fluid-functionalism-angular @angular/cdk @angular/aria
    ```
 
-2. Use the library in an app. Add the providers:
+2. Add the providers:
 
    ```ts
    // app.config.ts
-   import { provideFluid, provideFluidTheme } from 'fluid-functionalism';
+   import { provideFluid, provideFluidTheme } from '@angel-r/fluid-functionalism-angular';
 
    export const appConfig: ApplicationConfig = {
      providers: [provideFluid({ shape: 'rounded', size: 'default' }), provideFluidTheme({ shortcut: true })],
@@ -37,8 +39,8 @@ The React/Next source at the repository root is untouched, so upstream changes c
    ```css
    /* styles.css */
    @import "tailwindcss";
-   @import "fluid-functionalism/styles/theme.css";
-   @source "../node_modules/fluid-functionalism";
+   @import "@angel-r/fluid-functionalism-angular/styles/theme.css";
+   @source "../node_modules/@angel-r/fluid-functionalism-angular";
    ```
 
    Serve `InterVariable.ttf` and `InterVariable-Italic.ttf` under `/fonts/` (the theme's `@font-face` points there).
@@ -85,14 +87,16 @@ The per-component differences (and why) are recorded in `odd/tasks/angular-port.
 
 | Task | Command (from `angular/`) |
 |---|---|
+| Install the workspace | `npm install` |
 | Showcase dev server | `npx ng serve showcase` |
 | All tests (Vitest, jsdom) | `npx ng test fluid-functionalism --watch=false` |
 | One component's tests | `npx ng test fluid-functionalism --watch=false --include='**/select/*.spec.ts'` |
 | Browser motion/layout checks | `node scripts/browser-checks/run.mjs --url http://localhost:4200` (needs the showcase running and a local Chrome; `--only <text>` filters) |
 | Build the library | `npx ng build fluid-functionalism` (output in `dist/fluid-functionalism`) |
+| Publish to npm | bump `version` in `projects/fluid-functionalism/package.json`, build, then `npm publish` from `dist/fluid-functionalism` |
 | Regenerate the icon packs | `node scripts/generate-icon-packs.mjs` |
 
-In the workspace, the `fluid-functionalism` import path points at the library source, so the showcase needs no library build.
+In the workspace, the `@angel-r/fluid-functionalism-angular` import path points at the library source, so the showcase needs no library build.
 
 ## Checklist for a change
 
@@ -100,3 +104,7 @@ In the workspace, the `fluid-functionalism` import path points at the library so
 - [ ] Motion uses a spring tier from `core/springs`, never a hand-written duration.
 - [ ] The component's spec covers each rule through its public interface.
 - [ ] The showcase demo shows the change.
+
+## License
+
+[MIT](../LICENSE). Fluid Functionalism © Micka Touillaud; Angular port © angel-r.

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { CARD_PARTS, type IconName } from 'fluid-functionalism';
+import { CARD_PARTS, type IconName } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 // Clarity-blue mesh placeholders, the same art the React docs use.

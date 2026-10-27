@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { Slider } from 'fluid-functionalism';
+import { Slider } from '@angel-r/fluid-functionalism-angular';
 import { DemoPage, DemoSection } from '../../shared/demo-page';
 
 const QUALITY_LABELS = ['Off', 'Low', 'Medium', 'High', 'Ultra'];
