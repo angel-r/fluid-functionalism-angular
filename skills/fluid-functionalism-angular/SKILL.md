@@ -199,7 +199,7 @@ The stack read tells you which of these are already done. Skip those.
    ```ts
    // app.config.ts
    import { ApplicationConfig } from '@angular/core';
-   import { provideFluid, provideFluidTheme } from '@angel-r/fluid-functionalism-angular';
+   import { provideFluid, provideFluidTheme } from '@angel-r/fluid-functionalism-angular/core';
 
    export const appConfig: ApplicationConfig = {
      providers: [provideFluid(), provideFluidTheme()],
@@ -262,17 +262,20 @@ Every component is standalone: import the classes a template uses. Attribute
 selectors go on the native element the component stands in for, so a button
 stays a button and a link stays a link.
 
+Import each class from its entry point, the component folder it belongs to
+(`@angel-r/fluid-functionalism-angular/select`, `/blocks/sidebar`), and the
+foundations (`provideFluid`, `cn`, `Icon`, `spring`, `injectAnimateFluid`,
+`ThemeService`) from `/core`. Never import from the bare package name: it
+re-exports every entry, so a component named in a `@defer` block or a lazy
+route through it keeps the whole library in the initial bundle. When you
+audit a project, offer to move its bare imports to sub-paths.
+
 ```ts
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  Button,
-  Icon,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  Tooltip,
-} from '@angel-r/fluid-functionalism-angular';
+import { Button } from '@angel-r/fluid-functionalism-angular/button';
+import { Icon } from '@angel-r/fluid-functionalism-angular/core';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@angel-r/fluid-functionalism-angular/select';
+import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
 
 @Component({
   selector: 'app-fruit-picker',

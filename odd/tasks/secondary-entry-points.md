@@ -18,7 +18,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 - **S3**: the public API does not break. `import { X } from '@angel-r/fluid-functionalism-angular'` keeps working for every symbol that the root exports today:
   - The primary entry re-exports every secondary entry by package name, `export * from '@angel-r/fluid-functionalism-angular/<entry>'` (D2).
   - The showcase's 211 import sites (148 files) all use the bare name and compile **unchanged**.
-  - Importing through the bare name must still tree-shake and split per entry (the S1 probe, run through the bare import).
+  - Importing through the bare name must still tree-shake and split per entry (the S1 probe, run through the bare import). *Revised by L15:* this holds for static imports and lazy routes, not for `@defer`. The docs therefore recommend sub-path imports everywhere, and the bare name stays only for compatibility.
 - **S4**: cross-entry code imports other entries **only by package name** (`@angel-r/fluid-functionalism-angular/<entry>`), never by a relative path that leaves its own entry folder. Otherwise ng-packagr inlines a second copy or fails.
   - Every InjectionToken, abstract DI class (`ShapeContext`, `SizeContext`) and `providedIn: 'root'` service exists exactly once in the built output. Check with a grep over `dist/fluid-functionalism/fesm2022/*.mjs`: each `new InjectionToken('<name>')` appears in exactly one file.
 - **S5**: internal files that another folder already imports become exports of the entry that owns them (D3):
@@ -222,4 +222,12 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
     - Static bare imports do tree-shake. Lazy routes (`loadComponent` on the app's own file) split. The probe's (b) models a lazy route, not `@defer`, which is why it passed.
     - **Needs your decision:** L12's "the bare import stays recommended" is wrong for deferred components. The docs (both READMEs, the skill) must tell users to import any component used only inside `@defer` from its sub-path, or should recommend sub-path imports throughout, as Angular Material requires.
   - Showcase budget finding (L13) filed as issue #6: build the showcase against the packaged library instead of the source alias.
+- **L15** (2026-10-28, user decision on L14, verbatim: "1"). The option chosen: "Sub-rutas en todas partes, como Angular Material".
+  - Docs now import from sub-paths only and recommend them:
+    - the library README "Entry points" section, plus its Quick path and PDF snippets;
+    - the root README (paragraph and Quick path);
+    - `SKILL.md`: setup, the component example, and a new rule never to import from the bare name, with an offer to migrate bare imports during an audit;
+    - `references/components.md` and `references/custom-motion.md`.
+  - Every rewritten import was checked against a symbol → entry map generated with the TypeScript checker over each entry's `index.ts`.
+  - S3's bare-name bullet is revised: the bare import is kept for compatibility, and only its static imports tree-shake.
 - **Next step:** T9 done up to the PR: `feat/secondary-entry-points` is pushed (12 commits from `e593849`) and PR #5 is open against `main`. The merge is the user's; after it, `git checkout main && git pull`, `git tag v0.1.0 && git push origin v0.1.0`, then `gh run watch --repo angel-r/fluid-functionalism-angular` and `npm view @angel-r/fluid-functionalism-angular version` → `0.1.0`.
