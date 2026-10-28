@@ -6,12 +6,12 @@ How a fluid-functionalism component is ported into `projects/fluid-functionalism
 
 | React source | Angular target |
 |---|---|
-| `registry/base/<name>.tsx` (preferred flavor) + the `registry/default/*` cores it imports | `projects/fluid-functionalism/src/lib/<name>/<name>.ts` (split into more files when it helps) |
+| `registry/base/<name>.tsx` (preferred flavor) + the `registry/default/*` cores it imports | `projects/fluid-functionalism/<name>/<name>.ts` (split into more files when it helps) |
 | `lib/docs/api/<name>.ts` (props reference) | inputs/outputs with the same names and defaults |
-| `tests/<name>*.test.tsx` | `src/lib/<name>/<name>.spec.ts` |
+| `tests/<name>*.test.tsx` | `<name>/<name>.spec.ts` |
 | docs page demos (`app/docs/<name>/page.tsx`) | `projects/showcase/src/app/demos/<name>/<name>.demo.ts` |
 
-Each `src/lib/<name>/index.ts` re-exports the public pieces; `public-api.ts` already exports every component folder. Import foundations relatively (`../core`, `../fluid-hover`, `../merge-split`), never from `@angel-r/fluid-functionalism-angular`.
+Every folder at the package root is its own entry point, so `<name>/index.ts` re-exports the pieces other entries may use, and `public-api.ts` re-exports every entry by package name. Inside an entry, import relatively (`./x`). Code in one entry that needs another imports it by package name — `@angel-r/fluid-functionalism-angular/core`, `@angel-r/fluid-functionalism-angular/fluid-hover` — never by a relative path that leaves its own folder: ng-packagr would inline a second copy, or fail. A piece another entry needs that is not exported yet belongs in the owning `index.ts`.
 
 The Base UI and Radix flavors share one behavior: port it once.
 
@@ -28,7 +28,7 @@ The Base UI and Radix flavors share one behavior: port it once.
 | controlled + uncontrolled value (`value` / `defaultValue` / `onValueChange`) | `model()` (two-way `[(value)]`), plus a `valueChange` that `model` already emits |
 | `useShape()` / `useSize(size)` | `injectShape()` / `injectSize(() => this.size())` (signals) |
 | `useIcons()["x"]` + `<Icon />` | `<ff-icon name="x" [size]="..." class="..." />` |
-| `motion.div` + `spring.fast` | `animate()` from `motion` with `enterTransition(spring.fast)` / `exitTransition(...)` from `../core/motion`; or `injectAnimateFluid()` to honor reduced motion |
+| `motion.div` + `spring.fast` | `animate()` from `motion` with `enterTransition(spring.fast)` / `exitTransition(...)` from `@angel-r/fluid-functionalism-angular/core`; or `injectAnimateFluid()` to honor reduced motion |
 | `AnimatePresence` | keep the element until its exit animation's `finished` resolves (see `fluid-hover-highlight.ts`) |
 | `useFluidHover` + `FluidHoverHighlight` | `[ffFluidHover]` on the container, `[ffFluidHoverItem]="i"` on rows, `<ff-fluid-hover-highlight [class]="shape().bg" />`; or `createFluidHover()` for custom wiring |
 | `useSelectionRuns` + `useMergeSplitBlocks` + `SelectionBackgrounds` | `createSelectionRuns()` + `createMergeSplitBlocks()` + `<ff-selection-backgrounds>` |
@@ -41,7 +41,7 @@ The Base UI and Radix flavors share one behavior: port it once.
 ## Rules
 
 - Same visual output: copy class strings verbatim from the React source, including `data-*` state attributes the CSS keys on (`data-state`, `data-side`, `data-disabled`, `data-checked`).
-- Same motion: always a spring tier from `../core/springs`; never a hand-written duration.
+- Same motion: always a spring tier from `@angel-r/fluid-functionalism-angular/core` (`spring`); never a hand-written duration.
 - Same accessibility: roles, `aria-*`, keyboard behavior and focus rings as the source.
 - Tests go through the public component interface (render in a host component, interact with the DOM, assert DOM, emitted outputs and model values). Port the upstream test cases that apply; add one test per rule otherwise. jsdom has no layout: assert on attributes and calls, not pixels.
 - Run focused tests from `angular/`: `npx ng test fluid-functionalism --watch=false --include='**/<name>/*.spec.ts'`.
@@ -61,7 +61,7 @@ The Base UI and Radix flavors share one behavior: port it once.
 - **Two-way values:** a user action writes the `model()` and also emits the React-named output (`toggle`, `select`), so `[(x)]` and `[x]` + `(output)` both work; avoid double toggles by emitting before computing from the model.
 - **Outputs as clickability:** to know whether a parent bound an output (React's "has onClick"), build it with `outputFromObservable` over a subscriber-counting Observable (see `card.ts`).
 - **Type-check demos without `ng build`:** `npx ngc -p <scratch tsconfig>` with `noEmit` and `strictTemplates`, listing only your demo files (drop `baseUrl`), keeps parallel workers from colliding on `dist/`.
-- **Reuse ported parts** through relative imports (`../button`, `../tooltip`, `../scroll-area`, `../menu-item`, `../dropdown-search`, `../radio-group`, `../checkbox-group`, `../slider`); never re-implement them.
+- **Reuse ported parts** from their entry (`@angel-r/fluid-functionalism-angular/button`, `/tooltip`, `/scroll-area`, `/menu-item`, `/dropdown-search`, `/radio-group`, `/checkbox-group`, `/slider`); never re-implement them. A spec next to the component may keep a relative import, since tests are not part of the library build.
 
 ## Gotchas found in tier 2
 

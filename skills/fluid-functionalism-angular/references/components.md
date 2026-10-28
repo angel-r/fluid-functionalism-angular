@@ -6,7 +6,8 @@ classes into a standalone component's `imports` array, then use the element
 or attribute selector in its template:
 
 ```ts
-import { Button, Select, SelectContent, SelectItem, SelectTrigger } from '@angel-r/fluid-functionalism-angular';
+import { Button } from '@angel-r/fluid-functionalism-angular/button';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@angel-r/fluid-functionalism-angular/select';
 ```
 
 The setup (package, peers, `provideFluid()`, the theme import, the Tailwind

@@ -22,7 +22,7 @@ You need Angular 22 and Tailwind CSS 4.
 
    ```ts
    // app.config.ts
-   import { provideFluid, provideFluidTheme } from '@angel-r/fluid-functionalism-angular';
+   import { provideFluid, provideFluidTheme } from '@angel-r/fluid-functionalism-angular/core';
 
    export const appConfig: ApplicationConfig = {
      providers: [provideFluid(), provideFluidTheme()],
@@ -52,6 +52,8 @@ You need Angular 22 and Tailwind CSS 4.
      </ff-select-content>
    </ff-select>
    ```
+
+Import from the sub-path of each component folder (`@angel-r/fluid-functionalism-angular/button`, `/calendar`, `/dialog`, `/blocks/sidebar`; the foundations live in `/core`), the way Angular Material does. This keeps a component you load inside `@defer` or a lazy route out of the initial bundle. The bare `@angel-r/fluid-functionalism-angular` import still re-exports everything, but a `@defer` block that names a component imported from it keeps the whole library in the first load. See [Entry points](angular/projects/fluid-functionalism/README.md#entry-points).
 
 ## Options
 

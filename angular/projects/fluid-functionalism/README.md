@@ -17,7 +17,7 @@ You need Angular 22 and Tailwind CSS 4.
 2. Register the providers:
 
    ```ts
-   import { provideFluid, provideFluidTheme } from '@angel-r/fluid-functionalism-angular';
+   import { provideFluid, provideFluidTheme } from '@angel-r/fluid-functionalism-angular/core';
 
    bootstrapApplication(App, {
      providers: [provideFluid(), provideFluidTheme()],
@@ -48,12 +48,24 @@ You need Angular 22 and Tailwind CSS 4.
 
 Reduced motion follows the OS setting: transforms jump, fades stay.
 
+## Entry points
+
+The package ships one entry point per component folder (`core`, `button`, `calendar`, `dialog`, …, `blocks/sidebar`, `blocks/sidebar-app`), the way Angular Material does, plus `styles/theme.css`. Import each symbol from its entry:
+
+```ts
+import { provideFluid, cn, Icon } from '@angel-r/fluid-functionalism-angular/core';
+import { Button } from '@angel-r/fluid-functionalism-angular/button';
+import { Calendar } from '@angel-r/fluid-functionalism-angular/calendar';
+```
+
+Use the sub-paths. With them, a component you only load inside `@defer` or a lazy route stays out of the initial bundle. Angular compiles a `@defer` dependency to a dynamic `import()` of the path you wrote, so a deferred component imported from `@angel-r/fluid-functionalism-angular` would keep the whole root, which re-exports every entry. The bare `@angel-r/fluid-functionalism-angular` import still works and still re-exports everything, so code written for 0.0.x keeps compiling. Its static imports tree-shake, but move to sub-paths before you defer anything. Each symbol's entry is the component folder it belongs to; the foundations (`provideFluid`, `cn`, `Icon`, `spring`, `injectAnimateFluid`, `ThemeService`, …) live in `/core`, and the icon packs in `/icon-packs`.
+
 ## PDF thumbnails
 
 `ff-file-thumbnail` (used by `ff-input-message` and `ff-chat-message`) shows a PDF as a generic file icon. The library ships no PDF renderer, so it never pulls in pdfjs. To show a PDF's first page, provide a renderer. With `pdfjs-dist` (`npm i pdfjs-dist`):
 
 ```ts
-import { FILE_THUMBNAIL_PDF_RENDERER, type FileThumbnailPdfRenderer } from '@angel-r/fluid-functionalism-angular';
+import { FILE_THUMBNAIL_PDF_RENDERER, type FileThumbnailPdfRenderer } from '@angel-r/fluid-functionalism-angular/file-thumbnail';
 
 const renderPdf: FileThumbnailPdfRenderer = async (file, size) => {
   const pdfjs = await import('pdfjs-dist');

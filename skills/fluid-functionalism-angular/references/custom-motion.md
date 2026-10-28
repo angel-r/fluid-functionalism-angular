@@ -62,7 +62,7 @@ import {
   exitTransition,
   injectAnimateFluid,
   spring,
-} from '@angel-r/fluid-functionalism-angular';
+} from '@angel-r/fluid-functionalism-angular/core';
 
 @Component({
   selector: 'app-panel',
@@ -128,13 +128,8 @@ highlight never blinks off between rows.
 
 ```ts
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import {
-  FluidHover,
-  FluidHoverHighlight,
-  FluidHoverItem,
-  injectShape,
-  injectSize,
-} from '@angel-r/fluid-functionalism-angular';
+import { injectShape, injectSize } from '@angel-r/fluid-functionalism-angular/core';
+import { FluidHover, FluidHoverHighlight, FluidHoverItem } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 @Component({
   selector: 'app-thread-list',
@@ -211,7 +206,7 @@ visible copy animates `font-variation-settings`:
 
 ```ts
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { fontWeights } from '@angel-r/fluid-functionalism-angular';
+import { fontWeights } from '@angel-r/fluid-functionalism-angular/core';
 
 @Component({
   selector: 'app-weight-label',
@@ -271,7 +266,7 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import { Icon, injectAnimateFluid, spring, injectSize } from '@angel-r/fluid-functionalism-angular';
+import { Icon, injectAnimateFluid, spring, injectSize } from '@angel-r/fluid-functionalism-angular/core';
 
 const SHOWN = { opacity: 1, scale: 1, filter: 'blur(0px)' };
 const HIDDEN = { opacity: 0, scale: 0.6, filter: 'blur(4px)' };

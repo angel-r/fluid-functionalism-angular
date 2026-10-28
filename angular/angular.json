@@ -9,7 +9,7 @@
     "fluid-functionalism": {
       "projectType": "library",
       "root": "projects/fluid-functionalism",
-      "sourceRoot": "projects/fluid-functionalism/src",
+      "sourceRoot": "projects/fluid-functionalism",
       "prefix": "ff",
       "architect": {
         "build": {

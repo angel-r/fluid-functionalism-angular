@@ -9,6 +9,7 @@
     "build:changelog": "node scripts/changelog/build.mjs",
     "build:site-files": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/site-files/build.mjs",
     "build:showcase": "npm run build:changelog && ng build showcase",
+    "probe:bundle": "ng build fluid-functionalism && node scripts/bundle-probe/probe.mjs",
     "postbuild:showcase": "npm run build:site-files",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"

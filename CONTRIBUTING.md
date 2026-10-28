@@ -20,7 +20,7 @@ npx ng serve showcase    # demo app on http://localhost:4200
 
 ## Where things live
 
-- `angular/projects/fluid-functionalism/`: the library. Each component has its folder in `src/lib/<name>/`, with its spec next to it.
+- `angular/projects/fluid-functionalism/`: the library. Each component has its folder at the package root (`<name>/`), with its spec next to it; every folder is a secondary entry point.
 - `angular/projects/showcase/`: the demo app, one route per component and block.
 - `angular/PORTING.md`: how React maps to Angular, the gotchas found so far, the upstream sync and releases.
 - Everything outside `angular/` is the original React project. It stays unchanged so upstream changes can be merged and ported.
