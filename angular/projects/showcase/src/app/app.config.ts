@@ -6,6 +6,7 @@ import { readSiteSettings } from './site/site-settings';
 import { provideSiteIcons } from './site/site-icons';
 import { provideSiteShortcuts } from './site/settings-shortcuts';
 import { provideToastHost } from './site/toast-host';
+import { providePdfThumbnails } from './site/pdf-thumbnail';
 
 // The settings index.html's pre-paint script already painted. Reading them
 // here seeds every provider with the visitor's last choice, so the first
@@ -28,5 +29,6 @@ export const appConfig: ApplicationConfig = {
     provideFluidTheme({ defaultTheme: settings.theme }),
     provideToastHost(),
     provideSiteShortcuts(),
+    providePdfThumbnails(),
   ],
 };

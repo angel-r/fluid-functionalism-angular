@@ -12,47 +12,21 @@ import {
 import { cn } from '../core/utils';
 import { injectShape } from '../core/shape';
 
-// ─── Lazy pdfjs loader ────────────────────────────────────────────────────
-// Imports pdfjs-dist on first PDF, caches the module, and points the worker
-// at the matching CDN build. Consumers don't need bundler-side worker config.
-type PdfjsModule = typeof import('pdfjs-dist');
-let pdfjsPromise: Promise<PdfjsModule> | null = null;
+// ─── PDF renderer ─────────────────────────────────────────────────────────
+// The library ships no PDF renderer, so it never imports pdfjs: a PDF shows
+// the generic glyph unless the app provides one. See the README for a
+// pdfjs-dist renderer that serves its worker from the app's own assets.
 
-export async function loadPdfjs(): Promise<PdfjsModule> {
-  if (!pdfjsPromise) {
-    pdfjsPromise = import('pdfjs-dist').then((mod) => {
-      if (!mod.GlobalWorkerOptions.workerSrc) {
-        mod.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${mod.version}/build/pdf.worker.min.mjs`;
-      }
-      return mod;
-    });
-  }
-  return pdfjsPromise;
-}
-
-export async function renderPdfFirstPage(file: File, targetWidth: number): Promise<string> {
-  const pdfjs = await loadPdfjs();
-  const buffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: buffer }).promise;
-  const page = await pdf.getPage(1);
-  const baseViewport = page.getViewport({ scale: 1 });
-  const scale = (targetWidth * 2) / baseViewport.width; // 2× for retina
-  const viewport = page.getViewport({ scale });
-  const canvas = document.createElement('canvas');
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  await page.render({ canvas, viewport }).promise;
-  return canvas.toDataURL('image/png');
-}
+/** Renders a PDF's first page, `size` pixels wide, to an image URL. */
+export type FileThumbnailPdfRenderer = (file: File, size: number) => Promise<string>;
 
 /**
- * Renders a PDF's first page to an image URL. Defaults to
- * `renderPdfFirstPage` (lazy pdfjs); override it to plug in another renderer
- * or to stub rendering in tests.
+ * Renders PDF thumbnails. Unset (the default), a PDF shows the generic
+ * glyph; provide one to show its first page, or to stub rendering in tests.
  */
-export const FILE_THUMBNAIL_PDF_RENDERER = new InjectionToken<(file: File, size: number) => Promise<string>>(
+export const FILE_THUMBNAIL_PDF_RENDERER = new InjectionToken<FileThumbnailPdfRenderer | null>(
   'FF_FILE_THUMBNAIL_PDF_RENDERER',
-  { factory: () => renderPdfFirstPage },
+  { factory: () => null },
 );
 
 // ─── Object URLs ──────────────────────────────────────────────────────────
@@ -82,8 +56,10 @@ function subscribeObjectUrl(file: File) {
 
 // ─── File thumbnail ───────────────────────────────────────────────────────
 // Read-only square preview of a File. Images use object-cover via
-// `URL.createObjectURL`; PDFs render the first page via pdfjs; while either is
-// resolving a spinner is shown. Self-contained (outline + surface + sizing) so
+// `URL.createObjectURL`; PDFs render the first page through the provided
+// FILE_THUMBNAIL_PDF_RENDERER; while either is resolving a spinner is shown.
+// Without a renderer a PDF gets the generic icon. Self-contained (outline +
+// surface + sizing) so
 // it can be reused both inside the composer's preview row and to render
 // already-sent attachments in a chat transcript.
 @Component({
@@ -159,13 +135,15 @@ export class FileThumbnail {
   );
 
   private readonly isImage = computed(() => this.file().type.startsWith('image/'));
-  private readonly isPdf = computed(() => this.file().type === 'application/pdf');
+  // A PDF previews only through a provided renderer; without one it is just
+  // another file.
+  private readonly isPdf = computed(() => this.renderPdf !== null && this.file().type === 'application/pdf');
 
   private readonly imageUrl = signal<string | null>(null);
 
-  // PDFs need async rendering — a loading flash is unavoidable for the first
-  // ~100–300ms while pdfjs loads. Falls back to the generic icon on error
-  // (corrupt/password-protected file, CDN worker blocked). The last render
+  // PDFs need async rendering — a loading flash is unavoidable while the
+  // renderer works. Falls back to the generic icon on error
+  // (corrupt/password-protected file, renderer failure). The last render
   // stays up while a new one is on its way (a size change doesn't flash the
   // spinner); a failure only counts for the file and size it happened to.
   private readonly pdf = signal<{ url: string | null; failed: { file: File; size: number } | null }>({
@@ -207,7 +185,7 @@ export class FileThumbnail {
         return;
       }
       let cancelled = false;
-      untracked(() => this.renderPdf(file, size))
+      untracked(() => this.renderPdf!(file, size))
         .then((url) => {
           if (!cancelled) this.pdf.set({ url, failed: null });
         })

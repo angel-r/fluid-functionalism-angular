@@ -65,7 +65,7 @@ private readonly destroyRef = inject(DestroyRef);
 
 constructor() {
   // Pre-fill the composer with a real image + PDF. Images use object-cover;
-  // PDFs render their first page via pdfjs. Both show the × remove button.
+  // PDFs render their first page with a FILE_THUMBNAIL_PDF_RENDERER. Both show the × remove button.
   void Promise.all([
     fetch("micka.png")
       .then((r) => r.blob())

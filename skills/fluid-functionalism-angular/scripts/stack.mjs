@@ -627,8 +627,8 @@ export function formatStack(stack) {
   lines.push(
     `  pdfjs-dist ${req.pdfjs ?? "not declared"}${
       stack.usage.elements.some((e) => e.name === "ff-file-thumbnail")
-        ? " (ff-file-thumbnail is in use; the optional peer is needed)"
-        : " (only needed by ff-file-thumbnail)"
+        ? " (ff-file-thumbnail is in use; only needed if the app provides a FILE_THUMBNAIL_PDF_RENDERER)"
+        : " (not a peer; only for an app-provided PDF renderer)"
     }`,
   );
   lines.push("");

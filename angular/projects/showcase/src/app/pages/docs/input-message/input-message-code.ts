@@ -71,7 +71,7 @@ export function buildPlaygroundCode(o: InputMessagePlayState): string {
   l.push(`constructor() {`);
   if (o.attachments) {
     l.push(`  // Pre-fill the composer with a real image + PDF. Images use object-cover;`);
-    l.push(`  // PDFs render their first page via pdfjs. Both show the × remove button.`);
+    l.push(`  // PDFs render their first page with a FILE_THUMBNAIL_PDF_RENDERER. Both show the × remove button.`);
     l.push(`  void Promise.all([`);
     l.push(`    fetch("micka.png")`);
     l.push(`      .then((r) => r.blob())`);
@@ -426,7 +426,8 @@ export function buildPresetSnippet(o: InputMessagePlayState, globals: PresetGlob
   if (o.attachments) {
     l.push('');
     l.push(`    // Pre-fill the composer with sample attachments — swap the URLs for`);
-    l.push(`    // assets of your own. Images use object-cover; PDFs render page 1.`);
+    l.push(`    // assets of your own. Images use object-cover; PDFs render page 1`);
+    l.push(`    // with a FILE_THUMBNAIL_PDF_RENDERER (otherwise an icon).`);
     l.push(`    void Promise.all([`);
     l.push(`      fetch("sample.png")`);
     l.push(`        .then((r) => r.blob())`);

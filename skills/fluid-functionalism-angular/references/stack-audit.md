@@ -66,8 +66,11 @@ fact means.
   them by name; look for them and offer to record one as a
   [decision](#decisions) so later sessions extend it instead of importing
   beside it.
-- **`pdfjs-dist`.** Only needed by `ff-file-thumbnail` (PDF previews). Do not
-  flag its absence unless that component is in play.
+- **`pdfjs-dist`.** Not a peer of the package: `ff-file-thumbnail` shows a
+  PDF as an icon unless the app provides a `FILE_THUMBNAIL_PDF_RENDERER`
+  (package README, "PDF thumbnails"). Never flag its absence; when it is
+  installed for that renderer, check the worker is served from the app's
+  assets, not a CDN.
 - **Package manager.** Note which one (`packageManager` in `package.json`,
   the lockfile) for every command you hand over, not just removals.
 - **Build setup.** The application builder (`@angular/build:application`),

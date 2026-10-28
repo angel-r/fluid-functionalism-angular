@@ -1,6 +1,6 @@
 {
   "name": "@angel-r/fluid-functionalism-angular",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Unofficial Angular port of Fluid Functionalism: components with fluid hover, merged selections and spring motion. Standalone, signal-based and zoneless.",
   "keywords": [
     "angular",
@@ -28,8 +28,7 @@
     "@angular/common": "^22.2.0",
     "@angular/core": "^22.2.0",
     "@angular/cdk": "^22.2.0",
-    "@angular/aria": "^22.2.0",
-    "pdfjs-dist": "^5.7.0"
+    "@angular/aria": "^22.2.0"
   },
   "dependencies": {
     "tslib": "^2.3.0",
@@ -39,11 +38,6 @@
     "class-variance-authority": "^0.7.1"
   },
   "sideEffects": false,
-  "peerDependenciesMeta": {
-    "pdfjs-dist": {
-      "optional": true
-    }
-  },
   "exports": {
     "./styles/*": {
       "style": "./styles/*",
