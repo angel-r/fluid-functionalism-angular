@@ -87,6 +87,33 @@ Check parity with `node scripts/parity/parity.mjs --slug <slug> [--motion]` agai
 - **CDK and `scrollbar-gutter: stable`:** `documentElement.clientWidth` excludes the gutter, so `right`-anchored CDK panes land one gutter width off. Floating UI also rounds to device pixels; CDK keeps fractions.
 - **One-frame start lag:** zoneless change detection runs in a `setTimeout`/rAF race after an event; when rAF wins, `motion` work started there begins one frame after React's event-time start. Curves match; accepted.
 
+## The docs site
+
+`projects/showcase` is the Angular docs site, deployed to
+https://angel-r.github.io/fluid-functionalism-angular/ (the Next site at the
+repo root is the reference, D1-D10 in `odd/tasks/docs-site.md`). Its shape:
+
+| Folder | What lives there |
+|---|---|
+| `src/app/site/` | The `ff_*` settings (localStorage + the pre-paint script in `index.html`), the heading font and its Google Fonts catalog, the icon packs, the toast, the right-rail portal, the nav and command-menu tables, the install prompts, and the changelog build data. |
+| `src/app/shell/` | The chrome: sidebar (1280px sheet), right panel, site command menu, 404. `app.ts` renders it and the router outlet. |
+| `src/app/docs-kit/` | `DocPage`, `ComponentPreview` (tabs, shiki, inspect overlay, header action slot), `PropsTable`, the playground primitives, the preset codec and Share dialog, and `api/` with every page's props tables. |
+| `src/app/pages/` | One folder per route: `home/`, `intro/`, `changelog/`, `demo/`, `docs/<slug>/`. |
+| `scripts/changelog/` | `content/changelog/*.md` → `src/app/data/changelog.generated.ts`. `npm run build:showcase` runs it first. |
+
+Rules that keep it coherent:
+
+- `app.routes.ts` owns every route; a page module default-exports its
+  component (`pages/docs/<slug>/<slug>.page.ts`), so a route only names the
+  import. Nav tables live in `site/nav-data.ts`, one place.
+- Content is Angular (S8): snippets, install prompts and copy use
+  `@angel-r/fluid-functionalism-angular`, `provideFluid()` and the `ff-`
+  components, never `npx shadcn` or React imports.
+- Classes, copy and motion come from the React page verbatim; a page's
+  sections, previews and API table follow the reference's order.
+- Settings live in localStorage under the original `ff_*` keys; the pre-paint
+  script, `SiteSettingsService` and `HeadingFontService` must agree.
+
 ## Browser checks (T13)
 
 jsdom has no layout, so FLIP moves, springs, measured centring, popup orientation and pointer drag are verified in Chrome against the running showcase:
@@ -101,7 +128,7 @@ Checks live in `scripts/browser-checks/checks/*.mjs` (`messages`, `popups`, `lay
 
 The React source stays in place so upstream merges keep working; the port drifts unless it follows them.
 
-`git fetch upstream` → `git diff HEAD..upstream/main -- registry app/globals.css registry.json tests` lists what to port. Then read the full new source with `git show upstream/main:<path>` and map it hunk by hunk (the Angular files mirror the React structure closely: `calories.ts` → `calendar.ts`, `*-core.tsx` → the component, `.html` → the template). Not in scope: `app/docs/**`, `lib/docs/**`, `lib/preset/**` and the generated `public/r/**` (the Next docs site, A4); the theme ranges in `app/globals.css` still feed `styles/theme.css`.
+`git fetch upstream` → `git diff HEAD..upstream/main -- registry app/globals.css registry.json tests` lists what to port. Then read the full new source with `git show upstream/main:<path>` and map it hunk by hunk (the Angular files mirror the React structure closely: `calories.ts` → `calendar.ts`, `*-core.tsx` → the component, `.html` → the template). The docs site is in scope too, since `projects/showcase` reproduces it (see "The docs site" below): follow `app/docs/**`, `lib/docs/**`, `lib/preset/**` and `lib/changelog/**` changes into the showcase, mapping `app/docs/<slug>/page.tsx` → `pages/docs/<slug>/`, `lib/docs/playgrounds/<slug>.tsx` → the page's playground, `lib/docs/api/<slug>.ts` → `docs-kit/api/<slug>.ts`, and `lib/preset/<slug>-options.ts` → the page's preset. `app/globals.css` still feeds `styles/theme.css` for the library and `projects/showcase/src/styles.css` for the site-only part (heading font, section 7). The generated `public/r/**` stays out: it is the shadcn registry, which does not exist here.
 
 Last sync: `1dd8931..3699f84` (2026-10-27): calendar range picking (measured day column, pressed fill, ghost band, masks, weeks height), date-picker two rows for narrow parents, sidebar `--row-h` centring, `fadeIn` on the hover highlight. The browser checks that guard it live in `scripts/browser-checks/checks/calendar.mjs` (week column, pressed fill, ghost fade, pick-start glide), `popups.mjs` (two-row date picker) and `layout.mjs` (sidebar trailing centring).
 

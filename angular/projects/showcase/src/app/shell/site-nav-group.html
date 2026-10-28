@@ -1,0 +1,41 @@
+<!-- A labelled group (System, Components) gets 16px above it instead of the
+     group's 8px, so each section starts clear of the one before. -->
+<ff-sidebar-group [class]="label() ? 'pt-4' : ''">
+  @if (label(); as label) {
+    <!-- Foreground, not the component's muted default: on the site the group
+         names are wayfinding, and the counts beside them stay muted. -->
+    <ff-sidebar-group-label [class]="'text-foreground'">
+      {{ label }}
+      <!-- Styled like the "⌘K" badge in the Search row, so the counts line up
+           in the same right-hand column. -->
+      <span
+        class="ml-auto flex h-5 min-w-5 items-center justify-center px-1 font-sans text-site-caption tabular-nums text-muted-foreground"
+        >{{ entries().length }}</span
+      >
+    </ff-sidebar-group-label>
+  }
+  @if (label()) {
+    <!-- A hairline under the label, from the name's first letter (the label's
+         8px padding) to the count's last digit (12px in: the count box's 4px
+         padding on top), with 4px before the first row so its hover fill
+         clears the line. A block of its own: the group projects its label and
+         this line into different slots. -->
+    <div aria-hidden class="mb-1 ml-2 mr-3 h-px shrink-0 bg-border"></div>
+  }
+  <ul ffSidebarMenu [attr.aria-label]="ariaLabel()">
+    @for (entry of entries(); track entry.slug) {
+      <li ffSidebarMenuItem>
+        <a ffSidebarMenuButton [routerLink]="'/docs/' + entry.slug" [isActive]="location.path() === '/docs/' + entry.slug">
+          {{ entry.name }}
+          @if (isNew(entry.slug)) {
+            <!-- The New dot, in the changelog's blue: a flex sibling of the
+                 weight-animated label (the row's gap carries the spacing). -->
+            <span class="inline-block size-1.5 shrink-0 rounded-full" [class]="newDot">
+              <span class="sr-only">New</span>
+            </span>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+</ff-sidebar-group>

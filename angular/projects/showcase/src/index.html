@@ -2,10 +2,48 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Fluid Functionalism · Angular</title>
+    <title>Fluid Functionalism</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Open Source UI components created by @micka_design" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <script>
+      // The saved "Make them yours" settings, applied before the stylesheets
+      // can paint the defaults, so a reload keeps the visitor's theme, size
+      // step and heading font with no flash. The React site reads cookies on
+      // the server for the same reason; here there is no server, so this runs
+      // first and SiteSettingsService / HeadingFontService read the same keys
+      // (site/site-settings.ts) when they boot.
+      (() => {
+        const read = (key) => {
+          try {
+            return window.localStorage.getItem(key);
+          } catch {
+            return null;
+          }
+        };
+        const root = document.documentElement;
+
+        const theme = read('ff_theme');
+        if (theme === 'light' || theme === 'dark') root.classList.add(theme);
+
+        const size = read('ff_size');
+        if (size === 'default' || size === 'compact') root.dataset.size = size;
+
+        const font = read('ff_font');
+        if (font === 'inter' || font === 'source-serif') root.dataset.font = font;
+        if (font === 'custom') {
+          const family = read('ff_font_custom');
+          if (!family) return;
+          root.dataset.font = 'custom';
+          root.style.setProperty('--font-custom', JSON.stringify(family));
+          const weight = Number(read('ff_font_weight'));
+          if (Number.isInteger(weight) && weight >= 1 && weight <= 1000) {
+            root.style.setProperty('--font-custom-weight', String(weight));
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <app-root></app-root>

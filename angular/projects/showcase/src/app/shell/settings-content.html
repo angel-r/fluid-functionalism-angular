@@ -1,0 +1,128 @@
+<div class="flex flex-col gap-2">
+  <div class="flex flex-col gap-1.5 py-3">
+    <ff-tooltip [content]="tipTheme" [side]="tooltipSide()">
+      <div class="flex items-center justify-between">
+        <span class="text-site-body text-muted-foreground">Theme</span>
+        <ff-select [value]="settings.theme()" (valueChange)="setTheme($event)">
+          <ff-select-trigger variant="borderless" [class]="TRIGGER" [icon]="themeIcon()" />
+          <ff-select-content>
+            @for (option of themeOptions; track option.value; let i = $index) {
+              <ff-select-item [index]="i" [value]="option.value" [icon]="option.icon">{{ option.label }}</ff-select-item>
+            }
+          </ff-select-content>
+        </ff-select>
+      </div>
+    </ff-tooltip>
+
+    <ff-tooltip [content]="tipRadius" [side]="tooltipSide()">
+      <div class="flex items-center justify-between">
+        <span class="text-site-body text-muted-foreground">Radius</span>
+        <ff-select [value]="settings.shape()" (valueChange)="setShape($event)">
+          <ff-select-trigger variant="borderless" [class]="TRIGGER" [icon]="shapeIcon()" />
+          <ff-select-content>
+            @for (option of shapeOptions; track option.value; let i = $index) {
+              <ff-select-item [index]="i" [value]="option.value" [icon]="option.icon">{{ option.label }}</ff-select-item>
+            }
+          </ff-select-content>
+        </ff-select>
+      </div>
+    </ff-tooltip>
+
+    <ff-tooltip [content]="tipSize" [side]="tooltipSide()">
+      <div class="flex items-center justify-between">
+        <span class="text-site-body text-muted-foreground">Size</span>
+        <ff-select [value]="settings.size()" (valueChange)="setSize($event)">
+          <ff-select-trigger variant="borderless" [class]="TRIGGER" />
+          <ff-select-content>
+            @for (option of sizeOptions; track option.value; let i = $index) {
+              <ff-select-item [index]="i" [value]="option.value">{{ option.label }}</ff-select-item>
+            }
+          </ff-select-content>
+        </ff-select>
+      </div>
+    </ff-tooltip>
+
+    <ff-tooltip [content]="tipIcons" [side]="tooltipSide()">
+      <div class="flex items-center justify-between">
+        <span class="text-site-body text-muted-foreground">Icons</span>
+        <ff-select [value]="settings.icons()" (valueChange)="setIcons($event)">
+          <ff-select-trigger variant="borderless" [class]="TRIGGER" />
+          <ff-select-content>
+            @for (option of iconOptions; track option.value; let i = $index) {
+              <ff-select-item [index]="i" [value]="option.value" [icon]="option.icon">{{ option.label }}</ff-select-item>
+            }
+          </ff-select-content>
+        </ff-select>
+      </div>
+    </ff-tooltip>
+
+    <ff-tooltip [content]="tipFont" [side]="tooltipSide()">
+      <div class="flex items-center justify-between">
+        <span class="text-site-body text-muted-foreground">Heading font</span>
+        <!-- The last row is an action, not a value: it opens the Google Fonts
+             picker and leaves the selection alone. -->
+        <ff-select [value]="heading.font()" (valueChange)="setFont($event)">
+          <ff-select-trigger variant="borderless" [class]="TRIGGER" />
+          <ff-select-content>
+            @for (font of heading.fonts(); track font; let i = $index) {
+              <ff-select-item [index]="i" [value]="font">{{ fontLabel(font) }}</ff-select-item>
+            }
+            <ff-select-item [index]="heading.fonts().length" [value]="BROWSE">Browse Google Fonts…</ff-select-item>
+          </ff-select-content>
+        </ff-select>
+      </div>
+    </ff-tooltip>
+
+    <!-- Only while a custom Google Fonts family is the heading font. -->
+    @if (heading.font() === 'custom' && heading.custom()) {
+      <div class="flex items-center justify-between">
+        <span class="text-site-body text-muted-foreground">Heading weight</span>
+        <app-heading-weight-select [class]="TRIGGER" />
+      </div>
+    }
+  </div>
+
+  <!-- The home page's install prompt, carrying everything set above. mb-3:
+       with the column's gap-2, 20px to the credit, the same as the rows'
+       py-3 + gap-2 above it. -->
+  <app-copy-prompt-button
+    [prompt]="starterPrompt()"
+    label="Copy install prompt"
+    [class]="'mb-3 w-full h-7 px-3 gap-1 text-site-body'"
+  />
+
+  <!-- Credit -->
+  <div class="flex items-center gap-2">
+    <img
+      src="micka.png"
+      alt=""
+      class="w-5 h-5 rounded-full object-cover shrink-0 outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+    />
+    <p class="text-site-body text-muted-foreground">
+      Created by
+      <a
+        href="https://x.com/micka_design"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="rounded text-muted-foreground hover:text-foreground transition-colors duration-80 outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] focus-visible:ring-offset-2"
+        >&#64;micka_design</a
+      >
+    </p>
+  </div>
+</div>
+
+<ng-template #tipTheme>
+  <span>Press &ensp;<kbd class="font-mono opacity-50">T</kbd>&ensp; to cycle</span>
+</ng-template>
+<ng-template #tipRadius>
+  <span>Press &ensp;<kbd class="font-mono opacity-50">R</kbd>&ensp; to toggle</span>
+</ng-template>
+<ng-template #tipSize>
+  <span>Press &ensp;<kbd class="font-mono opacity-50">S</kbd>&ensp; to toggle</span>
+</ng-template>
+<ng-template #tipIcons>
+  <span>Press &ensp;<kbd class="font-mono opacity-50">I</kbd>&ensp; to cycle</span>
+</ng-template>
+<ng-template #tipFont>
+  <span>Press &ensp;<kbd class="font-mono opacity-50">F</kbd>&ensp; to cycle</span>
+</ng-template>

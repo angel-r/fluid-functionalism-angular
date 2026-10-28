@@ -1,0 +1,243 @@
+@if (visible()) {
+  <!-- Ruler layer — BELOW the demo content (z-10): an opaque demo masks the
+       ticks and numbers, and portalled popups cover them too — only the
+       crosshair layer below rides above those. Full-bleed previews opt out of
+       rulers entirely with `rulers={false}`. -->
+  @if (rulers()) {
+    <div
+      #rulerLayer
+      data-inspect-ui
+      class="absolute inset-0 z-10 pointer-events-none overflow-hidden"
+      style="opacity: 0"
+    >
+      <!-- Top ruler — sits in the gutter just below the header. The ticks run
+           up past the top of the gutter (negative y) so they tuck under the
+           opaque header (z-40); the numbers sit below the ticks with ~2px of
+           breathing room above them. overflow:visible lets the ticks bleed
+           under. -->
+      <div #topRuler class="absolute inset-0">
+        <svg
+          [attr.width]="size().w"
+          [attr.height]="rulerTop"
+          class="absolute left-0"
+          [style.top.px]="capTop()"
+          style="overflow: visible"
+        >
+          @if (topBandRect(); as band) {
+            <rect
+              [attr.x]="band.x"
+              [attr.y]="0"
+              [attr.width]="band.width"
+              [attr.height]="rulerTop"
+              [attr.fill]="bandFill"
+            />
+          }
+          @for (tick of topTicks(); track $index) {
+            <line
+              [attr.x1]="tick.pos"
+              [attr.y1]="-6"
+              [attr.x2]="tick.pos"
+              [attr.y2]="6"
+              [attr.stroke]="blue"
+              [attr.stroke-width]="1"
+              [attr.opacity]="tick.inComp ? (tick.labeled ? 0.9 : 0.45) : 0.16"
+            />
+          }
+          @for (tick of topLabels(); track $index) {
+            <text
+              [attr.x]="tick.pos"
+              [attr.y]="16"
+              [attr.font-size]="9"
+              [attr.fill]="blue"
+              font-family="monospace"
+              text-anchor="middle"
+            >{{ tick.value }}</text>
+          }
+        </svg>
+      </div>
+
+      <!-- Left ruler — ticks sit on the outer (left) edge; the rotated numbers
+           sit on the inner (right) edge next to the content, mirroring the top
+           ruler where the numbers face the content. -->
+      <div #leftRuler class="absolute inset-0">
+        <svg
+          [attr.width]="rulerLeft"
+          [attr.height]="size().h"
+          class="absolute top-0"
+          [style.left.px]="capLeft()"
+          style="overflow: visible"
+        >
+          @if (leftBandRect(); as band) {
+            <rect
+              [attr.x]="0"
+              [attr.y]="band.y"
+              [attr.width]="rulerLeft"
+              [attr.height]="band.height"
+              [attr.fill]="bandFill"
+            />
+          }
+          @for (tick of leftTicks(); track $index) {
+            <line
+              [attr.x1]="0"
+              [attr.y1]="tick.pos"
+              [attr.x2]="6"
+              [attr.y2]="tick.pos"
+              [attr.stroke]="blue"
+              [attr.stroke-width]="1"
+              [attr.opacity]="tick.inComp ? (tick.labeled ? 0.9 : 0.45) : 0.16"
+            />
+          }
+          @for (tick of leftLabels(); track $index) {
+            <text
+              [attr.x]="16"
+              [attr.y]="tick.pos"
+              [attr.font-size]="9"
+              [attr.fill]="blue"
+              font-family="monospace"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              [attr.transform]="'rotate(-90 16 ' + tick.pos + ')'"
+            >{{ tick.value }}</text>
+          }
+        </svg>
+      </div>
+    </div>
+  }
+
+  <!-- Crosshair layer — ABOVE portalled popups (z-[60] vs their z-50): a
+       dropdown held open through the Inspect toggle gets the hover guides and
+       box-model strips drawn over it, not clipped under it. The preview header
+       sits higher (z-[70]) so guides still tuck under its opaque background,
+       and the info tooltip clears the header at z-[80]. -->
+  <div
+    #crosshairLayer
+    data-inspect-ui
+    class="absolute inset-0 z-[60] pointer-events-none overflow-hidden"
+    style="opacity: 0"
+  >
+    <!-- Pointer-capturing region — only over the content, so the header
+         toggles stay clickable and the component underneath is frozen. -->
+    @if (active()) {
+      @if (capture(); as box) {
+        <div
+          class="absolute pointer-events-auto cursor-crosshair"
+          [style.left.px]="box.left"
+          [style.top.px]="box.top"
+          [style.width.px]="box.width"
+          [style.height.px]="box.height"
+          (mousemove)="onMove($event)"
+          (mouseleave)="clear()"
+        ></div>
+      }
+    }
+
+    @if (target(); as t) {
+      <!-- Box-model overlay for the hovered element. -->
+      <div
+        class="absolute"
+        [style.left.px]="t.content.left"
+        [style.top.px]="t.content.top"
+        [style.width.px]="t.content.width"
+        [style.height.px]="t.content.height"
+        [style.background]="contentFill"
+      ></div>
+
+      @for (strip of t.padStrips; track $index) {
+        <div
+          class="absolute flex items-center justify-center"
+          [style.left.px]="strip.left"
+          [style.top.px]="strip.top"
+          [style.width.px]="strip.width"
+          [style.height.px]="strip.height"
+          [style.background]="green"
+        >
+          <span
+            class="text-[9px] font-mono leading-none text-foreground"
+            [style.font-variation-settings]="fontWeights.semibold"
+          >{{ strip.label }}</span>
+        </div>
+      }
+
+      @for (strip of t.gapStrips; track $index) {
+        <div
+          class="absolute flex items-center justify-center"
+          [style.left.px]="strip.left"
+          [style.top.px]="strip.top"
+          [style.width.px]="strip.width"
+          [style.height.px]="strip.height"
+          [style.background]="green"
+          [style.outline]="'1px dashed ' + greenLine"
+          [style.outline-offset]="-1"
+        >
+          <span
+            class="text-[9px] font-mono leading-none text-foreground"
+            [style.font-variation-settings]="fontWeights.semibold"
+          >{{ strip.label }}</span>
+        </div>
+      }
+
+      <!-- Crosshair guides at the four box edges. -->
+      @for (x of verticalGuides(); track $index) {
+        <div
+          class="absolute top-0 bottom-0"
+          [style.left.px]="x"
+          [style.width.px]="1"
+          [style.background]="blue"
+          [style.opacity]="0.55"
+        ></div>
+      }
+      @for (y of horizontalGuides(); track $index) {
+        <div
+          class="absolute left-0 right-0"
+          [style.top.px]="y"
+          [style.height.px]="1"
+          [style.background]="blue"
+          [style.opacity]="0.55"
+        ></div>
+      }
+
+      <!-- Info tooltip — the FF Tooltip, anchored to the hovered element. -->
+      <ff-tooltip
+        [forceOpen]="true"
+        side="top"
+        [sideOffset]="readoutOffset()"
+        [content]="readoutTemplate()"
+        class="!px-3.5 !py-4 max-w-[240px]"
+        contentClass="z-[80]"
+      >
+        <div
+          class="absolute"
+          [style.left.px]="tooltipBox().left"
+          [style.top.px]="tooltipBox().top"
+          [style.width.px]="tooltipBox().width"
+          [style.height.px]="tooltipBox().height"
+        ></div>
+      </ff-tooltip>
+    }
+  </div>
+}
+
+<ng-template #tooltipReadout>
+  @if (target(); as t) {
+    @if (tooltip(); as custom) {
+      <ng-container
+        [ngTemplateOutlet]="custom"
+        [ngTemplateOutletContext]="{ $implicit: t.raw }"
+      />
+    } @else {
+      <div class="font-mono text-[11px] leading-4 normal-case tracking-normal">
+        <div [style.font-variation-settings]="fontWeights.semibold">{{ t.anchor }}</div>
+        <div>{{ t.meta }}</div>
+        <div>padding {{ t.padding }} · margin {{ t.margin }}</div>
+        @if (t.gap) {
+          <div>gap {{ t.gap }}</div>
+        }
+        @if (t.font; as font) {
+          <div>font {{ font.size }}</div>
+          <div>{{ font.family }} · {{ font.weight }}</div>
+          <div>tracking {{ font.tracking }} · {{ font.color }}</div>
+        }
+      </div>
+    }
+  }
+</ng-template>

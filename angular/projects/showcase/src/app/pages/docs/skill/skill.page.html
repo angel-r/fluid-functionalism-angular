@@ -1,0 +1,94 @@
+<app-doc-page
+  title="/fluid-functionalism-angular skill"
+  slug="skill"
+  description="Gives your coding agent the components and the craft behind them, then puts both to work on your project."
+  installNote="One prompt for your coding agent: it installs the skill, then audits your project with it."
+  [installPrompt]="installPrompt"
+>
+  <app-doc-section title="What it does">
+    <app-skill-timeline [steps]="jobs" />
+  </app-doc-section>
+
+  <app-doc-section title="What it knows">
+    <p class="text-site-body text-muted-foreground">
+      The craft behind every component, distilled from its implementation and code comments: exact
+      values, interaction rules, edge cases, and why each detail matters. Once the FF components are
+      in place, your agent uses this knowledge to apply the final layer of craft to your interface,
+      from spacing and alignment to motion and feedback.
+    </p>
+  </app-doc-section>
+
+  <app-doc-section title="Examples">
+    <p class="text-site-body text-muted-foreground">
+      What your agent writes on its own, next to what it writes with the skill.
+    </p>
+
+    <div class="mt-2 flex flex-col gap-4">
+      <h3
+        class="-mb-2 text-site-subtitle text-foreground leading-none"
+        [style.font-variation-settings]="semibold"
+      >
+        Tabs
+      </h3>
+      <p class="text-site-body text-muted-foreground">
+        Active labels get heavier without shifting neighboring tabs.
+      </p>
+      <app-component-preview [hideHeader]="true" [inspectable]="false">
+        <div class="flex w-full justify-center">
+          <app-skill-tabs-example />
+        </div>
+      </app-component-preview>
+    </div>
+
+    <div class="mt-6 flex flex-col gap-4">
+      <h3
+        class="-mb-2 text-site-subtitle text-foreground leading-none"
+        [style.font-variation-settings]="semibold"
+      >
+        Menu
+      </h3>
+      <p class="text-site-body text-muted-foreground">
+        One highlight follows your pointer smoothly between menu items.
+      </p>
+      <app-component-preview [hideHeader]="true" [inspectable]="false">
+        <div class="flex w-full justify-center">
+          <app-skill-menu-example />
+        </div>
+      </app-component-preview>
+    </div>
+
+    <div class="mt-6 flex flex-col gap-4">
+      <h3
+        class="-mb-2 text-site-subtitle text-foreground leading-none"
+        [style.font-variation-settings]="semibold"
+      >
+        Copy field
+      </h3>
+      <p class="text-site-body text-muted-foreground">
+        Hover and click anywhere on the text to copy.
+      </p>
+      <app-component-preview [hideHeader]="true" [inspectable]="false">
+        <div class="flex w-full justify-center">
+          <app-skill-copy-example />
+        </div>
+      </app-component-preview>
+    </div>
+
+    <div class="mt-6 flex flex-col gap-4">
+      <h3
+        class="-mb-2 text-site-subtitle text-foreground leading-none"
+        [style.font-variation-settings]="semibold"
+      >
+        Button press
+      </h3>
+      <p class="text-site-body text-muted-foreground">
+        Buttons scale down the same size no matter the width.
+      </p>
+      <app-component-preview [hideHeader]="true" [inspectable]="false">
+        <div class="flex w-full justify-center">
+          <app-skill-press-example />
+        </div>
+      </app-component-preview>
+    </div>
+  </app-doc-section>
+</app-doc-page>

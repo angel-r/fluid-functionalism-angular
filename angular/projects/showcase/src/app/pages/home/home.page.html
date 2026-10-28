@@ -1,0 +1,58 @@
+<ng-template #introTip>
+  <span>Introduction &ensp;<kbd class="font-mono opacity-50">&rarr;</kbd></span>
+</ng-template>
+
+<!-- reveal-landing-subtle, a preset the Reveal page documents: the hero plays
+     on load, and each tile rises on scroll (reveal-scroll, set in BentoGrid).
+     A value changed on /docs/reveal changes here too. -->
+<div class="reveal-landing-subtle mt-12 lg:mt-0">
+  <div class="w-full max-w-[680px] mx-auto py-20 sm:py-28 px-6">
+    <!-- The title and the arrows share a row, as on every docs page; the
+         description and the buttons run full width under them, so a phone
+         keeps each button on one line. -->
+    <div class="flex items-center justify-between gap-4">
+      <h1 class="text-site-display text-foreground leading-none" [style.font-variation-settings]="bold">
+        Fluid Functionalism
+      </h1>
+      <!-- -my-2: the buttons overhang the title's line box instead of
+           stretching the row. -->
+      <div class="flex items-center gap-1 shrink-0 -my-2">
+        <button ffButton variant="ghost" [size]="iconSize()" disabled aria-label="No previous page">
+          <ff-icon name="arrow-right" class="rotate-180" />
+        </button>
+        <ff-tooltip [content]="introTip">
+          <a routerLink="docs" aria-label="Next: Introduction" class="outline-none" tabindex="-1">
+            <button ffButton variant="ghost" [size]="iconSize()">
+              <ff-icon name="arrow-right" />
+            </button>
+          </a>
+        </ff-tooltip>
+      </div>
+    </div>
+    <p class="mt-2 text-site-body text-muted-foreground">Refined UI components with satisfying hover.</p>
+    <!-- flex-wrap: a narrow screen moves a whole button down; a label never
+         breaks (Button is whitespace-nowrap). The copy button follows the
+         live "Make them yours" settings and heading font, in the compact step
+         the row uses. -->
+    <div class="mt-4 flex flex-wrap items-center gap-2" ffSizeProvider size="compact">
+      <!-- display: contents so the button, not the host, is the flex item:
+           React renders it bare, and an inline box around it would add a line
+           box under the label. -->
+      <app-copy-prompt-button
+        style="display: contents"
+        label="Copy install prompt"
+        [prompt]="starterPrompt()"
+      />
+      <a routerLink="docs" class="outline-none" tabindex="-1">
+        <button ffButton variant="secondary" size="compact">Learn more</button>
+      </a>
+      <!-- The demo is a desktop stage: phones skip the button. -->
+      <a routerLink="demo" class="outline-none max-sm:hidden" tabindex="-1">
+        <button ffButton variant="ghost" size="compact">See demo</button>
+      </a>
+    </div>
+  </div>
+  <div class="w-full max-w-[1200px] mx-auto px-6 pb-16">
+    <app-bento-grid />
+  </div>
+</div>

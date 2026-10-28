@@ -74,13 +74,17 @@ Reduced motion follows the OS setting: transforms jump, fades stay.
 | Systems | theme tokens, surfaces, type scale, shape and size context, `[ffElevated]`, `<ff-icon>`, fluid hover, merged selection backgrounds, spring tiers |
 | Icon packs | Lucide (default), Tabler, Phosphor, Hugeicons, Untitled UI |
 
-The [live demo](https://angel-r.github.io/fluid-functionalism-angular/) has one page per component and block.
+The [live site](https://angel-r.github.io/fluid-functionalism-angular/) reproduces
+the [original docs site](https://www.fluidfunctionalism.com/) page by page in
+Angular: the same home grid, component and system pages with playgrounds,
+changelog and demo, with every snippet and install prompt rewritten for
+`@angel-r/fluid-functionalism-angular`.
 
 ## Repository layout
 
 | Path | What it is |
 |---|---|
-| `angular/` | The Angular workspace: the library, the showcase app and their docs. Start with [`angular/README.md`](angular/README.md). |
+| `angular/` | The Angular workspace: the library, the showcase docs site and their docs. Start with [`angular/README.md`](angular/README.md). |
 | everything else | The original React project, kept unchanged so upstream changes can be merged and ported. |
 
 ## Development

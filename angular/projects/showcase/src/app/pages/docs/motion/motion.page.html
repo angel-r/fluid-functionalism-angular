@@ -1,0 +1,48 @@
+<app-doc-page
+  title="Motion"
+  slug="motion"
+  installSlug="springs"
+  description="Three spring speeds, exits a little faster than entrances, and one fluid hover shared by every list. Pick a speed, wire it in — every component follows the same pattern."
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Three speeds">
+    <p class="text-site-body text-muted-foreground">
+      All animations come from one of three springs in
+      <app-motion-code-chip>lib/springs</app-motion-code-chip>. Hover states and small toggles use
+      <app-motion-code-chip>fast</app-motion-code-chip>. Dropdowns and tabs use
+      <app-motion-code-chip>moderate</app-motion-code-chip>. Dialogs and drawers use
+      <app-motion-code-chip>slow</app-motion-code-chip>. No component invents its own timing, so things you've never
+      thought about together will move at the same pace. <app-motion-code-chip>moderate</app-motion-code-chip> is
+      critically damped — it lands exactly with no overshoot, so it also carries panels and sheets that must settle
+      precisely (the mobile drawer, the merged selection backgrounds).
+    </p>
+    <app-spring-tokens-demo />
+  </app-doc-section>
+
+  <app-doc-section title="Slow in, faster out">
+    <p class="text-site-body text-muted-foreground">
+      Both modals open on <app-motion-code-chip>spring.slow</app-motion-code-chip>. The only difference is the close:
+      the left exits on the same <app-motion-code-chip>spring.slow</app-motion-code-chip>, the right on
+      <app-motion-code-chip>spring.slow.exit</app-motion-code-chip> — one tier faster. Toggle the left one first. That
+      slight drag on the way out is exactly what you're trying to avoid.
+    </p>
+    <app-modal-exit-demo />
+  </app-doc-section>
+
+  <app-doc-section title="All tokens">
+    <p class="text-site-body text-muted-foreground">
+      Click a track to see it. The ball enters right on the spring, then returns left on the exit tween. Everything
+      lives in <app-motion-code-chip>lib/springs</app-motion-code-chip> — duration values belong there, not scattered
+      through component code.
+    </p>
+    <app-spring-reference />
+
+    <h3 class="mt-8 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">Reduced motion</h3>
+    <p class="text-site-body text-muted-foreground">
+      All springs respect the OS setting. <app-motion-code-chip>injectAnimateFluid()</app-motion-code-chip> reads
+      <app-motion-code-chip>ReducedMotion</app-motion-code-chip> for you: when the user turns on reduced motion, the
+      position changes drop out and only the opacity fades remain. No wrapper to add around your app.
+    </p>
+  </app-doc-section>
+</app-doc-page>

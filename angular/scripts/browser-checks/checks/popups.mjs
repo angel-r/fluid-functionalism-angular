@@ -79,6 +79,11 @@ function multiple(page, h) {
   return { section, rows: section.getByRole('toolbar', { name: 'Selected' }), input: section.locator('input').first() };
 }
 
+/** A docs section can show several component previews; `nth` picks one. */
+function preview(page, h, title, nth = 0) {
+  return h.section(page, title).locator('app-component-preview').nth(nth);
+}
+
 /** Rect of the highlighted command-menu row against its scroll viewport. */
 function commandMenuState(menu) {
   return menu.evaluate((root) => {
@@ -156,7 +161,7 @@ export const checks = [
   // settled every chip paints exactly on its layout slot with no transform.
   {
     name: 'combobox: chips glide to their new slots when one is removed, on both axes, and settle clean',
-    path: 'combobox',
+    path: 'docs/combobox',
     async run(page, h) {
       const { rows, input } = multiple(page, h);
       // Fill the field to two rows: Next.js, Astro + five picks.
@@ -212,7 +217,7 @@ export const checks = [
   // then settles at full size on its slot with no transform left.
   {
     name: 'combobox: an added chip pops in at the end while the others hold their slots',
-    path: 'combobox',
+    path: 'docs/combobox',
     async run(page, h) {
       const { rows, input } = multiple(page, h);
       await input.click();
@@ -244,7 +249,7 @@ export const checks = [
   // clearing the query grows it back the same way to the 360px cap.
   {
     name: 'command-menu: filtering springs the list height to the content height and back',
-    path: 'command-menu',
+    path: 'docs/command-menu',
     async run(page, h) {
       const menu = h.section(page, 'Basic').locator('ff-command-menu');
       const input = menu.getByRole('combobox');
@@ -290,7 +295,7 @@ export const checks = [
   // wraps to the last, gliding the viewport there over several frames.
   {
     name: 'command-menu: arrow keys keep the highlighted row centred in view, ends and wrap-around included',
-    path: 'command-menu',
+    path: 'docs/command-menu',
     async run(page, h) {
       const menu = h.section(page, 'Basic').locator('ff-command-menu');
       const order = await menu
@@ -332,7 +337,7 @@ export const checks = [
   // leaves the DOM with the placeholder back.
   {
     name: 'date-picker: the clear control fades in when a date is picked and out when cleared',
-    path: 'date-picker',
+    path: 'docs/date-picker',
     async run(page, h) {
       const section = h.section(page, 'Date');
       const trigger = section.locator('[data-slot="date-picker-trigger"]');
@@ -372,9 +377,11 @@ export const checks = [
   // within a pixel, for the start time and for the end time.
   {
     name: 'date-picker: the time list opens with the selected time centred in its scroll box',
-    path: 'date-picker',
+    path: 'docs/date-picker',
     async run(page, h) {
-      const fields = h.section(page, 'Date and time', 0).locator('[data-slot="date-picker-time"]');
+      // The event demo's start and end times; the second preview adds a
+      // single-time field of its own.
+      const fields = preview(page, h, 'Date and time', 0).locator('[data-slot="date-picker-time"]');
       h.assert((await fields.count()) === 2, 'expected the start and end time fields');
       for (let i = 0; i < 2; i++) {
         const field = fields.nth(i);
@@ -415,7 +422,7 @@ export const checks = [
   // (presets below) one pixel narrower, and side by side again at 720.
   {
     name: 'date-picker: auto orientation lays the range months side by side when they fit, stacked when not',
-    path: 'date-picker',
+    path: 'docs/date-picker',
     async run(page, h) {
       const trigger = h.section(page, 'Range with presets').locator('[data-slot="date-picker-trigger"]');
       for (const [width, layout] of [[1280, 'horizontal'], [719, 'vertical'], [720, 'horizontal']]) {
@@ -448,9 +455,9 @@ export const checks = [
   // (React/Base UI flip there).
   {
     name: 'date-picker: the popover opens below its trigger with room and flips above near the viewport bottom',
-    path: 'date-picker',
+    path: 'docs/date-picker',
     async run(page, h) {
-      const trigger = h.section(page, 'Date and time', 1).locator('[data-slot="date-picker-trigger"]');
+      const trigger = preview(page, h, 'Date and time', 0).locator('[data-slot="date-picker-trigger"]');
       for (const [where, at] of [['below', { y: 200 }], ['above', { fromBottom: 40 }]]) {
         await scrollTriggerTo(trigger, at);
         await page.waitForTimeout(150);
@@ -479,10 +486,9 @@ export const checks = [
   // the parent puts them back on one row.
   {
     name: 'date-picker: a narrow parent stacks the time under the date and widening restores one row',
-    path: 'date-picker',
+    path: 'docs/date-picker',
     async run(page, h) {
-      const section = h.section(page, 'Date and time');
-      const picker = section.locator('ff-date-picker');
+      const picker = preview(page, h, 'Date and time', 0).locator('ff-date-picker');
       await picker.scrollIntoViewIfNeeded();
       const rows = () =>
         picker.evaluate((el) => {

@@ -1,0 +1,170 @@
+<app-doc-page
+  title="Sidebar"
+  description="A sidebar built from composable parts. Drag its edge to resize, collapse it away, and on mobile it becomes a drawer."
+  slug="sidebar"
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Playground">
+    <app-sidebar-playground />
+  </app-doc-section>
+
+  <app-doc-section title="Layouts">
+    <p class="text-site-body text-muted-foreground">
+      3 layout options: <code>sidebar</code> default, <code>floating</code> to elevate the sidebar in a higher
+      surface, <code>inset</code> to make your content stand out.
+    </p>
+    <app-component-preview
+      padding="none"
+      [minHeightClass]="shellHeight"
+      hideHeader
+      caption="Sidebar"
+    >
+      <app-sidebar-demo-shell />
+    </app-component-preview>
+    <app-component-preview
+      padding="none"
+      [minHeightClass]="shellHeight"
+      hideHeader
+      caption="Floating"
+    >
+      <app-sidebar-demo-shell variant="floating" />
+    </app-component-preview>
+    <app-component-preview
+      padding="none"
+      [minHeightClass]="shellHeight"
+      hideHeader
+      caption="Inset"
+    >
+      <app-sidebar-demo-shell variant="inset" />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Nesting">
+    <p class="text-site-body text-muted-foreground">
+      2 levels of nesting, one section level and one parent level.
+    </p>
+    <app-component-preview
+      [code]="nestingCode"
+      padding="none"
+      [minHeightClass]="shellHeight"
+      [inspectRulers]="false"
+    >
+      <app-sidebar-demo-nesting />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Actions & badges">
+    <p class="text-site-body text-muted-foreground">
+      Add badge indicator and up to 3 actions. Actions show on hover so the label keeps maximum readability.
+    </p>
+    <app-component-preview
+      [code]="actionsCode"
+      padding="none"
+      [minHeightClass]="shellHeight"
+      [inspectRulers]="false"
+    >
+      <app-sidebar-demo-actions />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Header & footer">
+    <p class="text-site-body text-muted-foreground">
+      Stack the header and footer content <code>vertically</code> or <code>horizontally</code>.
+    </p>
+    <app-component-preview padding="none" hideHeader caption="Vertical stacking">
+      <app-sidebar-demo-header-footer stack="vertical" />
+    </app-component-preview>
+    <app-component-preview padding="none" hideHeader caption="Horizontal stacking">
+      <app-sidebar-demo-header-footer stack="horizontal" />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Callouts">
+    <p class="text-site-body text-muted-foreground">
+      Elevate &amp; promote news using the callout with stackable <code>Banners</code> or <code>Inlines</code>.
+    </p>
+    <app-component-preview padding="none" hideHeader caption="Stacked inlines">
+      <app-sidebar-demo-callouts variant="inline" />
+    </app-component-preview>
+    <app-component-preview padding="none" hideHeader caption="Stacked banners">
+      <app-sidebar-demo-callouts variant="banner" />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Resize, collapse & peek">
+    <p class="text-site-body text-muted-foreground">
+      Drag to resize, click to collapse, or press <code>[</code> key. Open sidebar on <code>click</code> or
+      <code>hover</code>.
+    </p>
+    <app-component-preview padding="none" hideHeader caption="On hover">
+      <app-sidebar-demo-collapse />
+    </app-component-preview>
+    <app-component-preview padding="none" hideHeader caption="On click">
+      <app-sidebar-demo-collapse peek="click" [defaultOpen]="false" />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Inside a dialog">
+    <p class="text-site-body text-muted-foreground">
+      A settings dialog with the sidebar inside. 3 props make it fit:
+      <code>collapsible="none"</code> drops the rail and the drawer, <code>[persist]="false"</code> skips the cookie,
+      and <code>h-full</code> pins it to the dialog's height. Below <code>sm</code> a Select takes over.
+    </p>
+    <app-component-preview [code]="settingsDialogCode">
+      <app-sidebar-demo-settings-dialog />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="No icon rail version?">
+    <p class="text-site-body text-muted-foreground">
+      Hot take baked into this component: there's no icon-only collapsed mode. On purpose.
+    </p>
+    <p class="text-site-body text-muted-foreground">
+      Icon rails look tidy in screenshots but fail in use. Six ambiguous glyphs, and you suddenly need to tooltip most
+      of them until you've found the right one.
+    </p>
+    <p class="text-site-body text-muted-foreground">
+      Nesting, section labels and complementary actions are impossible to reflect. It only benefits power users on
+      simple sidebars — and it's your worst way to educate users.
+    </p>
+    <p class="text-site-body text-muted-foreground">
+      Half a sidebar is confusing for everybody. Convert yours now.
+    </p>
+    <app-sidebar-demo-icon-rail-demo />
+  </app-doc-section>
+
+  <app-doc-section title="Functional and perfectly aligned">
+    <p class="text-site-body text-muted-foreground">
+      One rhythm everywhere: 24px icon buttons with 16px icons from header to footer.
+    </p>
+    <app-component-preview
+      [code]="alignmentCode"
+      padding="none"
+      [minHeightClass]="shellHeight"
+      [inspectRulers]="false"
+    >
+      <app-sidebar-demo-alignment />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — SidebarProvider">
+    <app-props-table [props]="providerProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — Sidebar">
+    <app-props-table [props]="sidebarProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — Sections">
+    <app-props-table [props]="sectionProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — Content level 1">
+    <app-props-table [props]="level1Props" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — Content level 2">
+    <app-props-table [props]="level2Props" />
+  </app-doc-section>
+</app-doc-page>

@@ -1,0 +1,498 @@
+<!-- The playground's controls, parked in the right rail at >=1280px and inline
+     below the preview otherwise (PlaygroundLayout owns the move). The panel
+     mirrors the sidebar's own anatomy top to bottom — Layout, Header,
+     Sections, the three content levels, Footer — so a control's position
+     tells you what it touches. -->
+<ng-template #controlsTpl>
+  <app-playground-panel (shuffle)="randomize()">
+    <app-play-section label="Layout" />
+    <app-play-field label="Design">
+      <app-play-select [value]="state().design" [options]="designOptions" (valueChange)="set('design', $event)" />
+    </app-play-field>
+    <app-play-field label="Collapsed behavior">
+      <app-play-select
+        [value]="state().collapsedBehavior"
+        [options]="collapsedOptions"
+        (valueChange)="set('collapsedBehavior', $event)"
+      />
+    </app-play-field>
+    <app-play-field label="State">
+      <app-play-select [value]="state().state" [options]="stateOptions" (valueChange)="set('state', $event)" />
+    </app-play-field>
+
+    <app-play-divider />
+    <app-play-section label="Header" />
+    <app-play-field label="Primary element">
+      <app-play-select
+        [value]="state().headerPrimary"
+        [options]="headerPrimaryOptions"
+        (valueChange)="set('headerPrimary', $event)"
+      />
+    </app-play-field>
+    <app-play-field label="Stacking">
+      <app-play-select [value]="state().headerStack" [options]="headerStackOptions" (valueChange)="set('headerStack', $event)" />
+    </app-play-field>
+    <app-play-field label="Header actions">
+      <app-play-select
+        [value]="headerActionCount()"
+        [options]="count2Options"
+        (valueChange)="setCount('headerActions', $event)"
+      />
+    </app-play-field>
+
+    <app-play-divider />
+    <app-play-section label="Sections" />
+    <ff-switch
+      label="Collapsible"
+      [checked]="state().sectionsCollapsible"
+      [class]="playSwitch"
+      (toggle)="set('sectionsCollapsible', !state().sectionsCollapsible)"
+    />
+    <app-play-field label="Section actions">
+      <app-play-select
+        [value]="sectionActionCount()"
+        [options]="count3Options"
+        (valueChange)="setCount('sectionActions', $event)"
+      />
+    </app-play-field>
+
+    <app-play-divider />
+    <app-play-section label="Content level 1" />
+    <app-play-field label="Primary element">
+      <app-play-select
+        [value]="state().l1Primary"
+        [options]="l1PrimaryOptions"
+        (valueChange)="set('l1Primary', $event); selectedReset()"
+      />
+    </app-play-field>
+    <!-- Threads are leaves — a discussion doesn't own a sub-tree. -->
+    <ff-switch
+      label="Has children"
+      [checked]="l1Children()"
+      [disabled]="!l1CanNest()"
+      [class]="playSwitch"
+      (toggle)="set('l1Children', !state().l1Children)"
+    />
+    <app-play-field label="Actions">
+      <app-play-select [value]="l1ActionCount()" [options]="count3Options" (valueChange)="setCount('l1Actions', $event)" />
+    </app-play-field>
+    <ff-switch
+      label="Badges"
+      [checked]="state().l1Badges"
+      [class]="playSwitch"
+      (toggle)="set('l1Badges', !state().l1Badges)"
+    />
+
+    <app-play-divider />
+    <app-play-section label="Content level 2" />
+    <ff-switch
+      label="Leading icon"
+      [checked]="l1Children() && state().l2Icon"
+      [disabled]="!l1Children()"
+      [class]="playSwitch"
+      (toggle)="set('l2Icon', !state().l2Icon)"
+    />
+    <app-play-field label="Actions" [disabled]="!l1Children()">
+      <app-play-select [value]="l2ActionCount()" [options]="count3Options" (valueChange)="setCount('l2Actions', $event)" />
+    </app-play-field>
+    <ff-switch
+      label="Badges"
+      [checked]="l1Children() && state().l2Badges"
+      [disabled]="!l1Children()"
+      [class]="playSwitch"
+      (toggle)="set('l2Badges', !state().l2Badges)"
+    />
+
+    <app-play-divider />
+    <app-play-section label="Footer" />
+    <app-play-field label="Primary element">
+      <app-play-select
+        [value]="state().footerPrimary"
+        [options]="footerPrimaryOptions"
+        (valueChange)="set('footerPrimary', $event)"
+      />
+    </app-play-field>
+    <app-play-field label="Stacking">
+      <app-play-select [value]="state().footerStack" [options]="footerStackOptions" (valueChange)="set('footerStack', $event)" />
+    </app-play-field>
+    <app-play-field label="Footer actions">
+      <app-play-select
+        [value]="footerActionCount()"
+        [options]="count2Options"
+        (valueChange)="setCount('footerActions', $event)"
+      />
+    </app-play-field>
+    <app-play-field label="Callout">
+      <app-play-select [value]="state().footerCallout" [options]="calloutOptions" (valueChange)="set('footerCallout', $event)" />
+    </app-play-field>
+    <!-- Either anatomy stacks — a sonner-style pile of three cards. -->
+    <ff-switch
+      label="Stacked"
+      [checked]="state().footerCallout !== 'none' && state().footerCalloutStacked"
+      [disabled]="state().footerCallout === 'none'"
+      [class]="playSwitch"
+      (toggle)="set('footerCalloutStacked', !state().footerCalloutStacked)"
+    />
+
+    <app-play-divider />
+    <!-- shadcn's preset principle: the exact configuration above, as a
+         stateless code the registry can turn into an installable block. -->
+    <app-get-code-dialog
+      [def]="presetDef"
+      [code]="presetCode()"
+      [snippet]="code()"
+      [props]="propLines"
+      [description]="description"
+    />
+  </app-playground-panel>
+</ng-template>
+
+<!-- The live sidebar, filling the ComponentPreview stage edge to edge. -->
+<ng-template #previewTpl>
+  <app-component-preview
+    [code]="code()"
+    padding="none"
+    [minHeightClass]="shellHeight"
+    [inspectRulers]="false"
+  >
+    <div class="relative flex w-full overflow-hidden bg-background h-full self-stretch">
+      <ff-sidebar-provider
+        class="h-full min-h-0"
+        [persist]="false"
+        [mobileBreakpoint]="0"
+        [open]="open()"
+        (openChange)="set('state', $event ? 'opened' : 'closed')"
+        [peek]="state().collapsedBehavior"
+      >
+        <ff-sidebar [variant]="state().design" class="h-full">
+          <div ffSidebarHeader>
+            <!-- Stacking rule: vertical keeps the brand row on its own line
+                 with search and actions stacked beneath as full-width rows;
+                 horizontal collapses them to icon buttons sharing its line.
+                 The buttons are 24px (size-6) and the row insets pr-1.5 so
+                 each button's centre lands on the section actions' axis —
+                 26px from the sidebar's inner edge, on the same 28px pitch. -->
+            <div [class]="headerHorizontal() ? 'flex items-center gap-1 pr-1.5' : 'contents'">
+              <div [class]="headerHorizontal() ? 'min-w-0 flex-1' : 'contents'">
+                @if (state().headerPrimary === 'logo') {
+                  <ff-sidebar-workspace-header name="Acme Inc">
+                    <span ffWorkspaceTile>A</span>
+                  </ff-sidebar-workspace-header>
+                } @else if (state().headerPrimary === 'dropdown') {
+                  <ff-sidebar-workspace-header name="Acme Inc" [checkedIndex]="0">
+                    <span ffWorkspaceTile>A</span>
+                    <ng-template ffSidebarBlockMenu>
+                      <ff-menu-item [index]="0" [icon]="tiles.acme" label="Acme Inc" [checked]="true" />
+                      <ff-menu-item [index]="1" [icon]="tiles.fluid" label="Fluid Labs" />
+                      <ff-menu-item [index]="2" [icon]="tiles.personal" label="Personal" />
+                      <ff-menu-item [index]="3" icon="plus" label="New workspace" />
+                    </ng-template>
+                  </ff-sidebar-workspace-header>
+                }
+              </div>
+              @if (headerHorizontal()) {
+                <ng-template #searchTip>
+                  <span class="flex items-center gap-2">
+                    <span class="[text-box:trim-both_cap_alphabetic]">Search</span>
+                    <kbd [class]="tipKbd">{{ searchShortcut }}</kbd>
+                  </span>
+                </ng-template>
+                <ff-tooltip [content]="searchTip" side="bottom">
+                  <button ffButton variant="ghost" size="icon-compact" aria-label="Search" class="size-6 shrink-0">
+                    <ff-icon name="search" />
+                  </button>
+                </ff-tooltip>
+                @for (action of headerActionSet(); track action.icon) {
+                  <ng-template #actionTip>
+                    <span class="flex items-center gap-2">
+                      <span class="[text-box:trim-both_cap_alphabetic]">{{ action.label }}</span>
+                      <kbd [class]="tipKbd">{{ action.shortcut }}</kbd>
+                    </span>
+                  </ng-template>
+                  <ff-tooltip [content]="actionTip" side="bottom">
+                    <button
+                      ffButton
+                      variant="ghost"
+                      size="icon-compact"
+                      [attr.aria-label]="action.label"
+                      class="size-6 shrink-0"
+                    >
+                      <ff-icon [name]="action.icon" />
+                    </button>
+                  </ff-tooltip>
+                }
+              }
+            </div>
+            @if (!headerHorizontal()) {
+              <!-- Search and the action rows are ONE block: the header's gap-2
+                   separates it from the brand row, while inside it the search
+                   field reads as the list's first row (menu row rhythm). -->
+              <div class="flex flex-col">
+                <ff-sidebar-search-field />
+                @if (headerActionSet().length > 0) {
+                  <ul ffSidebarMenu aria-label="Actions">
+                    @for (action of headerActionSet(); track action.icon) {
+                      <li ffSidebarMenuItem>
+                        <button ffSidebarMenuButton [icon]="action.icon">
+                          {{ action.label }}
+                          <span
+                            class="ml-auto inline-flex opacity-0 transition-opacity duration-80 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100"
+                          >
+                            <kbd class="font-sans text-[11px] leading-3.5 text-muted-foreground">{{ action.shortcut }}</kbd>
+                          </span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            }
+          </div>
+
+          <ff-sidebar-content>
+            <ff-sidebar-group [collapsible]="state().sectionsCollapsible">
+              <ff-sidebar-group-label>{{ sectionLabels()[0] }}</ff-sidebar-group-label>
+              @if (groupActionSet().length > 0) {
+                <div ffSidebarGroupActions>
+                  @for (action of groupActionSet(); track action.icon) {
+                    <ff-tooltip [content]="action.label" side="top">
+                      <button ffSidebarGroupAction [attr.aria-label]="action.label">
+                        <ff-icon [name]="action.icon" />
+                      </button>
+                    </ff-tooltip>
+                  }
+                </div>
+              }
+              <ul ffSidebarMenu>
+                @if (loading()) {
+                  @for (row of skeletonRows(); track row.label) {
+                    <li ffSidebarMenuItem><div ffSidebarMenuSkeleton showIcon></div></li>
+                  }
+                } @else {
+                  @for (row of rows()[0]; track row.key) {
+                    <li ffSidebarMenuItem>
+                      <button
+                        ffSidebarMenuButton
+                        [class]="l1Children() ? 'group/parent-row' : ''"
+                        [icon]="row.icon"
+                        [status]="statusOf(row)"
+                        [isActive]="isActive(row)"
+                        [attr.aria-expanded]="l1Children() ? isRowOpen(row.key) : null"
+                        [style.--row-gutter]="l1Children() ? 'var(--row-gutter-hover)' : null"
+                        (click)="l1Children() ? toggleRow(row.key) : selectRow(row.key)"
+                      >
+                        {{ row.label }}
+                        @if (l1Children()) {
+                          <!-- A row holding a chevron pins its gutter to the
+                               hover value: the chevron rides the label's padding
+                               edge, so letting that padding grow on hover would
+                               slide the chevron sideways. -->
+                          <span class="ml-auto -mr-0.5 flex size-6 shrink-0 items-center justify-center">
+                            <span class="inline-flex" [appSpringRotate]="isRowOpen(row.key) ? 90 : 0">
+                              <ff-icon
+                                name="chevron-right"
+                                [size]="iconSize()"
+                                [strokeWidth]="1.5"
+                                [class]="chevronClass(isRowOpen(row.key))"
+                              />
+                            </span>
+                          </span>
+                        }
+                      </button>
+                      @if (state().l1Badges && row.badge) {
+                        <div ffSidebarMenuBadge>{{ row.badge }}</div>
+                      }
+                      <!-- A parent row spends its trailing slot on the
+                           chevron, so it skips the row actions: with both, the
+                           chevron is pushed off the axis the badges and
+                           actions share. -->
+                      @if (!l1Children()) {
+                        @if (l1ActionSet().length > 0) {
+                          <app-sidebar-playground-actions [actions]="l1ActionSet()" [clustered]="!l1Single()" />
+                        }
+                      } @else {
+                        <ff-sidebar-menu-sub [open]="isRowOpen(row.key)">
+                          @for (sub of l2Rows; track sub.label) {
+                            <li ffSidebarMenuSubItem>
+                              <a
+                                ffSidebarMenuSubButton
+                                href="#"
+                                [icon]="state().l2Icon ? sub.icon : undefined"
+                                [isActive]="selected() === subKey(row.key, sub.label)"
+                                (click)="$event.preventDefault(); selectRow(subKey(row.key, sub.label))"
+                              >
+                                {{ sub.label }}
+                              </a>
+                              @if (state().l2Badges && sub.badge) {
+                                <div ffSidebarMenuBadge>{{ sub.badge }}</div>
+                              }
+                              @if (l2ActionSet().length > 0) {
+                                <app-sidebar-playground-actions
+                                  [actions]="l2ActionSet()"
+                                  [clustered]="!l2Single()"
+                                />
+                              }
+                            </li>
+                          }
+                        </ff-sidebar-menu-sub>
+                      }
+                    </li>
+                  }
+                }
+              </ul>
+            </ff-sidebar-group>
+
+            @if (!loading()) {
+              <ff-sidebar-group [collapsible]="state().sectionsCollapsible">
+                <ff-sidebar-group-label>{{ sectionLabels()[1] }}</ff-sidebar-group-label>
+                <ul ffSidebarMenu>
+                  @for (row of rows()[1]; track row.key) {
+                    <li ffSidebarMenuItem>
+                      <button
+                        ffSidebarMenuButton
+                        [class]="l1Children() ? 'group/parent-row' : ''"
+                        [icon]="row.icon"
+                        [status]="statusOf(row)"
+                        [isActive]="isActive(row)"
+                        [attr.aria-expanded]="l1Children() ? isRowOpen(row.key) : null"
+                        [style.--row-gutter]="l1Children() ? 'var(--row-gutter-hover)' : null"
+                        (click)="l1Children() ? toggleRow(row.key) : selectRow(row.key)"
+                      >
+                        {{ row.label }}
+                        @if (l1Children()) {
+                          <span class="ml-auto -mr-0.5 flex size-6 shrink-0 items-center justify-center">
+                            <span class="inline-flex" [appSpringRotate]="isRowOpen(row.key) ? 90 : 0">
+                              <ff-icon
+                                name="chevron-right"
+                                [size]="iconSize()"
+                                [strokeWidth]="1.5"
+                                [class]="chevronClass(isRowOpen(row.key))"
+                              />
+                            </span>
+                          </span>
+                        }
+                      </button>
+                      @if (state().l1Badges && row.badge) {
+                        <div ffSidebarMenuBadge>{{ row.badge }}</div>
+                      }
+                      @if (!l1Children()) {
+                        @if (l1ActionSet().length > 0) {
+                          <app-sidebar-playground-actions [actions]="l1ActionSet()" [clustered]="!l1Single()" />
+                        }
+                      } @else {
+                        <ff-sidebar-menu-sub [open]="isRowOpen(row.key)">
+                          @for (sub of l2Rows; track sub.label) {
+                            <li ffSidebarMenuSubItem>
+                              <a
+                                ffSidebarMenuSubButton
+                                href="#"
+                                [icon]="state().l2Icon ? sub.icon : undefined"
+                                [isActive]="selected() === subKey(row.key, sub.label)"
+                                (click)="$event.preventDefault(); selectRow(subKey(row.key, sub.label))"
+                              >
+                                {{ sub.label }}
+                              </a>
+                              @if (state().l2Badges && sub.badge) {
+                                <div ffSidebarMenuBadge>{{ sub.badge }}</div>
+                              }
+                              @if (l2ActionSet().length > 0) {
+                                <app-sidebar-playground-actions
+                                  [actions]="l2ActionSet()"
+                                  [clustered]="!l2Single()"
+                                />
+                              }
+                            </li>
+                          }
+                        </ff-sidebar-menu-sub>
+                      }
+                    </li>
+                  }
+                </ul>
+              </ff-sidebar-group>
+            }
+          </ff-sidebar-content>
+
+          @if (state().footerPrimary === 'dropdown' || footerActionSet().length > 0 || state().footerCallout !== 'none') {
+            <div ffSidebarFooter [class]="calloutOnlyFooter() ? 'pb-0' : ''">
+              @if (state().footerCallout !== 'none') {
+                @if (state().footerCalloutStacked) {
+                  <app-sidebar-demo-callout-stack
+                    [variant]="calloutVariant()"
+                    (empty)="set('footerCallout', 'none')"
+                  />
+                } @else {
+                  <app-sidebar-playground-callout
+                    [variant]="calloutVariant()"
+                    (dismiss)="set('footerCallout', 'none')"
+                  />
+                }
+              }
+              <!-- Vertical stacking puts the actions above the user row, so
+                   identity stays anchored to the sidebar's outer edge —
+                   mirroring the brand row at the top. -->
+              @if (!footerHorizontal() && footerActionSet().length > 0) {
+                <ul ffSidebarMenu aria-label="Footer actions">
+                  @for (action of footerActionSet(); track action.icon) {
+                    <li ffSidebarMenuItem>
+                      <button ffSidebarMenuButton [icon]="action.icon">{{ action.label }}</button>
+                    </li>
+                  }
+                </ul>
+              }
+              <!-- Skip the row wrapper entirely when there's no user row and
+                   no horizontal actions — an empty div would still take the
+                   footer's gap and hold the card off the edge. -->
+              @if (state().footerPrimary === 'dropdown' || (footerHorizontal() && footerActionSet().length > 0)) {
+                <div [class]="footerHorizontal() ? 'flex items-center gap-1 pr-1.5' : 'contents'">
+                  @if (state().footerPrimary === 'dropdown') {
+                    <ff-sidebar-user-footer
+                      name="Micka Touillaud"
+                      [class]="footerHorizontal() ? 'min-w-0 flex-1' : ''"
+                    >
+                      <img
+                        [src]="avatar"
+                        alt=""
+                        width="20"
+                        height="20"
+                        class="size-5 shrink-0 rounded-full outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+                      />
+                      <ng-template ffSidebarBlockMenu>
+                        <ff-menu-item [index]="0" icon="user" label="Profile" />
+                        <ff-menu-item [index]="1" icon="settings" label="Settings" />
+                        <ff-menu-item [index]="2" icon="arrow-left" label="Log out" />
+                      </ng-template>
+                    </ff-sidebar-user-footer>
+                  }
+                  @if (footerHorizontal()) {
+                    @for (action of footerActionSet(); track action.icon) {
+                      <ff-tooltip [content]="action.label" side="top">
+                        <button
+                          ffButton
+                          variant="ghost"
+                          size="icon-compact"
+                          [attr.aria-label]="action.label"
+                          class="size-6 shrink-0"
+                        >
+                          <ff-icon [name]="action.icon" />
+                        </button>
+                      </ff-tooltip>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </ff-sidebar>
+
+        <!-- The main region stays blank on purpose — a bare topbar with the
+             trigger. Skeleton page furniture competed with the sidebar for
+             attention. -->
+        <main ffSidebarInset [class]="state().design === 'floating' ? 'min-h-0 pt-2' : 'min-h-0'">
+          <header ffSidebarInsetTopbar></header>
+        </main>
+      </ff-sidebar-provider>
+    </div>
+  </app-component-preview>
+</ng-template>
+
+<app-playground-layout [preview]="previewTpl" [controls]="controlsTpl" />

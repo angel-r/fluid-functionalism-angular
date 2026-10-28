@@ -1,7 +1,7 @@
-// Browser checks for the message components (see ../run.mjs): the chat
-// transcript's layout FLIP, the queued card's morph into its sent bubble and
-// the queued stack's drag reorder. Each one drives the demo like a user and
-// samples the moving boxes once per frame.
+// Browser checks for the message components (see ../run.mjs), on
+// /docs/input-message: the queued card's morph into its sent bubble and the
+// queued stack's drag reorder. Each one drives the docs page's "Queued
+// messages" demo like a user and samples the moving boxes once per frame.
 
 const CARD = '[data-slot="queued-stack-card"]';
 
@@ -22,106 +22,14 @@ async function hoverCenter(page, locator) {
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
 }
 
+// The old demo pages' "Live transcript" board (a fixed-height, bottom-justified
+// column whose rows a button appended) has no counterpart on the docs site:
+// the reference's ChatMessage page is static, and the input-message transcript
+// scrolls instead of reflowing its rows. Its layout-FLIP checks (normal and
+// reduced motion) were dropped with it; the queued-chat demos below still
+// exercise the component's entrance and the queued-to-sent morph.
+
 export const checks = [
-  // A message added to the live transcript (a bottom-anchored column) pushes
-  // the earlier messages up. They must slide there (FLIP on `translate`, the
-  // React `layout="position"`): start the frame the layout changes at their
-  // old box, pass through intermediate positions together (gap kept), land on
-  // their new layout box with no leftover translate, and the transcript ends
-  // as a column with the 8px gap.
-  {
-    name: 'chat-message: layout FLIP slides earlier messages to their new place',
-    path: 'chat-message',
-    async run(page, h) {
-      const live = h.section(page, 'Live transcript');
-      await live.scrollIntoViewIfNeeded();
-      const add = live.getByRole('button', { name: 'Add message' });
-      await add.click();
-      await page.waitForTimeout(600);
-      await add.click();
-      await page.waitForTimeout(600);
-
-      const probe = () => {
-        const section = [...document.querySelectorAll('app-demo-section')].find((s) =>
-          /^\s*live transcript\s*$/i.test(s.querySelector('h2')?.textContent ?? ''),
-        );
-        return [...section.querySelectorAll('ff-chat-message')].map((m) => {
-          const r = m.getBoundingClientRect();
-          return { top: r.top, bottom: r.bottom, off: m.offsetTop, translate: getComputedStyle(m).translate };
-        });
-      };
-      const before = await page.evaluate(probe);
-      h.assert(before.length === 2, 'two messages before the third is added', before.length);
-
-      const series = await h.sample(page, probe, () => add.click(), 700);
-      const last = series.at(-1).v;
-      h.assert(last.length === 3, 'the third message was added', last.length);
-      const changed = series.findIndex((s) => s.v.length === 3 && s.v[0].off !== before[0].off);
-      h.assert(changed > -1, 'the earlier messages changed layout position');
-
-      for (const i of [0, 1]) {
-        const start = before[i].top;
-        const shift = last[i].off - before[i].off;
-        const end = start + shift;
-        h.assert(shift < -20, `message ${i + 1} moves up by the new message`, { shift });
-        const tops = series.slice(changed).map((s) => s.v[i].top);
-        // No jump: the frame the layout changes still shows (about) the old box.
-        h.assert(
-          Math.abs(tops[0] - start) <= Math.abs(shift) * 0.4,
-          `message ${i + 1} starts the slide at its old position`,
-          { first: tops[0], start, end },
-        );
-        const between = tops.filter((y) => y < start - 0.5 && y > end + 0.5);
-        h.assert(between.length >= 3, `message ${i + 1} passes through intermediate positions`, tops);
-        // Moderate tier has no bounce: never past the target, never backwards.
-        tops.forEach((y, k) => {
-          h.assert(y >= end - 0.5, `message ${i + 1} overshoots its new place`, { y, end });
-          if (k) h.assert(y <= tops[k - 1] + 0.5, `message ${i + 1} moves backwards`, tops);
-        });
-        for (const s of series.slice(-5)) h.near(s.v[i].top, end, 0.5, `message ${i + 1} settles on its new layout box`);
-        h.assert(isIdentity(last[i].translate), `message ${i + 1} keeps no translate`, last[i].translate);
-      }
-      // Both earlier messages slide together: the gap between them never changes.
-      const gap = before[1].top - before[0].top;
-      for (const s of series.slice(changed)) h.near(s.v[1].top - s.v[0].top, gap, 1, 'earlier messages slide together');
-      // Final layout: one column, 8px apart.
-      for (const i of [1, 2]) h.near(last[i].top - last[i - 1].bottom, 8, 0.5, `gap above message ${i + 1}`);
-    },
-  },
-
-  {
-    // Reduced motion: the layout move is a jump, and a jump that is
-    // re-targeted before it lands (messages added back to back) must still
-    // leave every message on its own layout box, with no translate left over.
-    name: 'chat-message: with reduced motion, back-to-back messages land on their layout boxes',
-    path: 'chat-message',
-    async run(page, h) {
-      await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.reload({ waitUntil: 'networkidle' });
-      const live = h.section(page, 'Live transcript');
-      await live.scrollIntoViewIfNeeded();
-      const add = live.getByRole('button', { name: 'Add message' });
-      for (let i = 0; i < 4; i++) {
-        await add.click();
-        await page.waitForTimeout(40);
-      }
-      await page.waitForTimeout(500);
-      const messages = await live.locator('ff-chat-message').evaluateAll((els) =>
-        els.map((m) => {
-          const r = m.getBoundingClientRect();
-          return { top: r.top, bottom: r.bottom, off: m.offsetTop, translate: getComputedStyle(m).translate };
-        }),
-      );
-      h.assert(messages.length === 4, 'four messages were added', messages.length);
-      const origin = messages[0].top - messages[0].off;
-      messages.forEach((m, i) => {
-        h.assert(isIdentity(m.translate), `message ${i + 1} keeps no translate`, m.translate);
-        h.near(m.top - origin, m.off, 0.5, `message ${i + 1} sits on its layout box`);
-        if (i) h.near(m.top - messages[i - 1].bottom, 8, 0.5, `gap above message ${i + 1}`);
-      });
-    },
-  },
-
   // Dispatching a text-only queued card (Stop ends the streaming reply, so the
   // composer sends the front card) morphs that card into the sent bubble (the
   // React shared `layoutId`): the bubble's text starts in the card's box,
@@ -130,15 +38,17 @@ export const checks = [
   // on the way, and the card does not stay behind in the stack.
   {
     name: 'queued-stack: dispatched card morphs into the sent bubble',
-    path: 'queued-stack',
+    path: 'docs/input-message',
     async run(page, h) {
+      const section = h.section(page, 'Queued messages');
+      await section.scrollIntoViewIfNeeded();
       const TEXT = 'Tighten the spacing';
       // The front card carries attachments (those fade in, no morph): remove it.
-      const front = card(page, 'Match these mockups');
+      const front = section.locator(CARD, { hasText: 'Match these mockups' });
       await front.scrollIntoViewIfNeeded();
       await hoverCenter(page, front);
       await page.waitForTimeout(500);
-      await page.getByRole('button', { name: 'Remove queued message: Match these mockups' }).click();
+      await section.getByRole('button', { name: 'Remove queued message: Match these mockups' }).click();
       await page.mouse.move(5, 5);
       await page.waitForTimeout(600);
 
@@ -172,7 +82,7 @@ export const checks = [
       h.assert(before.card && !before.bubble, 'the card is queued and not sent yet', before);
       const start = before.card;
 
-      const series = await h.sample(page, probe, () => page.getByRole('button', { name: 'Stop' }).click(), 800);
+      const series = await h.sample(page, probe, () => section.getByRole('button', { name: 'Stop' }).click(), 800);
       const appear = series.findIndex((s) => s.v.bubble);
       h.assert(appear > -1, 'the sent bubble appears');
       const frames = series.slice(appear).map((s) => s.v);
@@ -215,9 +125,11 @@ export const checks = [
   // card is the new first one).
   {
     name: 'input-message: queued stack drag reorders cards into their new slots',
-    path: 'input-message',
+    path: 'docs/input-message',
     async run(page, h) {
       const NAMES = ['Match these mockups', 'Tighten the spacing', 'Audit the color contrast'];
+      const section = h.section(page, 'Queued messages');
+      await section.scrollIntoViewIfNeeded();
       const a = card(page, NAMES[0]);
       await a.scrollIntoViewIfNeeded();
       await hoverCenter(page, a);

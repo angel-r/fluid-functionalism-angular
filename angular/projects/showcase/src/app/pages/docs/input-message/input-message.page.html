@@ -1,0 +1,290 @@
+<app-doc-page
+  title="InputMessage"
+  slug="input-message"
+  [description]="description"
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Playground">
+    <app-playground-layout [preview]="playgroundPreview" [controls]="playgroundControls" />
+
+    <ng-template #playgroundPreview>
+      <app-component-preview
+        [code]="playgroundCode()"
+        padding="compact"
+        minHeightClass="h-[560px]"
+        align="bottom"
+      >
+        <div class="relative w-full self-stretch">
+          <div [appScrollPin]="playgroundPin()" class="absolute inset-0 overflow-y-auto scrollbar-hide">
+            <div
+              class="flex min-h-full flex-col justify-start gap-2"
+              [style.padding-bottom.px]="playgroundReservedBottom()"
+            >
+              @for (m of playgroundMessages(); track $index) {
+                <ff-chat-message from="user" [files]="m.files">{{ m.text }}</ff-chat-message>
+              }
+            </div>
+          </div>
+
+          @if (playgroundQueueOn()) {
+            <ff-queued-stack
+              [(queue)]="playgroundQueue"
+              [bottom]="playgroundInputH() + 8"
+              (edit)="editPlaygroundQueued($event)"
+              (remove)="removePlaygroundQueued($event)"
+            />
+          }
+
+          <ff-input-message
+            appMeasureHeight
+            data-playground-composer
+            (heightChange)="playgroundInputH.set($event)"
+            class="absolute inset-x-0 bottom-0"
+            [(value)]="playgroundValue"
+            [files]="playgroundFilesBinding()"
+            (filesChange)="onPlaygroundFiles($event)"
+            [placeholderSuggestion]="suggestion() ? placeholderPrompt : undefined"
+            [suggestions]="suggestionsOn() ? suggestions : undefined"
+            [history]="historyOn() ? playgroundHistory() : []"
+            [minRows]="minRows()"
+            [disabled]="disabled()"
+            [leftSlot]="leftSlotOn() ? attachSlot : null"
+            [rightSlot]="rightSlotOn() ? modelSlot : null"
+            [status]="composerStatus()"
+            [queue]="playgroundQueueOn() ? playgroundQueue() : undefined"
+            (queueChange)="onPlaygroundQueue($event)"
+            (stop)="playgroundStatus.set('idle')"
+            [showQueue]="false"
+            (send)="onPlaygroundSend($event)"
+          />
+        </div>
+      </app-component-preview>
+
+      <ng-template #attachSlot let-openFilePicker="openFilePicker">
+        <ff-tooltip content="Attach" side="top">
+          <button
+            ffButton
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Attach files"
+            (click)="openFilePicker()"
+          >
+            <ff-icon name="plus" />
+          </button>
+        </ff-tooltip>
+      </ng-template>
+      <ng-template #modelSlot>
+        <button ffButton variant="ghost" size="sm" trailingIcon="chevron-down">Sonnet 5</button>
+      </ng-template>
+    </ng-template>
+
+    <ng-template #playgroundControls>
+      <app-playground-panel (shuffle)="randomize()">
+        <app-play-section label="Composer" />
+        <div>
+          <ff-switch
+            label="Placeholder suggestion"
+            [checked]="suggestion()"
+            (toggle)="suggestion.set(!suggestion())"
+            [class]="playSwitch"
+          />
+          <ff-switch
+            label="Suggested prompts"
+            [checked]="suggestionsOn()"
+            (toggle)="suggestionsOn.set(!suggestionsOn())"
+            [class]="playSwitch"
+          />
+          <ff-switch
+            label="History recall"
+            [checked]="historyOn()"
+            (toggle)="historyOn.set(!historyOn())"
+            [class]="playSwitch"
+          />
+          <ff-switch
+            label="Attachments"
+            [checked]="attachments()"
+            (toggle)="attachments.set(!attachments())"
+            [class]="playSwitch"
+          />
+          <app-play-field label="Min rows">
+            <app-play-select [value]="minRows()" [options]="minRowOptions" (valueChange)="minRows.set($event)" />
+          </app-play-field>
+          <ff-switch
+            label="Disabled"
+            [checked]="disabled()"
+            (toggle)="disabled.set(!disabled())"
+            [class]="playSwitch"
+          />
+        </div>
+
+        <app-play-divider />
+        <app-play-section label="Slots" />
+        <div>
+          <ff-switch
+            label="Left slot"
+            [checked]="leftSlotOn()"
+            (toggle)="leftSlotOn.set(!leftSlotOn())"
+            [class]="playSwitch"
+          />
+          <ff-switch
+            label="Right slot"
+            [checked]="rightSlotOn()"
+            (toggle)="rightSlotOn.set(!rightSlotOn())"
+            [class]="playSwitch"
+          />
+        </div>
+
+        <app-play-divider />
+        <app-play-section label="Queue" />
+        <div>
+          <app-play-field label="Status">
+            <app-play-select [value]="playgroundStatus()" [options]="statusOptions" (valueChange)="setPlaygroundStatus($event)" />
+          </app-play-field>
+        </div>
+
+        <app-play-divider />
+        <!-- The exact configuration above, as a stateless code the Share
+             dialog turns into an Angular install prompt (D5). -->
+        <app-get-code-dialog
+          [def]="presetDef"
+          [code]="presetCode()"
+          [snippet]="presetSnippet()"
+          [props]="installProps"
+          [description]="description"
+        />
+      </app-playground-panel>
+    </ng-template>
+  </app-doc-section>
+
+  <app-doc-section title="Basic">
+    <app-component-preview [code]="basicCode" minHeightClass="min-h-[280px]">
+      <div class="w-full max-w-xl">
+        <ff-input-message [(value)]="basicValue" (send)="basicValue.set('')" />
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Suggestions">
+    <app-component-preview [code]="suggestionsCode" minHeightClass="min-h-[360px]">
+      <div class="w-full max-w-xl">
+        <ff-input-message
+          [(value)]="suggestValue"
+          (send)="suggestValue.set('')"
+          [placeholderSuggestion]="placeholderPrompt"
+          [suggestions]="suggestions"
+        />
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Attachments">
+    <app-component-preview
+      [code]="attachmentsCode"
+      minHeightClass="h-[440px]"
+      align="bottom"
+      padding="compact"
+    >
+      <!-- The reference's playbackButton: a Reset, only while the transcript
+           has messages. The wrapper owns the header slot so the control can
+           come and go (a projected action cannot sit inside an @if: the block
+           would land in the body slot instead). -->
+      <div preview-action class="contents">
+        @if (attachMessages().length > 0) {
+          <app-preview-action-button icon="rotate-ccw" tooltip="Reset" (pressed)="resetAttachments()" />
+        }
+      </div>
+      <div class="relative w-full self-stretch">
+        <div [appScrollPin]="attachPin()" class="absolute inset-0 overflow-y-auto scrollbar-hide">
+          <div
+            class="flex min-h-full flex-col justify-start gap-2"
+            [style.padding-bottom.px]="attachInputH() + 12"
+          >
+            @for (m of attachMessages(); track $index) {
+              <ff-chat-message [from]="m.from" [files]="m.files">{{ m.text }}</ff-chat-message>
+            }
+          </div>
+        </div>
+        <ff-input-message
+          appMeasureHeight
+          (heightChange)="attachInputH.set($event)"
+          class="absolute inset-x-0 bottom-0"
+          [(value)]="attachValue"
+          [(files)]="attachFiles"
+          (send)="onAttachSend($event)"
+        />
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Queued messages">
+    <app-component-preview [code]="queuedCode" padding="compact" minHeightClass="h-[440px]" align="bottom">
+      <div preview-action class="contents">
+        @if (queuedChat.playback(); as action) {
+          <app-preview-action-button [icon]="action.icon" [tooltip]="action.label" (pressed)="action.run()" />
+        }
+      </div>
+      <app-queued-chat #queuedChat />
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Left Slot Only">
+    <app-component-preview [code]="leftOnlyCode" minHeightClass="min-h-[280px]">
+      <div class="w-full max-w-xl">
+        <ff-input-message [(value)]="leftValue" (send)="leftValue.set('')" [leftSlot]="attachOnlySlot" />
+      </div>
+    </app-component-preview>
+    <ng-template #attachOnlySlot>
+      <button ffButton variant="ghost" size="icon-sm" aria-label="Attach">
+        <ff-icon name="plus" />
+      </button>
+    </ng-template>
+  </app-doc-section>
+
+  <app-doc-section title="Right Slot Only">
+    <app-component-preview [code]="rightOnlyCode" minHeightClass="min-h-[280px]">
+      <div class="w-full max-w-xl">
+        <ff-input-message [(value)]="rightValue" (send)="rightValue.set('')" [rightSlot]="modelOnlySlot" />
+      </div>
+    </app-component-preview>
+    <ng-template #modelOnlySlot>
+      <button ffButton variant="ghost" size="sm" trailingIcon="chevron-down">Sonnet 4.6</button>
+    </ng-template>
+  </app-doc-section>
+
+  <app-doc-section title="Send Handler">
+    <app-component-preview [code]="sendHandlerCode" minHeightClass="min-h-[280px]">
+      <div preview-action class="contents">
+        @if (messages().length > 0) {
+          <app-preview-action-button icon="rotate-ccw" tooltip="Clear messages" (pressed)="messages.set([])" />
+        }
+      </div>
+      <div class="flex w-full max-w-xl flex-col gap-3">
+        @if (messages().length > 0) {
+          <div class="flex flex-col gap-2">
+            @for (m of messages(); track $index) {
+              <ff-chat-message from="user">{{ m }}</ff-chat-message>
+            }
+          </div>
+        }
+        <ff-input-message
+          [(value)]="handlerValue"
+          (send)="onHandlerSend($event)"
+          placeholder="Press Enter to send. Shift+Enter for newline."
+        />
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Disabled">
+    <app-component-preview [code]="disabledCode" minHeightClass="min-h-[280px]">
+      <div class="w-full max-w-xl">
+        <ff-input-message value="This composer is disabled" disabled />
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="API Reference">
+    <app-props-table [props]="inputMessageProps" />
+  </app-doc-section>
+</app-doc-page>

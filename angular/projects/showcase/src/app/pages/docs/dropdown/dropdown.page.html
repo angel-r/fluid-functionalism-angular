@@ -1,0 +1,429 @@
+<app-doc-page
+  title="Dropdown"
+  description="2 forms: an inline panel, or a popup on any trigger."
+  slug="dropdown"
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Playground">
+    <app-playground-layout [preview]="previewTpl" [controls]="controlsTpl" />
+  </app-doc-section>
+
+  <app-doc-section title="Basic">
+    <app-component-preview [code]="basicCode">
+      <ff-dropdown aria-label="Views" [checkedIndex]="checkedView()">
+        @for (item of items; track item.label; let i = $index) {
+          <ff-menu-item
+            [index]="i"
+            [icon]="item.icon"
+            [label]="item.label"
+            [checked]="selected() === i"
+            (select)="selected.set(selected() === i ? null : i)"
+          />
+        }
+      </ff-dropdown>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Groups">
+    <app-component-preview [code]="groupsCode">
+      <ff-dropdown aria-label="Settings">
+        <ff-dropdown-label>Account</ff-dropdown-label>
+        <ff-menu-item [index]="0" icon="mail" label="Email" />
+        <ff-menu-item [index]="1" icon="bell" label="Notifications" />
+        <ff-menu-item [index]="2" icon="shield" label="Privacy" />
+        <ff-dropdown-separator />
+        <ff-dropdown-label>Appearance</ff-dropdown-label>
+        <ff-menu-item [index]="3" icon="settings" label="General" />
+        <ff-menu-item [index]="4" icon="palette" label="Theme" />
+        <ff-menu-item [index]="5" icon="monitor" label="Display" />
+      </ff-dropdown>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Triggered menu">
+    <p class="text-site-body text-muted-foreground">
+      3 parts: <code>ff-dropdown-menu</code>, <code>ff-dropdown-trigger</code>,
+      <code>ff-dropdown-content</code>. Any element takes
+      <code>ffDropdownTrigger</code>.
+    </p>
+    <app-component-preview [code]="triggeredCode">
+      <ff-dropdown-menu>
+        <button ffButton ffDropdownTrigger variant="ghost">Open menu</button>
+        <ff-dropdown-content [checkedIndex]="view()">
+          @for (item of items; track item.label; let i = $index) {
+            <ff-menu-item
+              [index]="i"
+              [icon]="item.icon"
+              [label]="item.label"
+              [checked]="view() === i"
+              (select)="view.set(i)"
+            />
+          }
+        </ff-dropdown-content>
+      </ff-dropdown-menu>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Submenus">
+    <p class="text-site-body text-muted-foreground">
+      Hover Move to, then cut across Share to its submenu: the highlight stays
+      on Move to until you stop on another row.
+    </p>
+    <app-component-preview [code]="submenuCode" minHeightClass="min-h-[160px]">
+      <ff-dropdown-menu>
+        <button ffButton ffDropdownTrigger variant="ghost">Q3 report.pdf</button>
+        <ff-dropdown-content>
+          <ff-dropdown-sub>
+            <ff-dropdown-sub-trigger [index]="0" icon="folder" label="Move to" />
+            <ff-dropdown-sub-content>
+              @for (folder of folders; track folder; let i = $index) {
+                <ff-menu-item [index]="i" [label]="folder" />
+              }
+            </ff-dropdown-sub-content>
+          </ff-dropdown-sub>
+          <ff-dropdown-sub>
+            <ff-dropdown-sub-trigger [index]="1" icon="link" label="Share" />
+            <ff-dropdown-sub-content>
+              <ff-menu-item [index]="0" icon="link" label="Copy link" />
+              <ff-menu-item [index]="1" icon="mail" label="Email" />
+            </ff-dropdown-sub-content>
+          </ff-dropdown-sub>
+          <ff-menu-item [index]="2" icon="pencil" label="Rename" />
+        </ff-dropdown-content>
+      </ff-dropdown-menu>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Multiple selection">
+    <p class="text-site-body text-muted-foreground">
+      Pass <code>checkedIndices</code>: rows become checkboxes, the menu stays
+      open, and touching picks share one background.
+    </p>
+    <app-component-preview [code]="multipleCode" minHeightClass="min-h-[160px]">
+      <ff-dropdown-menu>
+        <button ffButton ffDropdownTrigger variant="ghost">Status</button>
+        <ff-dropdown-content [checkedIndices]="statusesChecked()">
+          @for (status of statuses; track status; let i = $index) {
+            <ff-menu-item
+              [index]="i"
+              [label]="status"
+              [checked]="statusesChecked().includes(i)"
+              (select)="toggleStatus(i)"
+            />
+          }
+        </ff-dropdown-content>
+      </ff-dropdown-menu>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Searchable menu">
+    <p class="text-site-body text-muted-foreground">
+      Put a <code>ff-dropdown-search</code> first and filter the rows you
+      render. Type to filter, arrow down to a row, press Enter.
+    </p>
+    <app-component-preview [code]="searchableCode" minHeightClass="min-h-[160px]">
+      <ff-dropdown-menu>
+        <button ffButton ffDropdownTrigger variant="ghost" trailingIcon="chevron-down">
+          {{ language() }}
+        </button>
+        <ff-dropdown-content [checkedIndex]="languageMatches().indexOf(language())">
+          <ff-dropdown-search [(value)]="query" placeholder="Search languages" />
+          @for (option of languageMatches(); track option; let i = $index) {
+            <ff-menu-item
+              [index]="i"
+              [label]="option"
+              [checked]="language() === option"
+              (select)="language.set(option)"
+            />
+          }
+          @if (languageMatches().length === 0) {
+            <ff-dropdown-empty>No languages found</ff-dropdown-empty>
+          }
+        </ff-dropdown-content>
+      </ff-dropdown-menu>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Searchable multiple selection">
+    <p class="text-site-body text-muted-foreground">
+      Both at once. Compute <code>checkedIndices</code> against the filtered
+      rows; Enter toggles the focused row and the menu stays open.
+    </p>
+    <app-component-preview [code]="searchableMultipleCode" minHeightClass="min-h-[160px]">
+      <ff-dropdown-menu>
+        <button ffButton ffDropdownTrigger variant="ghost">Labels · {{ labels().length }}</button>
+        <ff-dropdown-content [checkedIndices]="labelChecked()">
+          <ff-dropdown-search [(value)]="labelQuery" placeholder="Search labels" />
+          @for (label of labelMatches(); track label; let i = $index) {
+            <ff-menu-item
+              [index]="i"
+              [label]="label"
+              [checked]="labels().includes(label)"
+              (select)="toggleLabel(label)"
+            />
+          }
+          @if (labelMatches().length === 0) {
+            <ff-dropdown-empty>No labels found</ff-dropdown-empty>
+          }
+        </ff-dropdown-content>
+      </ff-dropdown-menu>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Create from the query">
+    <p class="text-site-body text-muted-foreground">
+      1 extra row when nothing matches. Type a component that is not there,
+      press ↑ to reach it, then Enter.
+    </p>
+    <app-component-preview [code]="creatableCode" minHeightClass="min-h-[160px]">
+      <ff-dropdown-menu>
+        <button ffButton ffDropdownTrigger variant="ghost">Components · {{ used().length }}</button>
+        <ff-dropdown-content [checkedIndices]="usedChecked()">
+          <ff-dropdown-search [(value)]="componentQuery" placeholder="Search components" />
+          @for (component of componentMatches(); track component; let i = $index) {
+            <ff-menu-item
+              [index]="i"
+              [label]="component"
+              [checked]="used().includes(component)"
+              (select)="toggleUsed(component)"
+            />
+          }
+          @if (canCreateComponent()) {
+            <ff-menu-item
+              [index]="componentMatches().length"
+              icon="plus"
+              [label]="'Create “' + componentQueryText() + '”'"
+              [closeOnClick]="false"
+              (select)="createComponent()"
+            />
+          }
+          @if (componentMatches().length === 0 && !canCreateComponent()) {
+            <ff-dropdown-empty>No components found</ff-dropdown-empty>
+          }
+        </ff-dropdown-content>
+      </ff-dropdown-menu>
+    </app-component-preview>
+  </app-doc-section>
+
+  @for (table of api; track table.title) {
+    <app-doc-section [title]="'API Reference — ' + table.title">
+      <app-props-table [props]="table.props" />
+    </app-doc-section>
+  }
+</app-doc-page>
+
+<!-- The playground's two template inputs live at the component root, outside
+     the page's content projection. The rows are declared inside the popup
+     (twice: once per mode), so they keep the dropdown's own injection. -->
+<ng-template #previewTpl>
+  <app-component-preview [code]="playgroundCode()" minHeightClass="min-h-[360px]" align="top">
+    <div class="pt-6">
+      @if (playground().mode === 'menu') {
+        <ff-dropdown-menu>
+          <button ffButton ffDropdownTrigger variant="ghost" trailingIcon="chevron-down">
+            {{ triggerLabel() }}
+          </button>
+          <ff-dropdown-content
+            [checkedIndex]="playgroundCheckedIndex()"
+            [checkedIndices]="playgroundCheckedIndices()"
+          >
+            @if (derived().search) {
+              <ff-dropdown-search [(value)]="playgroundQuery" placeholder="Search…" />
+            }
+            @for (row of playRows(); track row.key) {
+              @if (row.separator) {
+                <ff-dropdown-separator />
+              }
+              @if (row.group) {
+                <ff-dropdown-label>{{ row.group }}</ff-dropdown-label>
+              }
+              @if (row.item; as item) {
+                @if (derived().submenu && item.label === submenuLabel) {
+                  <ff-dropdown-sub>
+                    <ff-dropdown-sub-trigger
+                      [index]="row.index!"
+                      [icon]="playground().icons ? item.icon : undefined"
+                      [label]="item.label"
+                    />
+                    <ff-dropdown-sub-content [checkedIndex]="themeIndex()">
+                      @for (option of themes; track option.label; let ti = $index) {
+                        <ff-menu-item
+                          [index]="ti"
+                          [icon]="playground().icons ? option.icon : undefined"
+                          [label]="option.label"
+                          [checked]="theme() === option.label"
+                          (select)="theme.set(option.label)"
+                        />
+                      }
+                    </ff-dropdown-sub-content>
+                  </ff-dropdown-sub>
+                } @else {
+                  <ff-menu-item
+                    [index]="row.index!"
+                    [icon]="playground().icons ? item.icon : undefined"
+                    [label]="item.label"
+                    [disabled]="playground().disabledRow && item.label === disabledLabel"
+                    [checked]="rowChecked(item.label)"
+                    (select)="pick(item.label)"
+                  />
+                }
+              }
+            }
+            @if (playgroundCanCreate()) {
+              <ff-menu-item
+                [index]="rows().length"
+                [icon]="playground().icons ? createdIcon : undefined"
+                [label]="'Create “' + playgroundQuery().trim() + '”'"
+                [closeOnClick]="playground().selection === 'multiple' ? false : undefined"
+                (select)="createFromQuery()"
+              />
+            }
+            @if (derived().search && rows().length === 0 && !playgroundCanCreate()) {
+              <ff-dropdown-empty>No results.</ff-dropdown-empty>
+            }
+          </ff-dropdown-content>
+        </ff-dropdown-menu>
+      } @else {
+        <ff-dropdown
+          aria-label="Settings"
+          [checkedIndex]="playgroundCheckedIndex()"
+          [checkedIndices]="playgroundCheckedIndices()"
+        >
+          @if (derived().search) {
+            <ff-dropdown-search [(value)]="playgroundQuery" placeholder="Search…" />
+          }
+          @for (row of playRows(); track row.key) {
+            @if (row.separator) {
+              <ff-dropdown-separator />
+            }
+            @if (row.group) {
+              <ff-dropdown-label>{{ row.group }}</ff-dropdown-label>
+            }
+            @if (row.item; as item) {
+              @if (derived().submenu && item.label === submenuLabel) {
+                <ff-dropdown-sub>
+                  <ff-dropdown-sub-trigger
+                    [index]="row.index!"
+                    [icon]="playground().icons ? item.icon : undefined"
+                    [label]="item.label"
+                  />
+                  <ff-dropdown-sub-content [checkedIndex]="themeIndex()">
+                    @for (option of themes; track option.label; let ti = $index) {
+                      <ff-menu-item
+                        [index]="ti"
+                        [icon]="playground().icons ? option.icon : undefined"
+                        [label]="option.label"
+                        [checked]="theme() === option.label"
+                        (select)="theme.set(option.label)"
+                      />
+                    }
+                  </ff-dropdown-sub-content>
+                </ff-dropdown-sub>
+              } @else {
+                <ff-menu-item
+                  [index]="row.index!"
+                  [icon]="playground().icons ? item.icon : undefined"
+                  [label]="item.label"
+                  [disabled]="playground().disabledRow && item.label === disabledLabel"
+                  [checked]="rowChecked(item.label)"
+                  (select)="pick(item.label)"
+                />
+              }
+            }
+          }
+          @if (playgroundCanCreate()) {
+            <ff-menu-item
+              [index]="rows().length"
+              [icon]="playground().icons ? createdIcon : undefined"
+              [label]="'Create “' + playgroundQuery().trim() + '”'"
+              [closeOnClick]="playground().selection === 'multiple' ? false : undefined"
+              (select)="createFromQuery()"
+            />
+          }
+          @if (derived().search && rows().length === 0 && !playgroundCanCreate()) {
+            <ff-dropdown-empty>No results.</ff-dropdown-empty>
+          }
+        </ff-dropdown>
+      }
+    </div>
+  </app-component-preview>
+</ng-template>
+
+<ng-template #controlsTpl>
+  <app-playground-panel (shuffle)="randomize()">
+    <app-play-section label="Dropdown" />
+    <div>
+      <app-play-field label="Mode">
+        <app-play-select
+          [value]="playground().mode"
+          [options]="modes"
+          (valueChange)="set('mode', $any($event))"
+        />
+      </app-play-field>
+      <app-play-field label="Selection">
+        <app-play-select
+          [value]="playground().selection"
+          [options]="selections"
+          (valueChange)="set('selection', $any($event))"
+        />
+      </app-play-field>
+      <ff-switch
+        label="Search"
+        [checked]="derived().search"
+        [disabled]="playground().mode !== 'menu'"
+        (toggle)="set('search', !playground().search)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Create from query"
+        [checked]="derived().creatable"
+        [disabled]="!derived().search"
+        (toggle)="set('creatable', !playground().creatable)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <app-play-section label="Rows" />
+    <div>
+      <ff-switch
+        label="Icons"
+        [checked]="playground().icons"
+        (toggle)="set('icons', !playground().icons)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Groups"
+        [checked]="derived().groups"
+        [disabled]="derived().search"
+        (toggle)="set('groups', !playground().groups)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Disabled row"
+        [checked]="playground().disabledRow"
+        (toggle)="set('disabledRow', !playground().disabledRow)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Submenu"
+        [checked]="derived().submenu"
+        [disabled]="playground().mode !== 'menu'"
+        (toggle)="set('submenu', !playground().submenu)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <!-- The exact configuration above, as a stateless code and an Angular
+         install prompt (D5). -->
+    <app-get-code-dialog
+      [def]="presetDef"
+      [code]="presetCode()"
+      [snippet]="promptSnippet()"
+      [props]="presetProps()"
+      description="2 forms: an inline panel, or a popup on any trigger."
+    />
+  </app-playground-panel>
+</ng-template>

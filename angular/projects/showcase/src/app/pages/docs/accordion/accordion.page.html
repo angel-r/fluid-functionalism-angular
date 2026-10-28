@@ -1,0 +1,130 @@
+<ng-template #playgroundPreview>
+  <app-component-preview [code]="code()" padding="none" minHeightClass="h-[420px]" align="top">
+    <div class="flex w-full justify-center px-6 py-10">
+      <!-- React keys the group on `expand`: single and multiple take different
+           defaultValue shapes, and an uncontrolled group keeps its first. -->
+      @for (mode of [expand()]; track mode) {
+        <ff-accordion-group
+          [type]="mode === 'any' ? 'multiple' : 'single'"
+          [collapsible]="mode === 'oneOrNone'"
+          [defaultValue]="mode === 'any' ? [items[0].value] : items[0].value"
+          [highlight]="highlightExpanded() ? 'item' : 'trigger'"
+        >
+          @for (item of items; track item.value; let i = $index) {
+            <ff-accordion-item [value]="item.value" [index]="i">
+              <ff-accordion-trigger>{{ item.title }}</ff-accordion-trigger>
+              <ff-accordion-content>{{ item.content }}</ff-accordion-content>
+            </ff-accordion-item>
+          }
+        </ff-accordion-group>
+      }
+    </div>
+  </app-component-preview>
+</ng-template>
+
+<ng-template #playgroundControls>
+  <app-playground-panel (shuffle)="shuffle()">
+    <app-play-field label="Expand">
+      <app-play-select [value]="expand()" [options]="expandOptions" (valueChange)="setExpand($event)" />
+    </app-play-field>
+    <ff-switch
+      label="Highlight expanded"
+      [checked]="highlightExpanded()"
+      (checkedChange)="highlightExpanded.set($event)"
+      [class]="playSwitch"
+    />
+  </app-playground-panel>
+</ng-template>
+
+<app-doc-page
+  title="Accordion"
+  slug="accordion"
+  description="Collapsible sections with animated expand/collapse and fluid hover in grouped mode."
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Playground">
+    <app-playground-layout [preview]="playgroundPreview" [controls]="playgroundControls" />
+  </app-doc-section>
+
+  <app-doc-section title="Standalone">
+    <p class="text-site-body text-muted-foreground">A single collapsible item with its own hover state.</p>
+    <app-component-preview [code]="standaloneCode" align="top">
+      <div class="min-h-[120px] flex items-center">
+        <ff-accordion type="single" collapsible defaultValue="item-1">
+          <ff-accordion-item value="item-1">
+            <ff-accordion-trigger>What is this component?</ff-accordion-trigger>
+            <ff-accordion-content>
+              A collapsible accordion with animated expand/collapse and spring-animated chevron.
+            </ff-accordion-content>
+          </ff-accordion-item>
+        </ff-accordion>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Single Expand">
+    <p class="text-site-body text-muted-foreground">
+      Multiple items with fluid hover — only one can be expanded at a time.
+    </p>
+    <app-component-preview [code]="groupedCode" align="top">
+      <ff-accordion-group type="single" collapsible defaultValue="item-1">
+        @for (section of singleSections; track section.value; let i = $index) {
+          <ff-accordion-item [value]="section.value" [index]="i">
+            <ff-accordion-trigger>{{ section.title }}</ff-accordion-trigger>
+            <ff-accordion-content>{{ section.body }}</ff-accordion-content>
+          </ff-accordion-item>
+        }
+      </ff-accordion-group>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Multi Expand">
+    <p class="text-site-body text-muted-foreground">
+      Multiple items with fluid hover — several can be expanded at once.
+    </p>
+    <app-component-preview [code]="multipleCode" align="top">
+      <ff-accordion-group type="multiple" [defaultValue]="['item-1', 'item-3']">
+        @for (section of multipleSections; track section.value; let i = $index) {
+          <ff-accordion-item [value]="section.value" [index]="i">
+            <ff-accordion-trigger>{{ section.title }}</ff-accordion-trigger>
+            <ff-accordion-content>{{ section.body }}</ff-accordion-content>
+          </ff-accordion-item>
+        }
+      </ff-accordion-group>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Row highlight">
+    <p class="text-site-body text-muted-foreground">
+      With <code>highlight="trigger"</code> an expanded item holds no tint — the fill scopes to the row and waits
+      for hover. Suits dense panels, where a block per open item reads as a second layer.
+    </p>
+    <app-component-preview [code]="rowHighlightCode" align="top">
+      <ff-accordion-group type="single" collapsible defaultValue="item-1" highlight="trigger">
+        @for (section of rowHighlightSections; track section.value; let i = $index) {
+          <ff-accordion-item [value]="section.value" [index]="i">
+            <ff-accordion-trigger>{{ section.title }}</ff-accordion-trigger>
+            <ff-accordion-content>{{ section.body }}</ff-accordion-content>
+          </ff-accordion-item>
+        }
+      </ff-accordion-group>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — Accordion / AccordionGroup">
+    <app-props-table [props]="rootProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — AccordionItem">
+    <app-props-table [props]="itemProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — AccordionTrigger">
+    <app-props-table [props]="triggerProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — AccordionContent">
+    <app-props-table [props]="contentProps" />
+  </app-doc-section>
+</app-doc-page>

@@ -1,0 +1,50 @@
+<ff-sidebar collapsible="offcanvas" [bordered]="false" [rail]="false" [class]="'ml-2'">
+  <ff-sidebar-content [class]="'py-2'">
+    <!-- Search: opens the site's command menu (⌘K anywhere). -->
+    <ff-sidebar-group>
+      <ul ffSidebarMenu aria-label="Search">
+        <li ffSidebarMenuItem>
+          <button ffSidebarMenuButton icon="search" (click)="openCommandMenu()">Search</button>
+          <span ffSidebarMenuBadge [class]="'font-sans text-site-caption'">{{ shortcutLabel }}</span>
+        </li>
+      </ul>
+    </ff-sidebar-group>
+
+    <!-- Top-level navigation -->
+    <ff-sidebar-group>
+      <ul ffSidebarMenu aria-label="Main navigation">
+        @for (row of mainNav; track row.href) {
+          <li ffSidebarMenuItem>
+            <a ffSidebarMenuButton [routerLink]="row.href" [isActive]="location.path() === row.href">
+              {{ row.label }}
+              @if (row.href === '/changelog') {
+                <!-- The page itself is new: dotted by hand, unlike the docs
+                     rows, which follow the latest release. -->
+                <span class="inline-block size-1.5 shrink-0 rounded-full" [class]="newDot">
+                  <span class="sr-only">New</span>
+                </span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </ff-sidebar-group>
+
+    <app-site-nav-group label="System" [entries]="systemNavList" ariaLabel="System navigation" />
+    <app-site-nav-group label="Components" [entries]="componentList" ariaLabel="Component navigation" />
+  </ff-sidebar-content>
+
+  <!-- The settings block only ships in the mobile sheet: on desktop it lives
+       in the right panel. -->
+  @if (sidebar.isMobile()) {
+    <div ffSidebarFooter [class]="'p-4 pt-2'">
+      <div class="flex items-center justify-between pt-2">
+        <h2 class="text-site-title text-foreground leading-none" [style.font-variation-settings]="semibold">
+          Make them yours
+        </h2>
+        <app-github-star-button />
+      </div>
+      <app-settings-content tooltipSide="right" />
+    </div>
+  }
+</ff-sidebar>

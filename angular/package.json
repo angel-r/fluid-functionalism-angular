@@ -4,7 +4,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prestart": "npm run build:changelog",
     "build": "ng build",
+    "build:changelog": "node scripts/changelog/build.mjs",
+    "build:site-files": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/site-files/build.mjs",
+    "build:showcase": "npm run build:changelog && ng build showcase",
+    "postbuild:showcase": "npm run build:site-files",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -21,9 +26,11 @@
     "@angular/router": "^22.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "mdast-util-from-markdown": "^2.1.0",
     "motion": "^14.6.0",
     "pdfjs-dist": "^5.7.284",
     "rxjs": "~7.8.0",
+    "shiki": "^4.5.0",
     "tailwind-merge": "^3.7.0",
     "tslib": "^2.3.0"
   },
