@@ -13,8 +13,8 @@ import {
   untracked,
 } from '@angular/core';
 import { animate, type AnimationOptions } from 'motion';
-import { spring } from '../core/springs';
-import type { ItemRect } from '../fluid-hover/fluid-hover';
+import { spring } from '../core';
+import type { ItemRect } from '../fluid-hover';
 
 // Edge spring for the selected-bg merge/split: spring.moderate (critically
 // damped) so converging edges meet exactly instead of overshooting. On a merge

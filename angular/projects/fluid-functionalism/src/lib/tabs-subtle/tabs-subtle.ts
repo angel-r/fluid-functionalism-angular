@@ -16,17 +16,24 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { injectSize, type SizeVariant } from '../core/size';
-import { ReducedMotion } from '../core/environment';
-import { enterTransition, exitTransition, animateFluid, type FluidAnimation } from '../core/motion';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
-import { createFluidHover, type ItemRect } from '../fluid-hover/fluid-hover';
-import { Layer, isFocusVisible, provideSizeOverride, writeInitialStyles, type Keyframes } from '../tabs/layer';
+import {
+  cn,
+  spring,
+  fontWeights,
+  injectShape,
+  injectSize,
+  type SizeVariant,
+  ReducedMotion,
+  enterTransition,
+  exitTransition,
+  animateFluid,
+  type FluidAnimation,
+  Icon,
+  type IconDefinition,
+  type IconName,
+} from '../core';
+import { createFluidHover, type ItemRect } from '../fluid-hover';
+import { Layer, isFocusVisible, provideSizeOverride, writeInitialStyles, type Keyframes } from '../tabs';
 
 // ---------------------------------------------------------------------------
 // TabsSubtle is a pill tab strip: one filled pill under the selected tab, a

@@ -17,17 +17,22 @@ import {
   viewChild,
 } from '@angular/core';
 import { animate, type AnimationPlaybackControls, type DOMKeyframesDefinition } from 'motion';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { injectSize, type SizeVariant } from '../core/size';
-import { ReducedMotion } from '../core/environment';
-import { animateFluid, enterTransition, exitTransition, type FluidAnimation } from '../core/motion';
-import { Icon } from '../core/icon';
-import { createFluidHover, type ItemRect } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { Layer, isFocusVisible, provideSizeOverride, writeInitialStyles } from '../tabs/layer';
+import {
+  cn,
+  spring,
+  fontWeights,
+  injectShape,
+  injectSize,
+  type SizeVariant,
+  ReducedMotion,
+  animateFluid,
+  enterTransition,
+  exitTransition,
+  type FluidAnimation,
+  Icon,
+} from '../core';
+import { createFluidHover, type ItemRect, FluidHoverHighlight } from '../fluid-hover';
+import { Layer, isFocusVisible, provideSizeOverride, writeInitialStyles } from '../tabs';
 
 // ---------------------------------------------------------------------------
 // Collapsible sections with a sprung height animation and a chevron that

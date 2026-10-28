@@ -19,13 +19,16 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { animate } from 'motion';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { shapeMap } from '../core/shape';
-import { injectSize } from '../core/size';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
-import { FLUID_HOVER } from '../fluid-hover/fluid-hover';
+import {
+  cn,
+  fontWeights,
+  shapeMap,
+  injectSize,
+  Icon,
+  type IconDefinition,
+  type IconName,
+} from '../core';
+import { FLUID_HOVER } from '../fluid-hover';
 
 // MenuItem is only used inside Dropdown, which opts out of the global pill
 // shape — see the dropdown for the rationale.

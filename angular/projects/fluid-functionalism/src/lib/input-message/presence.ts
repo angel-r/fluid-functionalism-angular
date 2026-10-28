@@ -7,10 +7,8 @@ import {
   linkedSignal,
   untracked,
 } from '@angular/core';
-import { spring } from '../core/springs';
-import { ReducedMotion } from '../core/environment';
-import { type FluidAnimation, animateFluid, enterTransition } from '../core/motion';
-import { writeInitialStyles } from '../tabs/layer';
+import { spring, ReducedMotion, type FluidAnimation, animateFluid, enterTransition } from '../core';
+import { writeInitialStyles } from '../tabs';
 
 // ---------------------------------------------------------------------------
 // Internal presence helpers of InputMessage (React `AnimatePresence`,

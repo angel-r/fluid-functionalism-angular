@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { cn } from '../core/utils';
-import { Icon } from '../core/icon';
+import { cn, Icon } from '../core';
 import { Button } from '../button';
 import { Tooltip } from '../tooltip';
-import { FluidHover, FluidHoverItem, type FluidHoverController } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
+import {
+  FluidHover,
+  FluidHoverItem,
+  type FluidHoverController,
+  FluidHoverHighlight,
+} from '../fluid-hover';
 import { CALENDAR_CONTEXT, isDisabledDay, type CalendarNavDirection } from './calendar-context';
 
 /**

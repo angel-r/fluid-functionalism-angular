@@ -22,18 +22,20 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { Observable, Subject } from 'rxjs';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { Icon } from '../core/icon';
-import { injectShape } from '../core/shape';
-import { SizeContext, type SizeVariant } from '../core/size';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { fieldTouchClass } from '../core/type-scale';
-import { FluidHover, FluidHoverItem } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { Button } from '../button/button';
-import { isFocusVisible, provideSizeOverride } from '../tabs/layer';
+import {
+  cn,
+  fontWeights,
+  Icon,
+  injectShape,
+  SizeContext,
+  type SizeVariant,
+  SURFACE_LEVEL,
+  surfaceClasses,
+  fieldTouchClass,
+} from '../core';
+import { FluidHover, FluidHoverItem, FluidHoverHighlight } from '../fluid-hover';
+import { Button } from '../button';
+import { isFocusVisible, provideSizeOverride } from '../tabs';
 import { InputMessageFileTile } from './file-preview-tile';
 import { InputMessageQueuedRow } from './queued-row';
 import { InputMessageSendGlyph } from './send-glyph';

@@ -9,6 +9,7 @@ export * from './size';
 export * from './surface';
 export * from './icons';
 export * from './icon';
+export * from './overlay';
 export * from './theme';
 export * from './environment';
 export * from './motion';

@@ -17,14 +17,21 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { animate } from 'motion';
-import { cn } from '../core/utils';
-import { exitFallbackMs, spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { type SizeVariant, injectSize } from '../core/size';
-import { Icon } from '../core/icon';
-import { type FluidAnimation, enterTransition, exitTransition, injectAnimateFluid } from '../core/motion';
-import { Tooltip } from '../tooltip/tooltip';
+import {
+  cn,
+  exitFallbackMs,
+  spring,
+  fontWeights,
+  injectShape,
+  type SizeVariant,
+  injectSize,
+  Icon,
+  type FluidAnimation,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../core';
+import { Tooltip } from '../tooltip';
 
 // ---------------------------------------------------------------------------
 // InputCopy shows a value and copies it on click. The whole row is one

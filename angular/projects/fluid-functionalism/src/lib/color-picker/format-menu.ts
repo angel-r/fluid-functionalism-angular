@@ -18,16 +18,27 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape, shapeMap } from '../core/shape';
-import { injectSize } from '../core/size';
-import { Elevated } from '../core/surface';
-import { Icon } from '../core/icon';
-import { enterTransition, exitTransition, injectAnimateFluid, type SpringTier } from '../core/motion';
-import { FLUID_HOVER, FluidHoverItem, type ItemRect, createFluidHover } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
+import {
+  cn,
+  spring,
+  fontWeights,
+  injectShape,
+  shapeMap,
+  injectSize,
+  Elevated,
+  Icon,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+  type SpringTier,
+} from '../core';
+import {
+  FLUID_HOVER,
+  FluidHoverItem,
+  type ItemRect,
+  createFluidHover,
+  FluidHoverHighlight,
+} from '../fluid-hover';
 import { FORMATS, FORMAT_LABELS, type ColorFormat } from './color-math';
 import { COLOR_PICKER_POPUP_SCOPE, COLOR_PICKER_PORTAL_CONTAINER } from './shared';
 import { PopupOverlay } from './popup-overlay';

@@ -22,16 +22,23 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { Directionality } from '@angular/cdk/bidi';
 import { MENU_COMPONENT, Menu as AriaMenu, MenuItem as AriaMenuItem } from '@angular/aria/menu';
-import { cn } from '../core/utils';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
-import { SizeContext, injectSize, type SizeVariant } from '../core/size';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { isDisabledRow, popupMotionClass, popupScrollAreaClass, popupViewportClass } from '../core/popup';
-import { createFluidHover, isOwnEvent } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split/merge-split';
+import {
+  cn,
+  Icon,
+  type IconDefinition,
+  type IconName,
+  SizeContext,
+  injectSize,
+  type SizeVariant,
+  SURFACE_LEVEL,
+  surfaceClasses,
+  isDisabledRow,
+  popupMotionClass,
+  popupScrollAreaClass,
+  popupViewportClass,
+} from '../core';
+import { createFluidHover, isOwnEvent, FluidHoverHighlight } from '../fluid-hover';
+import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split';
 import {
   DROPDOWN_CONTEXT,
   MenuItem,
@@ -39,9 +46,9 @@ import {
   type DropdownContextValue,
   type MenuItemRenderOptions,
   type MenuItemTemplateContext,
-} from '../menu-item/menu-item';
-import { DROPDOWN_SEARCH_HOST, createDropdownSearchHost } from '../dropdown-search/dropdown-search';
-import { ScrollArea } from '../scroll-area/scroll-area';
+} from '../menu-item';
+import { DROPDOWN_SEARCH_HOST, createDropdownSearchHost } from '../dropdown-search';
+import { ScrollArea } from '../scroll-area';
 import { dropdownShape } from './dropdown';
 import { SUBMENU_ALIGN_OFFSET, SUBMENU_SIDE_OFFSET, createSubmenuHost } from './dropdown-sub';
 import { createPopupOverlay, type PopupAlign, type PopupPlacement, type PopupSide } from './popup-overlay';

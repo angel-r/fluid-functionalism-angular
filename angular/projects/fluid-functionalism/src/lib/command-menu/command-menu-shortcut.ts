@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectSizeVariant } from '../core/size';
-import { typeClass } from '../core/type-scale';
+import { cn, injectSizeVariant, typeClass } from '../core';
 import { formatShortcut, injectIsMac } from './shortcut';
 
 /**

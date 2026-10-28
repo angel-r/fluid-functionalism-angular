@@ -12,11 +12,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { animate } from 'motion';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { typeClass } from '../core/type-scale';
-import { ReducedMotion } from '../core/environment';
-import { injectSizeVariant, type SizeVariant } from '../core/size';
+import {
+  cn,
+  fontWeights,
+  typeClass,
+  ReducedMotion,
+  injectSizeVariant,
+  type SizeVariant,
+} from '../core';
 
 // The glyph is one path morphing circle → infinity → circle → infinity →
 // circle. All 3 shapes share the same commands (a move, 4 curves, a close),

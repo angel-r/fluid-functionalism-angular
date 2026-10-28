@@ -14,12 +14,16 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
-import { SizeContext, type SizeVariant } from '../core/size';
-import { ReducedMotion } from '../core/environment';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
+import {
+  cn,
+  injectShape,
+  SizeContext,
+  type SizeVariant,
+  ReducedMotion,
+  Icon,
+  type IconDefinition,
+  type IconName,
+} from '../core';
 import { BannerPresence, bannerMotion, type BannerMotionConfig } from './banner-motion';
 import { BannerAction, BannerActions, BannerDescription, BannerTitle } from './banner-parts';
 

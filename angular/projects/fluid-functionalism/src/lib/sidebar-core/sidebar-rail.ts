@@ -6,8 +6,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
+import { cn, fontWeights } from '../core';
 import { Tooltip } from '../tooltip';
 import {
   SIDEBAR_COLLAPSE_SLOP,

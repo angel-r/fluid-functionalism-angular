@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, model } from '@angular/core';
-import { Icon } from '../../core/icon';
-import type { IconName } from '../../core/icons';
+import { Icon, type IconName } from '../../core';
 import { Tooltip } from '../../tooltip';
 import { MenuItem } from '../../menu-item';
 import { Sidebar, SidebarContent } from '../../sidebar';

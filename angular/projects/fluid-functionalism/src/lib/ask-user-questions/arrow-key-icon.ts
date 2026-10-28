@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { cn } from '../core/utils';
-import { Icon } from '../core/icon';
+import { cn, Icon } from '../core';
 
 // The footer ← / → icons hint at the ArrowLeft/ArrowRight keys, which mobile
 // has no equivalent for, so they render desktop-only. They are icon

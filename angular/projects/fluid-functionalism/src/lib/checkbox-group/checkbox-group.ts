@@ -13,14 +13,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { animate } from 'motion';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { injectSize, type SizeVariant } from '../core/size';
-import { FLUID_HOVER, createFluidHover } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split/merge-split';
-import { GroupFocusRing, createGroupFocus, focusRowOnPress, groupRows } from '../radio-group/group-focus';
+import { cn, fontWeights, injectShape, injectSize, type SizeVariant } from '../core';
+import { FLUID_HOVER, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
+import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split';
+import { GroupFocusRing, createGroupFocus, focusRowOnPress, groupRows } from '../radio-group';
 
 // ---------------------------------------------------------------------------
 // CheckboxGroup is a vertical list of CheckboxItem rows sharing one fluid

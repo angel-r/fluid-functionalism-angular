@@ -8,8 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
+import { cn, injectShape } from '../core';
 import { parseColor, resolveCssColor, rgbToHexStr } from './color-math';
 import { CHECKER_IMAGE, CHECKER_SIZE } from './shared';
 

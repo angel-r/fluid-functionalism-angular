@@ -18,24 +18,35 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { spring, exitFallbackMs } from '../core/springs';
-import { injectShape, nestedRadius } from '../core/shape';
-import { SizeContext, sizeMap, type SizeVariant } from '../core/size';
-import { Elevated } from '../core/surface';
-import { Icon } from '../core/icon';
-import { enterTransition, exitTransition, injectAnimateFluid, type FluidAnimation } from '../core/motion';
-import { FLUID_HOVER, FluidHoverItem, createFluidHover } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
+import {
+  cn,
+  spring,
+  exitFallbackMs,
+  injectShape,
+  nestedRadius,
+  SizeContext,
+  sizeMap,
+  type SizeVariant,
+  Elevated,
+  Icon,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+  type FluidAnimation,
+} from '../core';
+import { FLUID_HOVER, FluidHoverItem, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
 import {
   Calendar,
   WEEK_COL_RATIO,
   type CalendarDayDetailContext,
   type CalendarOrientation,
   type CalendarValue,
-} from '../calendar/calendar';
-import type { DateRange, Matcher, WeekStartsOn } from '../calendar/calendar-dates';
-import type { CalendarFormatters, CalendarLabels } from '../calendar/calendar-locale';
+  type DateRange,
+  type Matcher,
+  type WeekStartsOn,
+  type CalendarFormatters,
+  type CalendarLabels,
+} from '../calendar';
 import { LAST_MINUTE, buildSlots, formatDuration, minutesToTime, resolveHourCycle, shiftEnd, timeToMinutes } from './date-picker-time';
 import {
   formValue,

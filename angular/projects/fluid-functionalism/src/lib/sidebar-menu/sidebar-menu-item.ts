@@ -9,8 +9,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectSize } from '../core/size';
+import { cn, injectSize } from '../core';
 import { rowHeightClass } from './menu-utils';
 import { SidebarMenu } from './sidebar-menu';
 

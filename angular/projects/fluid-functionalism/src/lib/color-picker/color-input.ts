@@ -14,11 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { injectSize } from '../core/size';
-import { typeClass } from '../core/type-scale';
+import { cn, fontWeights, injectShape, injectSize, typeClass } from '../core';
 
 // ---------------------------------------------------------------------------
 // ColorInput — one field of the panel's input row, two variants behind one

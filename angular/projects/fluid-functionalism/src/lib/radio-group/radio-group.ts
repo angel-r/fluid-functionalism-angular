@@ -14,14 +14,17 @@ import {
   viewChild,
 } from '@angular/core';
 import type { AnimationOptions } from 'motion';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { enterTransition, injectAnimateFluid } from '../core/motion';
-import { injectShape } from '../core/shape';
-import { injectSize, type SizeVariant } from '../core/size';
-import { FLUID_HOVER, createFluidHover } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
+import {
+  cn,
+  spring,
+  fontWeights,
+  enterTransition,
+  injectAnimateFluid,
+  injectShape,
+  injectSize,
+  type SizeVariant,
+} from '../core';
+import { FLUID_HOVER, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
 import { GroupFocusRing, createGroupFocus, focusRowOnPress, groupRows } from './group-focus';
 
 // ---------------------------------------------------------------------------

@@ -11,8 +11,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
+import { cn, fontWeights } from '../core';
 
 /**
  * A row's label with the ghost-span weight treatment. Leading text of the

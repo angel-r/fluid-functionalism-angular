@@ -19,17 +19,22 @@ import {
   viewChildren,
 } from '@angular/core';
 import { type AnimationOptions } from 'motion';
-import { spring } from '../../core/springs';
-import { fontWeights } from '../../core/font-weight';
-import { Icon } from '../../core/icon';
-import { injectShape, nestedRadius } from '../../core/shape';
-import { injectSizeVariant } from '../../core/size';
-import { typeClass } from '../../core/type-scale';
-import { type FluidAnimation, enterTransition, exitTransition, injectAnimateFluid } from '../../core/motion';
-import { FileThumbnail } from '../../file-thumbnail/file-thumbnail';
-import { Tooltip } from '../../tooltip/tooltip';
-import { type QueuedMessage } from '../../input-message/input-message.types';
-import { type PresenceEntry, createPresenceList } from '../../input-message/presence';
+import {
+  spring,
+  fontWeights,
+  Icon,
+  injectShape,
+  nestedRadius,
+  injectSizeVariant,
+  typeClass,
+  type FluidAnimation,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../../core';
+import { FileThumbnail } from '../../file-thumbnail';
+import { Tooltip } from '../../tooltip';
+import { type QueuedMessage, type PresenceEntry, createPresenceList } from '../../input-message';
 import { QueuedStackMorphRegistry, setInstant } from './queued-stack-morph';
 
 // ---------------------------------------------------------------------------

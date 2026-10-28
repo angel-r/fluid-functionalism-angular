@@ -17,13 +17,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { shapeMap } from '../core/shape';
-import { injectSize } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { Icon } from '../core/icon';
-import { ScrollArea } from '../scroll-area/scroll-area';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
+import { cn, shapeMap, injectSize, typeClass, Icon } from '../core';
+import { ScrollArea } from '../scroll-area';
+import { FluidHoverHighlight } from '../fluid-hover';
 import { CommandMenu } from './command-menu';
 import { CommandMenuShortcut } from './command-menu-shortcut';
 import type { CommandMenuIcon, CommandMenuItemData } from './items';

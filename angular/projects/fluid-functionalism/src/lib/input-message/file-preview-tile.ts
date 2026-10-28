@@ -11,13 +11,20 @@ import {
   output,
   untracked,
 } from '@angular/core';
-import { spring, exitFallbackMs } from '../core/springs';
-import { Icon } from '../core/icon';
-import { injectShape, nestedRadius } from '../core/shape';
-import { type FluidAnimation, enterTransition, exitTransition, injectAnimateFluid } from '../core/motion';
-import { FileThumbnail } from '../file-thumbnail/file-thumbnail';
-import { Tooltip } from '../tooltip/tooltip';
-import { writeInitialStyles } from '../tabs/layer';
+import {
+  spring,
+  exitFallbackMs,
+  Icon,
+  injectShape,
+  nestedRadius,
+  type FluidAnimation,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../core';
+import { FileThumbnail } from '../file-thumbnail';
+import { Tooltip } from '../tooltip';
+import { writeInitialStyles } from '../tabs';
 
 /**
  * Composer-row tile: a FileThumbnail with enter/exit motion and a

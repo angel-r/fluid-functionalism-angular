@@ -11,13 +11,15 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
-import { SizeContext, type SizeVariant } from '../core/size';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { Slider } from '../slider/slider';
-import type { SliderStyle, SliderValue } from '../slider/slider-math';
+import {
+  cn,
+  injectShape,
+  SizeContext,
+  type SizeVariant,
+  SURFACE_LEVEL,
+  surfaceClasses,
+} from '../core';
+import { Slider, type SliderStyle, type SliderValue } from '../slider';
 import {
   applyChannelEdit,
   buildParsed,

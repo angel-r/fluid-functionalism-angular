@@ -9,9 +9,15 @@ import {
   createRepositionScrollStrategy,
 } from '@angular/cdk/overlay';
 import { DomPortal } from '@angular/cdk/portal';
-import { fitToOverlayBox } from '../core/overlay';
-import { spring, exitFallbackMs } from '../core/springs';
-import { enterTransition, exitTransition, injectAnimateFluid, type FluidAnimation } from '../core/motion';
+import {
+  fitToOverlayBox,
+  spring,
+  exitFallbackMs,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+  type FluidAnimation,
+} from '../core';
 
 // ---------------------------------------------------------------------------
 // The popup half the dropdown and select share: a CDK overlay that carries an

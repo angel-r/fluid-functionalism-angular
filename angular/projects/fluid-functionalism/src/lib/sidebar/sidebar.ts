@@ -9,16 +9,16 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { SURFACE_LEVEL } from '../core/surface';
-import { ScrollArea } from '../scroll-area/scroll-area';
+import { cn, SURFACE_LEVEL } from '../core';
+import { ScrollArea } from '../scroll-area';
 import {
   injectSidebar,
   type SidebarCollapsible,
   type SidebarSide,
   type SidebarVariant,
-} from '../sidebar-core/sidebar-context';
-import { SidebarShell, injectSidebarContentLevel } from '../sidebar-core/sidebar-shell';
+  SidebarShell,
+  injectSidebarContentLevel,
+} from '../sidebar-core';
 import { SidebarSheet, sheetLevel } from './sidebar-sheet';
 
 const pageLevel = signal(1).asReadonly();

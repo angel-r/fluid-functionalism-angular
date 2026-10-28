@@ -1,5 +1,5 @@
 import { animate, motionValue, type MotionValue, type ValueAnimationTransition } from 'motion';
-import { spring } from '../core/springs';
+import { spring } from '../core';
 
 /** The fast tier's enter spring, as a value transition. */
 const fastEnter: ValueAnimationTransition<number> = {

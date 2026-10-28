@@ -15,16 +15,21 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { injectSize } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { Icon } from '../core/icon';
-import { ReducedMotion } from '../core/environment';
-import { type FluidAnimation, animateFluid, enterTransition, exitTransition } from '../core/motion';
-import { Layer, writeInitialStyles } from '../tabs/layer';
+import {
+  cn,
+  spring,
+  fontWeights,
+  injectShape,
+  injectSize,
+  typeClass,
+  Icon,
+  ReducedMotion,
+  type FluidAnimation,
+  animateFluid,
+  enterTransition,
+  exitTransition,
+} from '../core';
+import { Layer, writeInitialStyles } from '../tabs';
 
 // ─── Shared collapsible parts ───────────────────────────────────────────────
 //

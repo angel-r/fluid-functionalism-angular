@@ -12,15 +12,21 @@ import {
   output,
   untracked,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { spring, exitFallbackMs } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { Icon } from '../core/icon';
-import { injectSizeVariant } from '../core/size';
-import { injectTouchPrimary } from '../core/environment';
-import { type FluidAnimation, enterTransition, exitTransition, injectAnimateFluid } from '../core/motion';
-import { Tooltip } from '../tooltip/tooltip';
-import { writeInitialStyles } from '../tabs/layer';
+import {
+  cn,
+  spring,
+  exitFallbackMs,
+  fontWeights,
+  Icon,
+  injectSizeVariant,
+  injectTouchPrimary,
+  type FluidAnimation,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../core';
+import { Tooltip } from '../tooltip';
+import { writeInitialStyles } from '../tabs';
 import { type QueuedMessage } from './input-message.types';
 
 /** Pointer travel (px) before a press on a row becomes a drag. */

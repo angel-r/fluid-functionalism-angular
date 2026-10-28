@@ -1,7 +1,5 @@
 import { Directive, computed, input } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
-import { injectSize } from '../core/size';
+import { cn, injectShape, injectSize } from '../core';
 
 /**
  * `<main ffSidebarInset>`: the main column beside the sidebar. Next to an

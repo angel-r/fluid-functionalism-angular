@@ -24,22 +24,35 @@ import {
 import { LISTBOX, Listbox, Option } from '@angular/aria/listbox';
 import { animate } from 'motion';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../core/utils';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
-import { injectShape, shapeMap } from '../core/shape';
-import { SizeContext, injectSize, type SizeVariant } from '../core/size';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { typeClass } from '../core/type-scale';
-import { createKeyboardNavGate } from '../core/environment';
-import { isDisabledRow, popupMotionClass, popupScrollAreaClass, popupViewportClass } from '../core/popup';
-import { createFluidHover, type ItemRect } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { GroupFocusRing } from '../radio-group/group-focus';
-import { ScrollArea } from '../scroll-area/scroll-area';
-import { createPopupOverlay, type PopupPlacement } from '../dropdown/popup-overlay';
-import { PopupCheckedBackground, createPinnedSize, createRaisedSurface } from '../dropdown/popup-parts';
+import {
+  cn,
+  Icon,
+  type IconDefinition,
+  type IconName,
+  injectShape,
+  shapeMap,
+  SizeContext,
+  injectSize,
+  type SizeVariant,
+  SURFACE_LEVEL,
+  surfaceClasses,
+  typeClass,
+  createKeyboardNavGate,
+  isDisabledRow,
+  popupMotionClass,
+  popupScrollAreaClass,
+  popupViewportClass,
+} from '../core';
+import { createFluidHover, type ItemRect, FluidHoverHighlight } from '../fluid-hover';
+import { GroupFocusRing } from '../radio-group';
+import { ScrollArea } from '../scroll-area';
+import {
+  createPopupOverlay,
+  type PopupPlacement,
+  PopupCheckedBackground,
+  createPinnedSize,
+  createRaisedSurface,
+} from '../dropdown';
 
 // ---------------------------------------------------------------------------
 // Select

@@ -8,13 +8,8 @@ import {
   output,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { spring } from '../core/springs';
-import { typeClass } from '../core/type-scale';
-import { injectShape } from '../core/shape';
-import { Icon } from '../core/icon';
-import { focusRowOnPress } from '../radio-group/group-focus';
+import { cn, fontWeights, spring, typeClass, injectShape, Icon } from '../core';
+import { focusRowOnPress } from '../radio-group';
 import { AuqPresence, fastWithFade } from './presence';
 
 /**

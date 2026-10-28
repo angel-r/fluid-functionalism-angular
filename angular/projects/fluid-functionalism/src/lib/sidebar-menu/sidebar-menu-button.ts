@@ -11,12 +11,15 @@ import {
   input,
 } from '@angular/core';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
-import { injectSize } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
+import {
+  cn,
+  injectShape,
+  injectSize,
+  typeClass,
+  Icon,
+  type IconDefinition,
+  type IconName,
+} from '../core';
 import { SidebarMenu } from './sidebar-menu';
 import { SidebarMenuRow } from './sidebar-menu-item';
 import { SidebarMenuRowLabel } from './row-label';

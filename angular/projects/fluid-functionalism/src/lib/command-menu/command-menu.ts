@@ -18,14 +18,16 @@ import {
   viewChild,
 } from '@angular/core';
 import { animate } from 'motion';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { enterTransition } from '../core/motion';
-import { ReducedMotion } from '../core/environment';
-import { isDisabledRow } from '../core/popup';
-import type { SizeVariant } from '../core/size';
-import { createFluidHover } from '../fluid-hover/fluid-hover';
-import { provideSizeOverride } from '../tabs/layer';
+import {
+  cn,
+  spring,
+  enterTransition,
+  ReducedMotion,
+  isDisabledRow,
+  type SizeVariant,
+} from '../core';
+import { createFluidHover } from '../fluid-hover';
+import { provideSizeOverride } from '../tabs';
 import {
   defaultCommandMenuFilter,
   sectionRows,

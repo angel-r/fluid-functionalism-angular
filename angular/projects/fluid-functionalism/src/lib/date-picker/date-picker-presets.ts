@@ -1,10 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output } from '@angular/core';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { injectSize } from '../core/size';
-import { FLUID_HOVER, FluidHoverItem, createFluidHover } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import type { DateRange } from '../calendar/calendar-dates';
+import { cn, fontWeights, injectSize } from '../core';
+import { FLUID_HOVER, FluidHoverItem, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
+import type { DateRange } from '../calendar';
 import { sameDay } from './date-picker-labels';
 
 /** A range listed beside the calendar in range mode. */

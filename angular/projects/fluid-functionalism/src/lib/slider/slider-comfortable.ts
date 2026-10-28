@@ -13,11 +13,7 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { enterTransition } from '../core/motion';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
+import { cn, spring, enterTransition, fontWeights, injectShape } from '../core';
 import {
   HOVER_PREVIEW_BG,
   PIP_SIZE,

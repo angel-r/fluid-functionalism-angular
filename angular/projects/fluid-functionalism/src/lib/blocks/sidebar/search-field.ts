@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, booleanAttribute, input, model, viewChild } from '@angular/core';
-import { Icon } from '../../core/icon';
-import { injectSize } from '../../core/size';
+import { Icon, injectSize } from '../../core';
 import { SidebarInput } from '../../sidebar-core';
 
 // ---------------------------------------------------------------------------

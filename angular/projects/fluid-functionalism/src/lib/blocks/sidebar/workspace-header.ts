@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, contentChild, input } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../../core/utils';
-import { Icon } from '../../core/icon';
-import { injectShape } from '../../core/shape';
-import { injectSize } from '../../core/size';
-import { fontWeights } from '../../core/font-weight';
+import { cn, Icon, injectShape, injectSize, fontWeights } from '../../core';
 import { SidebarTrigger, injectSidebar } from '../../sidebar-core';
 import { SIDEBAR_MENU_POPUP, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../sidebar-menu';
 import { DropdownContent, DropdownMenu, DropdownTrigger } from '../../dropdown';

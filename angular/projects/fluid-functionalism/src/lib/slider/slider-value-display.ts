@@ -11,10 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { fieldTouchClass } from '../core/type-scale';
-import { injectShape } from '../core/shape';
+import { cn, fontWeights, fieldTouchClass, injectShape } from '../core';
 import { nearestStepIndex } from './slider-math';
 
 /** A click-to-edit commit: which thumb and the clamped, snapped value. */

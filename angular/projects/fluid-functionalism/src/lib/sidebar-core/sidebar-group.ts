@@ -21,13 +21,17 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { animate, type AnimationOptions, type AnimationPlaybackControls } from 'motion';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { enterTransition, exitTransition } from '../core/motion';
-import { injectShape } from '../core/shape';
-import { injectSize, injectSizeVariant } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { Icon } from '../core/icon';
+import {
+  cn,
+  spring,
+  enterTransition,
+  exitTransition,
+  injectShape,
+  injectSize,
+  injectSizeVariant,
+  typeClass,
+  Icon,
+} from '../core';
 import { wrapLeadingText } from './leading-text';
 
 let nextId = 0;

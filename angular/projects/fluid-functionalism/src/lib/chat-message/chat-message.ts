@@ -11,14 +11,20 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { injectShape } from '../core/shape';
-import { type SizeVariant, injectSizeVariant } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { injectTouchPrimary, ReducedMotion } from '../core/environment';
-import { type FluidAnimation, enterTransition, injectAnimateFluid } from '../core/motion';
-import { FileThumbnail } from '../file-thumbnail/file-thumbnail';
+import {
+  cn,
+  spring,
+  injectShape,
+  type SizeVariant,
+  injectSizeVariant,
+  typeClass,
+  injectTouchPrimary,
+  ReducedMotion,
+  type FluidAnimation,
+  enterTransition,
+  injectAnimateFluid,
+} from '../core';
+import { FileThumbnail } from '../file-thumbnail';
 import { CHAT_MESSAGE_ENTRANCE_OVERRIDE } from './entrance';
 
 export type ChatMessageFrom = 'user' | 'assistant';

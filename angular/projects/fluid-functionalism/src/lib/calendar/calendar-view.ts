@@ -4,9 +4,7 @@
 // The React version spreads this over its Day and DayButton parts.
 // ---------------------------------------------------------------------------
 
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { typeClass } from '../core/type-scale';
+import { cn, fontWeights, typeClass } from '../core';
 import {
   addDays,
   dateMatchModifiers,

@@ -21,15 +21,19 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { Observable, Subject } from 'rxjs';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { typeClass } from '../core/type-scale';
-import { injectShape } from '../core/shape';
-import { SizeContext, injectSize, type SizeVariant } from '../core/size';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
-import { createFluidHover } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
+import {
+  cn,
+  fontWeights,
+  typeClass,
+  injectShape,
+  SizeContext,
+  injectSize,
+  type SizeVariant,
+  Icon,
+  type IconDefinition,
+  type IconName,
+} from '../core';
+import { createFluidHover, FluidHoverHighlight } from '../fluid-hover';
 
 // ---------------------------------------------------------------------------
 // Card is shadcn/ui's compositional card — the same parts and `data-slot`

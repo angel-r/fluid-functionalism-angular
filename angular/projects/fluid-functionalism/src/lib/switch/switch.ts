@@ -15,11 +15,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { animate, motionValue, type MotionValue, type ValueAnimationTransition } from 'motion';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { enterTransition } from '../core/motion';
-import { ReducedMotion } from '../core/environment';
-import { injectSize, type SizeVariant } from '../core/size';
+import { cn, spring, enterTransition, ReducedMotion, injectSize, type SizeVariant } from '../core';
 
 // ---------------------------------------------------------------------------
 // Switch is a whole labeled row: a click anywhere on it toggles, and the thumb

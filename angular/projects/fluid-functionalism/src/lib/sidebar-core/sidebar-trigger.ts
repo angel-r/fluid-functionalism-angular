@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { injectSizeVariant } from '../core/size';
-import { Icon } from '../core/icon';
+import { injectSizeVariant, Icon } from '../core';
 import { Button, type ButtonSize, type ButtonVariant } from '../button';
 import { Tooltip } from '../tooltip';
 import { injectSidebar } from './sidebar-context';

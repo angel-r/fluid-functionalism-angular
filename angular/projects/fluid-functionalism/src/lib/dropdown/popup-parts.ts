@@ -13,13 +13,18 @@ import {
   untracked,
 } from '@angular/core';
 import type { AnimationOptions } from 'motion';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { shapeMap } from '../core/shape';
-import { SizeContext, type SizeVariant } from '../core/size';
-import { SURFACE_LEVEL } from '../core/surface';
-import { enterTransition, exitTransition, injectAnimateFluid } from '../core/motion';
-import type { ItemRect } from '../fluid-hover/fluid-hover';
+import {
+  cn,
+  spring,
+  shapeMap,
+  SizeContext,
+  type SizeVariant,
+  SURFACE_LEVEL,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../core';
+import type { ItemRect } from '../fluid-hover';
 
 // ---------------------------------------------------------------------------
 // Small pieces the dropdown and select popups share.

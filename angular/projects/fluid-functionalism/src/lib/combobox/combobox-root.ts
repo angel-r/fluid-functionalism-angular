@@ -12,7 +12,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { SizeContext, type SizeVariant } from '../core/size';
+import { SizeContext, type SizeVariant } from '../core';
 
 // ---------------------------------------------------------------------------
 // Combobox

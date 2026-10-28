@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { Tooltip } from '../tooltip/tooltip';
+import { Tooltip } from '../tooltip';
 import { rgbToHsl, rgbToOklch, type ChannelKey, type ColorFormat, type ParsedColor } from './color-math';
 import { ColorInput } from './color-input';
 

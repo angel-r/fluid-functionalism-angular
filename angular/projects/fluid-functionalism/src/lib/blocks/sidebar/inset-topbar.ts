@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { cn } from '../../core/utils';
+import { cn } from '../../core';
 import { SidebarTrigger, injectSidebar } from '../../sidebar-core';
 
 // ---------------------------------------------------------------------------

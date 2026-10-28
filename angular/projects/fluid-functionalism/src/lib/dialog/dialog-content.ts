@@ -20,14 +20,20 @@ import {
 import { Dialog as CdkDialog, type DialogRef, type DialogRole } from '@angular/cdk/dialog';
 import { type FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import type { Subscription } from 'rxjs';
-import { cn } from '../core/utils';
-import { exitFallbackMs, spring } from '../core/springs';
-import { enterTransition, exitTransition, injectAnimateFluid, type FluidAnimation } from '../core/motion';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { injectShape } from '../core/shape';
-import { injectSizeVariant } from '../core/size';
-import { Icon } from '../core/icon';
+import {
+  cn,
+  exitFallbackMs,
+  spring,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+  type FluidAnimation,
+  SURFACE_LEVEL,
+  surfaceClasses,
+  injectShape,
+  injectSizeVariant,
+  Icon,
+} from '../core';
 import { Button } from '../button';
 import { Dialog } from './dialog';
 

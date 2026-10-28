@@ -9,10 +9,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectSize } from '../core/size';
-import { fieldTouchClass } from '../core/type-scale';
-import { Icon } from '../core/icon';
+import { cn, injectSize, fieldTouchClass, Icon } from '../core';
 import { CommandMenu } from './command-menu';
 import type { CommandMenuIcon } from './items';
 

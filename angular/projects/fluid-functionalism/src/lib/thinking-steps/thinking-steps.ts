@@ -14,17 +14,23 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { type SizeVariant, injectSize, injectSizeVariant } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { Icon } from '../core/icon';
-import { type IconName } from '../core/icons';
-import { type FluidAnimation, enterTransition, injectAnimateFluid } from '../core/motion';
-import { provideSizeOverride } from '../tabs/layer';
-import { Badge, type BadgeColor } from '../badge/badge';
+import {
+  cn,
+  spring,
+  fontWeights,
+  injectShape,
+  type SizeVariant,
+  injectSize,
+  injectSizeVariant,
+  typeClass,
+  Icon,
+  type IconName,
+  type FluidAnimation,
+  enterTransition,
+  injectAnimateFluid,
+} from '../core';
+import { provideSizeOverride } from '../tabs';
+import { Badge, type BadgeColor } from '../badge';
 import { ThinkingStepsPanel, ThinkingStepsTrigger } from './collapsible';
 
 export type StepStatus = 'complete' | 'active' | 'pending';

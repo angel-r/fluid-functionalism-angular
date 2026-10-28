@@ -9,8 +9,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
+import { cn, injectShape } from '../core';
 
 // ─── PDF renderer ─────────────────────────────────────────────────────────
 // The library ships no PDF renderer, so it never imports pdfjs: a PDF shows

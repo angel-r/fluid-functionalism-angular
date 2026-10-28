@@ -13,13 +13,17 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
-import { injectShape } from '../core/shape';
-import { injectSize, type SizeVariant } from '../core/size';
-import { FLUID_HOVER, createFluidHover } from '../fluid-hover/fluid-hover';
+import {
+  cn,
+  fontWeights,
+  Icon,
+  type IconDefinition,
+  type IconName,
+  injectShape,
+  injectSize,
+  type SizeVariant,
+} from '../core';
+import { FLUID_HOVER, createFluidHover } from '../fluid-hover';
 
 // ---------------------------------------------------------------------------
 // InputGroup stacks labelled text fields that share one fluid hover scope.

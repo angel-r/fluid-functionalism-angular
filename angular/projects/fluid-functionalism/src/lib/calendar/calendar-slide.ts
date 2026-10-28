@@ -12,8 +12,7 @@ import {
   untracked,
 } from '@angular/core';
 import { animate, type AnimationOptions } from 'motion';
-import { spring } from '../core/springs';
-import { enterTransition, exitTransition } from '../core/motion';
+import { spring, enterTransition, exitTransition } from '../core';
 
 /**
  * A month change. Side by side: every grid travels a full stride, so the

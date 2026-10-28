@@ -16,14 +16,22 @@ import {
   viewChild,
 } from '@angular/core';
 import { cva } from 'class-variance-authority';
-import { cn } from '../core/utils';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
-import { injectShape } from '../core/shape';
-import { injectSize, type SizeVariant } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { exitFallbackMs, spring } from '../core/springs';
-import { type FluidAnimation, enterTransition, exitTransition, injectAnimateFluid } from '../core/motion';
+import {
+  cn,
+  Icon,
+  type IconDefinition,
+  type IconName,
+  injectShape,
+  injectSize,
+  type SizeVariant,
+  typeClass,
+  exitFallbackMs,
+  spring,
+  type FluidAnimation,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../core';
 import { Combobox, type ComboboxItemData, comboboxItemLabel } from './combobox-root';
 
 export type ComboboxFieldVariant = 'bordered' | 'borderless';

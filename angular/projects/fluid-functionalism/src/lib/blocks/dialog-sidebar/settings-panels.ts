@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import { cn } from '../../core/utils';
+import { cn } from '../../core';
 import { Button } from '../../button';
 import { InputField, InputGroup } from '../../input-group';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../../select';

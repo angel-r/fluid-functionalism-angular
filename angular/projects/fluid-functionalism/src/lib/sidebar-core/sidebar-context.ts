@@ -16,7 +16,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { cn } from '../core/utils';
+import { cn } from '../core';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 

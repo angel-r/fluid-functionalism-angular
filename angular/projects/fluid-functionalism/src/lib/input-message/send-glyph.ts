@@ -11,10 +11,16 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { spring, exitFallbackMs } from '../core/springs';
-import { Icon } from '../core/icon';
-import { type FluidAnimation, enterTransition, exitTransition, injectAnimateFluid } from '../core/motion';
-import { writeInitialStyles } from '../tabs/layer';
+import {
+  spring,
+  exitFallbackMs,
+  Icon,
+  type FluidAnimation,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../core';
+import { writeInitialStyles } from '../tabs';
 
 export type SendGlyphMode = 'stop' | 'arrow';
 

@@ -9,11 +9,14 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
-import { injectSizeVariant } from '../core/size';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
+import {
+  cn,
+  injectShape,
+  injectSizeVariant,
+  Icon,
+  type IconDefinition,
+  type IconName,
+} from '../core';
 
 export const buttonVariants = cva(
   [

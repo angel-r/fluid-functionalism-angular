@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { injectShape, nestedRadius } from '../core/shape';
+import { injectShape, nestedRadius } from '../core';
 import { clamp01, hsvToRgb } from './color-math';
 import { SQUARE_HEIGHT } from './shared';
 

@@ -12,10 +12,8 @@ import {
   output,
   untracked,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { Dialog } from '../dialog/dialog';
-import { DialogContent } from '../dialog/dialog-content';
-import { DialogDescription, DialogTitle } from '../dialog/dialog-parts';
+import { cn } from '../core';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../dialog';
 import { COMMAND_MENU_DIALOG, type CommandMenuDialogContext } from './command-menu';
 import { comboKey, hasModifier, isEditable, matchesShortcut, parseShortcut } from './shortcut';
 

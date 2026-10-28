@@ -17,13 +17,17 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { animate, type AnimationOptions, type AnimationPlaybackControls } from 'motion';
-import { cn } from '../core/utils';
-import { exitFallbackMs, spring } from '../core/springs';
-import { enterTransition, exitTransition } from '../core/motion';
-import { ReducedMotion } from '../core/environment';
-import { injectShape } from '../core/shape';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
+import {
+  cn,
+  exitFallbackMs,
+  spring,
+  enterTransition,
+  exitTransition,
+  ReducedMotion,
+  injectShape,
+  SURFACE_LEVEL,
+  surfaceClasses,
+} from '../core';
 import { injectSidebar, type SidebarSide, type SidebarVariant } from './sidebar-context';
 import { SidebarRail } from './sidebar-rail';
 

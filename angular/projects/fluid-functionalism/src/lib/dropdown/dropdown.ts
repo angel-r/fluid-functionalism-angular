@@ -6,18 +6,21 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { shapeMap } from '../core/shape';
-import { SizeContext, injectSize, type SizeVariant } from '../core/size';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { typeClass } from '../core/type-scale';
-import { isDisabledRow } from '../core/popup';
-import { createFluidHover } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split/merge-split';
-import { DROPDOWN_CONTEXT, type DropdownContextValue } from '../menu-item/menu-item';
-import { GroupFocusRing, createGroupFocus } from '../radio-group/group-focus';
+import {
+  cn,
+  shapeMap,
+  SizeContext,
+  injectSize,
+  type SizeVariant,
+  SURFACE_LEVEL,
+  surfaceClasses,
+  typeClass,
+  isDisabledRow,
+} from '../core';
+import { createFluidHover, FluidHoverHighlight } from '../fluid-hover';
+import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split';
+import { DROPDOWN_CONTEXT, type DropdownContextValue } from '../menu-item';
+import { GroupFocusRing, createGroupFocus } from '../radio-group';
 import { PopupCheckedBackground, createPinnedSize, createRaisedSurface } from './popup-parts';
 
 // Dropdown opts out of the global pill/rounded shape context — popover surfaces

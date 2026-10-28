@@ -1,7 +1,6 @@
 import { type Provider, type Type, computed, inject } from '@angular/core';
 import { animate, type AnimationOptions, type DOMKeyframesDefinition } from 'motion';
-import { animateFluid, type FluidAnimation } from '../core/motion';
-import { SizeContext, type SizeVariant } from '../core/size';
+import { animateFluid, type FluidAnimation, SizeContext, type SizeVariant } from '../core';
 
 // ---------------------------------------------------------------------------
 // Internal helpers shared by the tabs, tabs-subtle and accordion ports. Not

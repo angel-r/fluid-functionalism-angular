@@ -23,18 +23,23 @@ import {
   TabPanel as NgTabPanel,
   Tabs as NgTabs,
 } from '@angular/aria/tabs';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { injectSize, type SizeVariant } from '../core/size';
-import { injectSurface } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { ReducedMotion } from '../core/environment';
-import { enterTransition, exitTransition } from '../core/motion';
-import { Icon } from '../core/icon';
-import type { IconDefinition, IconName } from '../core/icons';
-import { createFluidHover, type ItemRect } from '../fluid-hover/fluid-hover';
+import {
+  cn,
+  spring,
+  fontWeights,
+  injectShape,
+  injectSize,
+  type SizeVariant,
+  injectSurface,
+  surfaceClasses,
+  ReducedMotion,
+  enterTransition,
+  exitTransition,
+  Icon,
+  type IconDefinition,
+  type IconName,
+} from '../core';
+import { createFluidHover, type ItemRect } from '../fluid-hover';
 import { Layer, isFocusVisible, provideSizeOverride, type Keyframes } from './layer';
 
 // ---------------------------------------------------------------------------

@@ -16,10 +16,16 @@ import {
 } from '@angular/core';
 import { Dialog, type DialogRef, type DialogRole } from '@angular/cdk/dialog';
 import type { Subscription } from 'rxjs';
-import { exitFallbackMs, spring } from '../core/springs';
-import { enterTransition, exitTransition, injectAnimateFluid, type FluidAnimation } from '../core/motion';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
+import {
+  exitFallbackMs,
+  spring,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+  type FluidAnimation,
+  SURFACE_LEVEL,
+  surfaceClasses,
+} from '../core';
 
 // Built on the CDK Dialog: it provides everything the drawer needs — scroll
 // lock, focus trap, focus restore after close — while leaving the slide

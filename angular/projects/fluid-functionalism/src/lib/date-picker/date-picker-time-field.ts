@@ -14,22 +14,25 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { injectSize } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { popupScrollAreaClass, popupViewportClass } from '../core/popup';
-import { Elevated } from '../core/surface';
-import { Icon } from '../core/icon';
-import type { IconName } from '../core/icons';
+import {
+  cn,
+  fontWeights,
+  injectSize,
+  typeClass,
+  popupScrollAreaClass,
+  popupViewportClass,
+  Elevated,
+  Icon,
+  type IconName,
+} from '../core';
 import {
   FLUID_HOVER,
   FluidHoverItem,
   createFluidHover,
   type FluidHoverController,
-} from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { ScrollArea } from '../scroll-area/scroll-area';
+  FluidHoverHighlight,
+} from '../fluid-hover';
+import { ScrollArea } from '../scroll-area';
 import { formatDuration, formatTime, nearestSlotIndex, parseTime, type TimeSlot } from './date-picker-time';
 import {
   createDatePickerPopover,

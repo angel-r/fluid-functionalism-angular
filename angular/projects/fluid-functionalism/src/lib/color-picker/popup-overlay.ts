@@ -7,9 +7,15 @@ import {
   createRepositionScrollStrategy,
 } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { fitToOverlayBox } from '../core/overlay';
-import { exitFallbackMs } from '../core/springs';
-import { type FluidAnimation, type SpringTier, enterTransition, exitTransition, type injectAnimateFluid } from '../core/motion';
+import {
+  fitToOverlayBox,
+  exitFallbackMs,
+  type FluidAnimation,
+  type SpringTier,
+  enterTransition,
+  exitTransition,
+  type injectAnimateFluid,
+} from '../core';
 
 // ---------------------------------------------------------------------------
 // The overlay both color picker popups share (the format menu and the

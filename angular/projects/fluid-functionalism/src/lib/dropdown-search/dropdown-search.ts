@@ -18,11 +18,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { Icon } from '../core/icon';
-import { injectSize } from '../core/size';
-import { injectSurface } from '../core/surface';
-import { SURFACE_BG } from '../core/surface-classes';
+import { cn, Icon, injectSize, injectSurface, SURFACE_BG } from '../core';
 
 // ---------------------------------------------------------------------------
 // Search inside a dropdown menu.

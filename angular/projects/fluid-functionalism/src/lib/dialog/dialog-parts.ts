@@ -1,8 +1,5 @@
 import { DestroyRef, Directive, computed, effect, inject, input } from '@angular/core';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { injectSizeVariant } from '../core/size';
-import { typeClass } from '../core/type-scale';
+import { cn, fontWeights, injectSizeVariant, typeClass } from '../core';
 import { Dialog } from './dialog';
 
 let nextId = 0;

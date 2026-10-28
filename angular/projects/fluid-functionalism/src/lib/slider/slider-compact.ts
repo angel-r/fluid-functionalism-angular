@@ -17,11 +17,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { enterTransition } from '../core/motion';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
+import { cn, spring, enterTransition, fontWeights, injectShape } from '../core';
 import {
   DOT_SIZE,
   HOVER_PREVIEW_BG,

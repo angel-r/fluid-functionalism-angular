@@ -10,11 +10,8 @@ import {
   input,
   untracked,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { SizeContext, injectSize, sizeMap, type SizeVariant } from '../core/size';
-import { createFluidHover, type FluidHoverController } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
+import { cn, fontWeights, SizeContext, injectSize, sizeMap, type SizeVariant } from '../core';
+import { createFluidHover, type FluidHoverController, FluidHoverHighlight } from '../fluid-hover';
 
 // ---------------------------------------------------------------------------
 // Table is a plain HTML table with one fluid hover highlight drawn behind all

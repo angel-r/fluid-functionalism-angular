@@ -13,11 +13,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
-import { injectSize } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { fontWeights } from '../core/font-weight';
+import { cn, injectShape, injectSize, typeClass, fontWeights } from '../core';
 import { SIDEBAR_MENU_ACTIONS_CLUSTER, SidebarMenuRow } from './sidebar-menu-item';
 import { ACTION_TOP, BADGE_TOP } from './menu-utils';
 

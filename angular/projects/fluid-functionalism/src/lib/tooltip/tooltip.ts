@@ -31,12 +31,18 @@ import {
   createRepositionScrollStrategy,
 } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { cn } from '../core/utils';
-import { fitToOverlayBox } from '../core/overlay';
-import { exitFallbackMs, spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { type FluidAnimation, enterTransition, exitTransition, injectAnimateFluid } from '../core/motion';
+import {
+  cn,
+  fitToOverlayBox,
+  exitFallbackMs,
+  spring,
+  fontWeights,
+  injectShape,
+  type FluidAnimation,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../core';
 
 export type TooltipSide = 'top' | 'right' | 'bottom' | 'left';
 export type TooltipContent = string | number | TemplateRef<unknown> | null | undefined;

@@ -15,13 +15,17 @@ import {
   viewChild,
 } from '@angular/core';
 import type { AnimationOptions } from 'motion';
-import { cn } from '../core/utils';
-import { exitFallbackMs, spring } from '../core/springs';
-import { enterTransition, exitTransition } from '../core/motion';
-import { injectShape } from '../core/shape';
-import { SizeContext, type SizeVariant } from '../core/size';
-import { createFluidHover, type ItemRect } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
+import {
+  cn,
+  exitFallbackMs,
+  spring,
+  enterTransition,
+  exitTransition,
+  injectShape,
+  SizeContext,
+  type SizeVariant,
+} from '../core';
+import { createFluidHover, type ItemRect, FluidHoverHighlight } from '../fluid-hover';
 import {
   NO_TARGET,
   ROOT_LEVEL_ID,

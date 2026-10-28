@@ -7,11 +7,8 @@ import {
   input,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { fontWeights } from '../core/font-weight';
-import { injectSizeVariant } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { Button, type ButtonIcon } from '../button/button';
+import { cn, fontWeights, injectSizeVariant, typeClass } from '../core';
+import { Button, type ButtonIcon } from '../button';
 
 // ── BannerTitle ──────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-import type { IconDefinition, IconName } from '../core/icons';
+import type { IconDefinition, IconName } from '../core';
 
 /** A row's icon: a role name from the icon map, or an icon definition. */
 export type CommandMenuIcon = IconName | IconDefinition;

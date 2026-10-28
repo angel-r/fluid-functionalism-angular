@@ -16,12 +16,18 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { Dialog, type DialogRef, type DialogRole } from '@angular/cdk/dialog';
 import type { Subscription } from 'rxjs';
-import { cn } from '../core/utils';
-import { exitFallbackMs, spring } from '../core/springs';
-import { enterTransition, exitTransition, injectAnimateFluid, type FluidAnimation } from '../core/motion';
-import { SURFACE_LEVEL } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { injectSidebar, type SidebarSide } from '../sidebar-core/sidebar-context';
+import {
+  cn,
+  exitFallbackMs,
+  spring,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+  type FluidAnimation,
+  SURFACE_LEVEL,
+  surfaceClasses,
+} from '../core';
+import { injectSidebar, type SidebarSide } from '../sidebar-core';
 
 const pageLevel = signal(1).asReadonly();
 

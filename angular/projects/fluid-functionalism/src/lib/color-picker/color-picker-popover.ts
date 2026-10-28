@@ -18,15 +18,20 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { SizeContext, sizeMap, type SizeVariant } from '../core/size';
-import { SurfaceProvider, injectSurface } from '../core/surface';
-import { surfaceClasses } from '../core/surface-classes';
-import { Icon } from '../core/icon';
-import { injectAnimateFluid } from '../core/motion';
+import {
+  cn,
+  spring,
+  fontWeights,
+  injectShape,
+  SizeContext,
+  sizeMap,
+  type SizeVariant,
+  SurfaceProvider,
+  injectSurface,
+  surfaceClasses,
+  Icon,
+  injectAnimateFluid,
+} from '../core';
 import { parseColor, rgbToHexStr, type ColorFormat } from './color-math';
 import { ColorPicker, type ColorChange } from './color-picker';
 import { ColorTile } from './color-swatch';

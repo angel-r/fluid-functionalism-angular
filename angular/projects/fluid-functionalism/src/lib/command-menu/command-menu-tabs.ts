@@ -12,9 +12,8 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn } from '../core/utils';
-import { SizeContext, injectSizeVariant, type SizeVariant } from '../core/size';
-import { TabsSubtle, TabsSubtleItem } from '../tabs-subtle/tabs-subtle';
+import { cn, SizeContext, injectSizeVariant, type SizeVariant } from '../core';
+import { TabsSubtle, TabsSubtleItem } from '../tabs-subtle';
 import { CommandMenu, type CommandMenuTab, type CommandMenuTabsHandle } from './command-menu';
 
 /**

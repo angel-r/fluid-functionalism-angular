@@ -33,19 +33,27 @@ import {
 } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { animate } from 'motion';
-import { cn } from '../core/utils';
-import { fitToOverlayBox } from '../core/overlay';
-import { Icon } from '../core/icon';
-import { shapeMap } from '../core/shape';
-import { injectSize } from '../core/size';
-import { exitFallbackMs, spring } from '../core/springs';
-import { Elevated } from '../core/surface';
-import { isDisabledRow, popupMotionClass, popupScrollAreaClass, popupViewportClass } from '../core/popup';
-import { type FluidAnimation, enterTransition, exitTransition, injectAnimateFluid } from '../core/motion';
-import { type ItemRect, createFluidHover } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split/merge-split';
-import { ScrollArea } from '../scroll-area/scroll-area';
+import {
+  cn,
+  fitToOverlayBox,
+  Icon,
+  shapeMap,
+  injectSize,
+  exitFallbackMs,
+  spring,
+  Elevated,
+  isDisabledRow,
+  popupMotionClass,
+  popupScrollAreaClass,
+  popupViewportClass,
+  type FluidAnimation,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+} from '../core';
+import { type ItemRect, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
+import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split';
+import { ScrollArea } from '../scroll-area';
 import {
   COMBOBOX_CREATE_VALUE,
   Combobox,

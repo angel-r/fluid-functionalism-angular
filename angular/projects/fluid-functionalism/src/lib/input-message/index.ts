@@ -13,3 +13,4 @@ export {
   mergeFiles,
   parseAccept,
 } from './input-message.types';
+export { createPresenceList, type PresenceEntry } from './presence';

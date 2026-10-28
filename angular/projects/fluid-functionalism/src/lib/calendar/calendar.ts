@@ -20,18 +20,29 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { spring, exitFallbackMs } from '../core/springs';
-import { fontWeights } from '../core/font-weight';
-import { injectShape } from '../core/shape';
-import { injectSize, type SizeVariant } from '../core/size';
-import { typeClass } from '../core/type-scale';
-import { POPUP_NAV_KEYS } from '../core/popup';
-import { ReducedMotion, createKeyboardNavGate } from '../core/environment';
-import { enterTransition, exitTransition } from '../core/motion';
-import { createFluidHover, FluidHoverItem, FLUID_HOVER, type ItemRect } from '../fluid-hover/fluid-hover';
-import { FluidHoverHighlight } from '../fluid-hover/fluid-hover-highlight';
-import { Layer, isFocusVisible } from '../tabs/layer';
+import {
+  cn,
+  spring,
+  exitFallbackMs,
+  fontWeights,
+  injectShape,
+  injectSize,
+  type SizeVariant,
+  typeClass,
+  POPUP_NAV_KEYS,
+  ReducedMotion,
+  createKeyboardNavGate,
+  enterTransition,
+  exitTransition,
+} from '../core';
+import {
+  createFluidHover,
+  FluidHoverItem,
+  FLUID_HOVER,
+  type ItemRect,
+  FluidHoverHighlight,
+} from '../fluid-hover';
+import { Layer, isFocusVisible } from '../tabs';
 import {
   addDays,
   addMonths,

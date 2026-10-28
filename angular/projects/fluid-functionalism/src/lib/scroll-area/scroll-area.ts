@@ -20,9 +20,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn } from '../core/utils';
-import { injectShape } from '../core/shape';
-import { injectTouchPrimary } from '../core/environment';
+import { cn, injectShape, injectTouchPrimary } from '../core';
 
 export type ScrollAreaOrientation = 'vertical' | 'horizontal' | 'both';
 type Axis = 'vertical' | 'horizontal';

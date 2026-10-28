@@ -80,7 +80,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 |---|---|---|---|---|
 | T1 | S1, S6 | inline | done | `angular/scripts/bundle-probe/probe.mjs` + `npm run probe:bundle`; baseline (a) 53.5 / 63.8 / 74.1 / 950.9 KB, (b) one 152.5 KB chunk with `ff-calendar` imported statically by main (RED) |
 | T2 | S3, D2 | inline (scratch copy) | done | Spike in `dist/.spike` (never committed): ng-packagr 22.2 builds a primary that re-exports two secondaries; the bare import still splits (16.5 KB static core, 8.6 KB lazy button) — D2 holds |
-| T3 | S5 | inline | todo | Export the cross-entry internals from their owning `index.ts` |
+| T3 | S5 | inline | done | 573 cross-folder imports in 111 files now go through the folder `index.ts`; the S5 internals are exported from their entry; 1171 tests, lib and showcase builds green |
 | T4 | S2, D1, D4 | inline | todo | `git mv` every folder to the package root and fix config; tests and builds green, still one FESM |
 | T5 | S2, S3, S4 | inline | todo | One `ng-package.json` per entry; cross-entry imports by package name; primary re-exports |
 | T6 | S6 | inline | todo | `/* @__PURE__ */` annotations |
@@ -170,4 +170,10 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
   - Bare import still splits: main keeps a 16.5 KB static chunk (core), Button lands in an 8.6 KB lazy chunk. Sub-paths give the same chunks. Sizes: `cn` 3.3 KB, `provideFluid` 13.5 KB, `+ Button` 25.0 KB, everything 34.6 KB.
   - **Probe fix found by the spike:** my plugin resolves library files by path, so esbuild never read the manifest and kept the primary's unused re-export as a side-effectful import — the bare run looked broken. The plugin now forwards `sideEffects` from the dist manifest (`sideEffects: false`). Real bundlers read that field from `node_modules`, so this matches reality; T7 re-checks it with the real showcase build. The unsplit baseline still reports RED (152.5 KB static chunk).
   - Learned for T5: the spike's secondary entry needs no `allowedNonPeerDependencies`; only the primary's `ng-package.json` carries it.
-- **Next step:** T3.
+- **L7** (2026-10-28, T3): deep cross-folder imports are gone.
+  - 573 import specifiers in 111 production files rewritten from `<rel>/<folder>/<file>` to `<rel>/<folder>` (codemod over the TS AST, spec files untouched per D5). The blocks files use `../../<folder>` and keep it: `src/lib/blocks/x` and `<pkg>/blocks/x` are both two levels from the package root.
+  - A file could import up to 11 separate symbols from `core` through different deep paths, so 381 duplicate same-module declarations were merged into one (prettier style, 100 columns). Merges never crossed a comment between the declarations.
+  - New exports, all from the S5 list: `/tabs` → `Layer, isFocusVisible, provideSizeOverride, writeInitialStyles, Keyframes`; `/radio-group` → `createGroupFocus, GroupFocusRing, focusRowOnPress, groupRows`; `/dropdown` → `createPopupOverlay, PopupCheckedBackground, createPinnedSize, createRaisedSurface` plus the overlay types the importers need (`PopupAlign`, `PopupPlacement`, `PopupOverlay`, `PopupOverlayOptions` — `Dropdown*` aliases stay as they were); `/chat-message` → `CHAT_MESSAGE_ENTRANCE_OVERRIDE, ChatMessageEntranceOverride`; `/input-message` → `createPresenceList, PresenceEntry`; `/core` → `overlay` (`fitToOverlayBox`).
+  - No name collisions: the lib build, the showcase build and the 1171 tests pass. `core/lucide-icons` is still internal; nothing outside core imports it.
+  - Two type errors in the first build (`'strategy' is possibly null`, `Parameter implicitly has an 'any' type`) were cascades from the missing `fitToOverlayBox` import and disappeared with it.
+- **Next step:** T4.

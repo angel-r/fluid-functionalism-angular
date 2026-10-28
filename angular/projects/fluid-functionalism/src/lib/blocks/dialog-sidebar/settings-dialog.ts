@@ -7,8 +7,7 @@ import {
   linkedSignal,
   output,
 } from '@angular/core';
-import { fontWeights } from '../../core/font-weight';
-import { type IconName } from '../../core/icons';
+import { fontWeights, type IconName } from '../../core';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../../dialog';
 import { SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarProvider } from '../../sidebar-core';
 import { Sidebar, SidebarContent } from '../../sidebar';

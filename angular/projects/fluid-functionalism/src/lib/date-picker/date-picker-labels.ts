@@ -1,4 +1,4 @@
-import type { DateRange } from '../calendar/calendar-dates';
+import type { DateRange } from '../calendar';
 
 // ---------------------------------------------------------------------------
 // Date labels and the form value of the date picker (pure, exported for the

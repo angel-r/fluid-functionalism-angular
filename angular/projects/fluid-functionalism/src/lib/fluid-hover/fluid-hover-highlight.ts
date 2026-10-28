@@ -11,10 +11,7 @@ import {
   untracked,
 } from '@angular/core';
 import { animate, type AnimationOptions } from 'motion';
-import { cn } from '../core/utils';
-import { spring } from '../core/springs';
-import { ReducedMotion } from '../core/environment';
-import { exitTransition } from '../core/motion';
+import { cn, spring, ReducedMotion, exitTransition } from '../core';
 import { FLUID_HOVER, type FluidHoverController, type ItemRect } from './fluid-hover';
 
 // ---------------------------------------------------------------------------
