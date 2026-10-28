@@ -29,12 +29,28 @@ const requireFromAngular = createRequire(path.join(angularRoot, 'package.json'))
 
 const args = process.argv.slice(2);
 const jsonOut = args.includes('--json');
+const flag = (name, fallback) => {
+  const index = args.indexOf(name);
+  return index !== -1 && args[index + 1] ? args[index + 1] : fallback;
+};
 const distFlag = args.indexOf('--dist');
 const distDir = path.resolve(
   angularRoot,
   distFlag !== -1 ? args[distFlag + 1] : 'dist/fluid-functionalism',
 );
 const PKG_NAME = '@angel-r/fluid-functionalism-angular';
+
+/**
+ * The symbol used only by the lazy module, and a string that appears in its
+ * code. Defaults to the S1 case: Calendar, imported lazily, outside the main
+ * chunk. Overridable so a spike on a partial split (few entries) can use a
+ * symbol that exists there.
+ */
+const LAZY = {
+  symbol: flag('--lazy-symbol', 'Calendar'),
+  entry: flag('--lazy-entry', 'calendar'),
+  marker: flag('--lazy-marker', 'ff-calendar'),
+};
 
 if (!existsSync(path.join(distDir, 'package.json'))) {
   fail(`No built library at ${distDir}. Run \`npm run probe:bundle\`, which builds it first.`);
@@ -116,6 +132,12 @@ const knownEntries = [...Object.keys(exportsMap)]
   .map((key) => `${PKG_NAME}/${key.slice(2)}`);
 /** Sub-path specifiers are only expected once the split exists. */
 const hasSecondaryEntryPoints = knownEntries.length > 0;
+/**
+ * The package declares `sideEffects: false`. A bundler that resolves the real
+ * package reads it and may drop a re-export whose names nobody uses; this
+ * plugin resolves by path, so it has to forward the flag itself.
+ */
+const PACKAGE_SIDE_EFFECTS = primaryPkg.sideEffects !== false;
 
 /* ------------------------------------------------------------------ *
  * esbuild wiring
@@ -146,7 +168,7 @@ function libraryPlugin() {
             ],
           };
         }
-        return { path: file, namespace: 'ff' };
+        return { path: file, namespace: 'ff', sideEffects: PACKAGE_SIDE_EFFECTS };
       });
       build.onResolve({ filter: /.*/ }, (a) => {
         if (a.path.startsWith('.') || path.isAbsolute(a.path)) {
@@ -231,27 +253,27 @@ async function splitting({ main, lazy, label }) {
       name: path.relative(angularRoot, abs(key)),
       bytes: contents.get(abs(key))?.length ?? 0,
       staticFromMain: staticClosure.has(key),
-      hasCalendar: /\bff-calendar\b/.test(contents.get(abs(key)) ?? ''),
+      hasLazy: (contents.get(abs(key)) ?? '').includes(LAZY.marker),
       imports: (outputs[key].imports ?? [])
         .filter((imp) => imp.kind !== 'dynamic-import')
         .map((imp) => path.relative(angularRoot, abs(imp.path))),
     }))
     .sort((a, b) => b.bytes - a.bytes);
 
-  const lazyHasCalendar = chunks.some((c) => !c.staticFromMain && c.hasCalendar);
-  const staticHasCalendar = chunks.some((c) => c.staticFromMain && c.hasCalendar);
+  const lazyHasSymbol = chunks.some((c) => !c.staticFromMain && c.hasLazy);
+  const staticHasSymbol = chunks.some((c) => c.staticFromMain && c.hasLazy);
 
   return {
     label,
     chunks,
-    lazyHasCalendar,
-    staticHasCalendar,
-    ok: staticHasCalendar === false,
-    detail: staticHasCalendar
-      ? 'Calendar is in a chunk the main chunk imports statically'
-      : lazyHasCalendar
-        ? 'Calendar lives only in the lazy chunk'
-        : 'Calendar was not emitted at all (the dynamic import kept nothing)',
+    lazyHasSymbol,
+    staticHasSymbol,
+    ok: staticHasSymbol === false,
+    detail: staticHasSymbol
+      ? `${LAZY.symbol} is in a chunk the main chunk imports statically`
+      : lazyHasSymbol
+        ? `${LAZY.symbol} lives only in the lazy chunk`
+        : `${LAZY.symbol} was not emitted at all (the dynamic import kept nothing)`,
   };
 }
 
@@ -272,7 +294,7 @@ async function sizesFor(sub) {
   const spec = (entry) => (entry && sub ? `${PKG_NAME}/${entry}` : PKG_NAME);
   const coreFrom = spec('core');
   const buttonFrom = spec('button');
-  const calendarFrom = spec('calendar');
+  const lazyFrom = spec(LAZY.entry);
 
   if (sub && !hasSecondaryEntryPoints) return null;
   const rows = [
@@ -291,7 +313,7 @@ async function sizesFor(sub) {
   for (const [name, code] of rows) {
     out.push([name, await measure({ code })]);
   }
-  return { calendarFrom, rows: out, sub };
+  return { lazyFrom, rows: out, sub };
 }
 
 const bareSizes = await sizesFor(null);
@@ -307,18 +329,18 @@ if (hasSecondaryEntryPoints) {
 const bareSplit = await splitting({
   label: 'bare',
   main: `import { provideFluid } from '${PKG_NAME}';\nglobalThis.__main = provideFluid;\nimport('probe:lazy');\n`,
-  lazy: `import { Calendar } from '${PKG_NAME}';\nglobalThis.__lazy = Calendar;\n`,
+  lazy: `import { ${LAZY.symbol} } from '${PKG_NAME}';\nglobalThis.__lazy = ${LAZY.symbol};\n`,
 });
 scenarios.push({ kind: 'split', ...bareSplit });
 if (!bareSplit.ok) failures.push(`bare import: ${bareSplit.detail}`);
 
 // (b) splitting, through sub-paths.
 let subSplit = null;
-if (subSizes && subSizes.calendarFrom) {
+if (subSizes && subSizes.lazyFrom) {
   subSplit = await splitting({
     label: 'sub-paths',
     main: `import { provideFluid } from '${PKG_NAME}/core';\nglobalThis.__main = provideFluid;\nimport('probe:lazy');\n`,
-    lazy: `import { Calendar } from '${PKG_NAME}/calendar';\nglobalThis.__lazy = Calendar;\n`,
+    lazy: `import { ${LAZY.symbol} } from '${PKG_NAME}/${LAZY.entry}';\nglobalThis.__lazy = ${LAZY.symbol};\n`,
   });
   scenarios.push({ kind: 'split', ...subSplit });
   if (!subSplit.ok) failures.push(`sub-path import: ${subSplit.detail}`);
@@ -352,7 +374,7 @@ if (jsonOut) {
     for (const chunk of split.chunks) {
       console.log(
         `  ${chunk.staticFromMain ? 'static' : 'lazy  '} ${kb(chunk.bytes).padStart(9)}  ${
-          chunk.hasCalendar ? 'has ff-calendar' : '             '
+          chunk.hasLazy ? `has ${LAZY.marker}` : ''
         }  ${chunk.name}`,
       );
       if (chunk.imports.length) console.log(`         imports: ${chunk.imports.join(', ')}`);

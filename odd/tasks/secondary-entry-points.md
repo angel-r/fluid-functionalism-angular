@@ -79,7 +79,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 | ID | Specs | Route | Status | Evidence |
 |---|---|---|---|---|
 | T1 | S1, S6 | inline | done | `angular/scripts/bundle-probe/probe.mjs` + `npm run probe:bundle`; baseline (a) 53.5 / 63.8 / 74.1 / 950.9 KB, (b) one 152.5 KB chunk with `ff-calendar` imported statically by main (RED) |
-| T2 | S3, D2 | inline (scratch copy) | todo | Spike: primary re-exports two secondaries; the bare import still splits |
+| T2 | S3, D2 | inline (scratch copy) | done | Spike in `dist/.spike` (never committed): ng-packagr 22.2 builds a primary that re-exports two secondaries; the bare import still splits (16.5 KB static core, 8.6 KB lazy button) — D2 holds |
 | T3 | S5 | inline | todo | Export the cross-entry internals from their owning `index.ts` |
 | T4 | S2, D1, D4 | inline | todo | `git mv` every folder to the package root and fix config; tests and builds green, still one FESM |
 | T5 | S2, S3, S4 | inline | todo | One `ng-package.json` per entry; cross-entry imports by package name; primary re-exports |
@@ -165,4 +165,9 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
   - Baseline at `e593849` (RED): (a) `cn` 53.5 KB, `provideFluid` 63.8 KB, `provideFluid` + `Button` 74.1 KB, everything 950.9 KB. (b) main imports one 152.5 KB chunk that contains `ff-calendar`; the lazy chunk is 0.1 KB and re-imports that same chunk. Exit 1.
   - The numbers sit ~2% under L3's (55 / 65 / 76 / 974 / 156 KB). Same harness shape, different esbuild/linker build; T7 compares with these, not with L3's.
   - The sub-path runs (a and b) auto-skip while the package has no secondary entries; they activate in T5/T7.
-- **Next step:** T1 done, start T2.
+- **L6** (2026-10-28, T2): D2 holds. Spike = a copy of `core` + `button` under `angular/dist/.spike/t2` (gitignored, removed afterwards), each with `ng-package.json`, a primary `src/public-api.ts` of two `export * from '@angel-r/fluid-functionalism-angular/<entry>'` lines, and the D4 `paths` mapping in a `tsconfig.lib.json`. Built with `npx ng-packagr -p … -c …` (2.6 s).
+  - ng-packagr orders the graph itself: core, then button, then the primary. The primary FESM is the two re-export lines verbatim; the button FESM imports `{ Icon, cn, injectShape, injectSizeVariant }` from `@angel-r/fluid-functionalism-angular/core`. The dist manifest gains `./core` and `./button` export keys.
+  - Bare import still splits: main keeps a 16.5 KB static chunk (core), Button lands in an 8.6 KB lazy chunk. Sub-paths give the same chunks. Sizes: `cn` 3.3 KB, `provideFluid` 13.5 KB, `+ Button` 25.0 KB, everything 34.6 KB.
+  - **Probe fix found by the spike:** my plugin resolves library files by path, so esbuild never read the manifest and kept the primary's unused re-export as a side-effectful import — the bare run looked broken. The plugin now forwards `sideEffects` from the dist manifest (`sideEffects: false`). Real bundlers read that field from `node_modules`, so this matches reality; T7 re-checks it with the real showcase build. The unsplit baseline still reports RED (152.5 KB static chunk).
+  - Learned for T5: the spike's secondary entry needs no `allowedNonPeerDependencies`; only the primary's `ng-package.json` carries it.
+- **Next step:** T3.
