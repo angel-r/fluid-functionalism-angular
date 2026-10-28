@@ -1,6 +1,6 @@
 {
   "name": "@angel-r/fluid-functionalism-angular",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Unofficial Angular port of Fluid Functionalism: components with fluid hover, merged selections and spring motion. Standalone, signal-based and zoneless.",
   "keywords": [
     "angular",
