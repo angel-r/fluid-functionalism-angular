@@ -269,7 +269,7 @@ async function splitting({ main, lazy, label }) {
     chunks,
     lazyHasSymbol,
     staticHasSymbol,
-    ok: staticHasSymbol === false,
+    ok: staticHasSymbol === false && lazyHasSymbol === true,
     detail: staticHasSymbol
       ? `${LAZY.symbol} is in a chunk the main chunk imports statically`
       : lazyHasSymbol
