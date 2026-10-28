@@ -81,7 +81,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 | T1 | S1, S6 | inline | done | `angular/scripts/bundle-probe/probe.mjs` + `npm run probe:bundle`; baseline (a) 53.5 / 63.8 / 74.1 / 950.9 KB, (b) one 152.5 KB chunk with `ff-calendar` imported statically by main (RED) |
 | T2 | S3, D2 | inline (scratch copy) | done | Spike in `dist/.spike` (never committed): ng-packagr 22.2 builds a primary that re-exports two secondaries; the bare import still splits (16.5 KB static core, 8.6 KB lazy button) — D2 holds |
 | T3 | S5 | inline | done | 573 cross-folder imports in 111 files now go through the folder `index.ts`; the S5 internals are exported from their entry; 1171 tests, lib and showcase builds green |
-| T4 | S2, D1, D4 | inline | todo | `git mv` every folder to the package root and fix config; tests and builds green, still one FESM |
+| T4 | S2, D1, D4 | inline | done | 43 folders `git mv`'d to the package root; primary entry moved to `public-api.ts` (L8); tests 1171 (same count), lib and showcase builds green, still one FESM |
 | T5 | S2, S3, S4 | inline | todo | One `ng-package.json` per entry; cross-entry imports by package name; primary re-exports |
 | T6 | S6 | inline | todo | `/* @__PURE__ */` annotations |
 | T7 | S1, S3, S6, S7 | inline | todo | Probe GREEN plus showcase browser check |
@@ -176,4 +176,9 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
   - New exports, all from the S5 list: `/tabs` → `Layer, isFocusVisible, provideSizeOverride, writeInitialStyles, Keyframes`; `/radio-group` → `createGroupFocus, GroupFocusRing, focusRowOnPress, groupRows`; `/dropdown` → `createPopupOverlay, PopupCheckedBackground, createPinnedSize, createRaisedSurface` plus the overlay types the importers need (`PopupAlign`, `PopupPlacement`, `PopupOverlay`, `PopupOverlayOptions` — `Dropdown*` aliases stay as they were); `/chat-message` → `CHAT_MESSAGE_ENTRANCE_OVERRIDE, ChatMessageEntranceOverride`; `/input-message` → `createPresenceList, PresenceEntry`; `/core` → `overlay` (`fitToOverlayBox`).
   - No name collisions: the lib build, the showcase build and the 1171 tests pass. `core/lucide-icons` is still internal; nothing outside core imports it.
   - Two type errors in the first build (`'strategy' is possibly null`, `Parameter implicitly has an 'any' type`) were cascades from the missing `fitToOverlayBox` import and disappeared with it.
-- **Next step:** T4.
+- **L8** (2026-10-28, T4): the move, plus one deviation from D1.
+  - `git mv src/lib/<x> src/lib/blocks → <pkg>/<x>`, `<pkg>/blocks` for all 43 folders. `git diff -M` shows 236 renames.
+  - **Deviation:** the primary entry moved from `src/public-api.ts` to `public-api.ts` at the package root, and `ng-package.json` `lib.entryFile` follows. ng-packagr forces `rootDir` to `dirname(entryFilePath)` for every entry point (`ng-packagr/src/lib/ts/tsconfig.js`, `initializeTsConfig`), so keeping the entry in `src/` fails with TS6059 on every moved file. Angular Material has the same shape: its entry file sits next to the component folders. D1's "the primary keeps `src/public-api.ts`" was wrong on this point; the rest of D1 holds.
+  - Config: `tsconfig.lib.json` `include: ["**/*.ts"]`; `tsconfig.spec.json` `include: ["**/*.d.ts", "**/*.spec.ts"]`; root `tsconfig.json` bare path → `./projects/fluid-functionalism/public-api.ts` and new `/*` → `./projects/fluid-functionalism/*`; `angular.json` `sourceRoot` → `projects/fluid-functionalism`; showcase `styles.css` `@source "../../fluid-functionalism"`; the generator writes `icon-packs/` and `core/lucide-icons.ts`.
+  - Gate: 1171 tests in 61 files (same count as before the move), lib build emits a single FESM, showcase build passes. The Tailwind scan still sees library-only classes: `backdrop-blur-sm` (only in `card.ts`) is in the built `styles-*.css`.
+- **Next step:** T5.

@@ -21,7 +21,7 @@
 }
 
 /* Tailwind only emits classes it can read in source: scan the library too. */
-@source "../../fluid-functionalism/src";
+@source "../../fluid-functionalism";
 
 /* Source Serif 4, the built-in heading serif (right panel > Heading font).
    The React site loads it through next/font (preload: false); here it is a
