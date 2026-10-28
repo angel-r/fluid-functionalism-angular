@@ -1,0 +1,183 @@
+<app-doc-page
+  title="Typography"
+  slug="typography"
+  description="Bold rules that create consistency across the whole component library."
+  intro="Typography is hard. Every style you add makes it clunkier, so building this page was mostly cutting and refactoring until only the essential rules remained. Those rules power every component in the library, and each one is simple. Defining them and applying them on every surface is what makes it hard. Good rules hold every kind of component, and every component holds to them. Enjoy!"
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="5 rules">
+    <ul class="flex list-disc flex-col gap-1.5 pl-5 marker:text-muted-foreground">
+      <li class="pl-1 text-site-body text-muted-foreground">5 styles for the whole site, from page titles to captions.</li>
+      <li class="pl-1 text-site-body text-muted-foreground">
+        3 weights: regular for text, semibold for headings and selected items, bold for page titles.
+      </li>
+      <li class="pl-1 text-site-body text-muted-foreground">2 text colors: foreground and muted.</li>
+      <li class="pl-1 text-site-body text-muted-foreground">
+        1 font family:
+        <a
+          href="https://rsms.me/inter/"
+          target="_blank"
+          rel="noreferrer"
+          class="text-foreground underline underline-offset-4"
+          >Inter Variable 4.0</a
+        >. Headings can switch to
+        <a
+          href="https://fonts.google.com/specimen/Source+Serif+4"
+          target="_blank"
+          rel="noreferrer"
+          class="text-foreground underline underline-offset-4"
+          >Source Serif 4</a
+        >
+        or any Google Fonts family.
+      </li>
+      <li class="pl-1 text-site-body text-muted-foreground">1 paragraph style.</li>
+    </ul>
+  </app-doc-section>
+
+  <app-doc-section title="5 no-gos">
+    <ul class="flex list-disc flex-col gap-1.5 pl-5 marker:text-muted-foreground">
+      <li class="pl-1 text-site-body text-muted-foreground">
+        No uppercase: hierarchy comes from size and weight.
+      </li>
+      <li class="pl-1 text-site-body text-muted-foreground">
+        No letter-spacing: handled with Inter's optical sizing.
+      </li>
+      <li class="pl-1 text-site-body text-muted-foreground">No eyebrows: a section starts with its title.</li>
+      <li class="pl-1 text-site-body text-muted-foreground">
+        No difference with markdown: it uses the same styles and colors as everything else.
+      </li>
+      <li class="pl-1 text-site-body text-muted-foreground">
+        No opacity for text: it's foreground or muted, never a faded step of them.
+      </li>
+    </ul>
+  </app-doc-section>
+
+  <app-doc-section title="The scale">
+    <p class="text-site-body text-muted-foreground">
+      5 styles, each a size and a line height. Press<code
+        class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground"
+        >S</code
+      >for compact.
+    </p>
+    <app-type-scale-specimen />
+  </app-doc-section>
+
+  <app-doc-section title="Heading font">
+    <p class="text-site-body text-muted-foreground">
+      3 choices for headings: Inter, Source Serif 4, or any Google Fonts family. Source Serif 4 has
+      the same weight and optical size axes as Inter. Press<code
+        class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground"
+        >F</code
+      >to cycle.
+    </p>
+    <app-heading-font-demo />
+  </app-doc-section>
+
+  <app-doc-section title="Markdown">
+    <p class="text-site-body text-muted-foreground">
+      Markdown gets the same 5 styles, to-dos and tables included.
+    </p>
+    <app-typeset-editor [content]="sample" label="Markdown sample" />
+  </app-doc-section>
+
+  <app-doc-section title="Spacing">
+    <p class="text-site-body text-muted-foreground">
+      Space only goes above a block, so streaming text never shifts.
+    </p>
+    <table
+      class="w-full border-collapse text-site-body tabular-nums [&_th:first-child]:pl-0 [&_td:first-child]:pl-0"
+    >
+      <thead>
+        <tr class="border-b border-border">
+          @for (label of gapHeadings; track label) {
+            <th class="px-3 py-2 text-left text-foreground" [style.font-variation-settings]="semibold">
+              {{ label }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (gap of gaps; track gap.label) {
+          <tr class="border-b border-border/40">
+            <td class="px-3 py-2 text-muted-foreground">{{ gap.label }}</td>
+            <td class="px-3 py-2 text-foreground">{{ gap.default }}px</td>
+            <td class="px-3 py-2 text-foreground">{{ gap.compact }}px</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </app-doc-section>
+
+  <app-doc-section title="5 tweaks">
+    <p class="text-site-body text-muted-foreground">
+      Small details that keep text still, snug in its box, and evenly wrapped.
+    </p>
+
+    <h3 class="-mb-2 mt-2 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">
+      Weight without reflow
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Each weight carries its own optical size, so semibold labels keep their width. Idea from
+      <a
+        href="https://x.com/lochieaxon/status/2061631101999968701"
+        target="_blank"
+        rel="noreferrer"
+        class="text-foreground underline underline-offset-4"
+        >@lochieaxon</a
+      >.
+    </p>
+    <app-weight-opsz-demo />
+
+    <h3 class="-mb-2 mt-6 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">
+      Steady numbers
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Changing numbers use<code
+        class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground"
+        >tabular-nums</code
+      >so every digit is the same width and the words after them hold still.
+    </p>
+    <app-numbers-demo />
+
+    <h3 class="-mb-2 mt-6 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">
+      Trimmed labels
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Labels use<code
+        class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground"
+        >text-box: trim-both cap alphabetic</code
+      >so the padding you set is the space you see. Idea from
+      <a
+        href="https://interfaces.dev/magazine/issues/working-with-type"
+        target="_blank"
+        rel="noreferrer"
+        class="text-foreground underline underline-offset-4"
+        >@jakubkrehel</a
+      >.
+    </p>
+    <app-trim-demo />
+
+    <h3 class="-mb-2 mt-6 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">
+      Balanced headings
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Headings use<code
+        class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground"
+        >text-wrap: balance</code
+      >so their lines come out even.
+    </p>
+    <app-balance-demo />
+
+    <h3 class="-mb-2 mt-6 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">
+      Pretty paragraphs
+    </h3>
+    <p class="text-site-body text-muted-foreground">
+      Paragraphs use<code
+        class="mx-1 rounded bg-[light-dark(#EBEBED,#2C2C2C)] px-1 py-0.5 text-site-caption text-foreground"
+        >text-wrap: pretty</code
+      >so none ends on a lone word.
+    </p>
+    <app-pretty-demo />
+  </app-doc-section>
+</app-doc-page>

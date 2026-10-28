@@ -1,0 +1,313 @@
+<ng-template #playgroundPreview>
+  <app-component-preview [code]="code()" padding="compact" minHeightClass="min-h-[600px]">
+    <div class="w-full max-w-[560px]">
+      <ff-card-group
+        [orientation]="orientation()"
+        [columns]="cols()"
+        [border]="border()"
+        [separated]="effectiveSeparated()"
+        [fluidHover]="fluidHover()"
+      >
+        @for (item of items(); track item.title; let i = $index) {
+          <!-- Always a click target, so the fluid hover toggle has something to
+               light; selection only listens when it is on. -->
+          <ff-card
+            [label]="item.title"
+            [selected]="selectedOn() && i === activeSelected()"
+            (cardClick)="onCardClick(i)"
+          >
+            @if (isImage()) {
+              <img ffCardImage [src]="banner" />
+            }
+            @if (isSmall() && isInline()) {
+              @if (media() === 'icon') {
+                <ff-card-media [icon]="item.icon" />
+              }
+              @if (media() === 'logo') {
+                <ff-card-media [logo]="thumb" size="32" />
+              }
+            }
+            <div ffCardHeader>
+              @if (isSmall() && !isInline()) {
+                @if (media() === 'icon') {
+                  <ff-card-media [icon]="item.icon" />
+                }
+                @if (media() === 'logo') {
+                  <ff-card-media [logo]="thumb" size="32" />
+                }
+              }
+              <span ffCardTitle>{{ item.title }}</span>
+              @if (description()) {
+                <p ffCardDescription>{{ item.description }}</p>
+              }
+            </div>
+            @if (footerButtons().length) {
+              <div ffCardFooter>
+                @for (button of footerButtons(); track button.variant) {
+                  <button ffCardButton [variant]="button.variant">{{ button.label }}</button>
+                }
+              </div>
+            }
+          </ff-card>
+        }
+      </ff-card-group>
+    </div>
+  </app-component-preview>
+</ng-template>
+
+<ng-template #playgroundControls>
+  <app-playground-panel (shuffle)="shuffle()">
+    <app-play-section label="Card" />
+    <div>
+      <app-play-field label="Media">
+        <app-play-select [value]="media()" [options]="mediaOptions" (valueChange)="setMedia($event)" />
+      </app-play-field>
+      <ff-switch
+        label="Description"
+        [checked]="description()"
+        (checkedChange)="description.set($event)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Primary button"
+        [checked]="primaryBtn()"
+        (checkedChange)="primaryBtn.set($event)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Secondary button"
+        [checked]="secondaryBtn()"
+        (checkedChange)="secondaryBtn.set($event)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Ghost button"
+        [checked]="ghostBtn()"
+        (checkedChange)="ghostBtn.set($event)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <app-play-section label="Card group" />
+    <div>
+      <app-play-field label="Orientation">
+        <app-play-select [value]="orientation()" [options]="orientationOptions" (valueChange)="setOrientation($event)" />
+      </app-play-field>
+      <app-play-field label="Columns" [disabled]="isInline()">
+        <app-play-select
+          [value]="isInline() ? '1' : columns()"
+          [options]="columnOptions"
+          (valueChange)="setColumns($event)"
+        />
+      </app-play-field>
+      <app-play-field label="Border">
+        <app-play-select [value]="border()" [options]="borderOptions" (valueChange)="setBorder($event)" />
+      </app-play-field>
+      <ff-switch
+        label="Separated"
+        [checked]="effectiveSeparated()"
+        (checkedChange)="separated.set($event)"
+        [disabled]="isImage()"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Fluid hover"
+        [checked]="fluidHover()"
+        (checkedChange)="fluidHover.set($event)"
+        [class]="playSwitch"
+      />
+      <ff-switch
+        label="Selected"
+        [checked]="selectedOn()"
+        (checkedChange)="selectedOn.set($event)"
+        [class]="playSwitch"
+      />
+    </div>
+
+    <app-play-divider />
+    <!-- The exact configuration above, as a stateless code the Share dialog
+         turns into a prompt. -->
+    <app-get-code-dialog [def]="presetDef" [code]="presetCode()" [snippet]="installSnippet()" />
+  </app-playground-panel>
+</ng-template>
+
+<app-doc-page
+  title="Card"
+  slug="card"
+  description="shadcn's compositional card, dressed in Fluid Functionalism. Stacked, inline, or grid — borderless by default with fluid hover that previews where a click will land."
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Playground">
+    <app-playground-layout [preview]="playgroundPreview" [controls]="playgroundControls" />
+  </app-doc-section>
+
+  <app-doc-section title="Basic">
+    <app-component-preview [code]="basicCode" padding="compact">
+      <div class="w-full max-w-[520px]">
+        <ff-card-group orientation="inline">
+          @for (feature of features; track feature.title) {
+            <ff-card (cardClick)="noop()">
+              <ff-card-media [icon]="feature.icon" />
+              <div ffCardHeader>
+                <span ffCardTitle>{{ feature.title }}</span>
+                <p ffCardDescription>{{ feature.description }}</p>
+              </div>
+              <div ffCardFooter>
+                <button ffCardButton>Connect</button>
+              </div>
+            </ff-card>
+          }
+        </ff-card-group>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Grid: 2-D fluid hover">
+    <app-component-preview [code]="gridCode" padding="compact">
+      <div class="w-full max-w-[560px]">
+        <ff-card-group [columns]="2" border="outlined" separated>
+          @for (feature of features; track feature.title) {
+            <ff-card (cardClick)="noop()">
+              <img ffCardImage [src]="banner" />
+              <div ffCardHeader>
+                <span ffCardTitle>{{ feature.title }}</span>
+                <p ffCardDescription>{{ feature.description }}</p>
+              </div>
+              <div ffCardFooter>
+                <button ffCardButton variant="primary">Get started</button>
+                <button ffCardButton variant="secondary">Learn more</button>
+              </div>
+            </ff-card>
+          }
+        </ff-card-group>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Outlined group">
+    <app-component-preview [code]="outlinedCode" padding="compact">
+      <div class="w-full max-w-[520px]">
+        <ff-card-group orientation="inline" border="outlined">
+          @for (feature of features; track feature.title) {
+            <ff-card (cardClick)="noop()">
+              <ff-card-media [logo]="thumb" />
+              <div ffCardHeader>
+                <span ffCardTitle>{{ feature.title }}</span>
+                <p ffCardDescription>{{ feature.description }}</p>
+              </div>
+              <div ffCardFooter>
+                <button ffCardButton variant="primary">Get started</button>
+              </div>
+            </ff-card>
+          }
+        </ff-card-group>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Separated tiles">
+    <app-component-preview [code]="separatedCode" padding="compact">
+      <div class="w-full max-w-[560px]">
+        <ff-card-group orientation="inline" separated>
+          @for (feature of features; track feature.title) {
+            <ff-card (cardClick)="noop()">
+              <img ffCardImage [src]="banner" />
+              <div ffCardHeader>
+                <span ffCardTitle>{{ feature.title }}</span>
+                <p ffCardDescription>{{ feature.description }}</p>
+              </div>
+              <div ffCardFooter>
+                <button ffCardButton variant="primary">Get started</button>
+                <button ffCardButton variant="secondary">Learn more</button>
+                <button ffCardButton>Connect</button>
+              </div>
+            </ff-card>
+          }
+        </ff-card-group>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Fully yours — compose anything">
+    <app-component-preview [code]="promoCode" padding="compact">
+      @if (promoDismissed()) {
+        <button
+          type="button"
+          (click)="promoDismissed.set(false)"
+          class="text-site-body text-muted-foreground hover:text-foreground underline underline-offset-4 cursor-pointer"
+        >
+          Restore card
+        </button>
+      } @else {
+        <div class="w-full max-w-[300px]">
+          <ff-card
+            dismissible
+            class="border border-border/60 overflow-hidden rounded-xl"
+            (dismiss)="promoDismissed.set(true)"
+          >
+            <img ffCardImage [src]="banner" />
+            <div ffCardHeader>
+              <span ffCardTitle>Meet the new Card component</span>
+            </div>
+            <div ffCardContent class="flex flex-col gap-3">
+              <ff-card-feature
+                icon="paintbrush"
+                title="Always pixel-perfect"
+                description="Renders your design exactly — token-driven and crisp in light and dark, at any radius"
+              />
+              <ff-card-feature
+                icon="square-library"
+                title="Stacked, inline, or grid"
+                description="One compositional API — borderless by default, with separated tiles or a shared frame"
+              />
+            </div>
+            <div ffCardFooter>
+              <button ffCardButton variant="primary">Get started</button>
+              <button ffCardButton variant="ghost">Learn more</button>
+            </div>
+          </ff-card>
+        </div>
+      }
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="Selected">
+    <app-component-preview [code]="selectedCode" padding="compact">
+      <div class="w-full max-w-[520px]">
+        <ff-card-group orientation="inline">
+          @for (feature of features; track feature.title; let i = $index) {
+            <ff-card
+              [label]="feature.title"
+              [selected]="demoSelected() === i"
+              (cardClick)="demoSelected.set(i)"
+            >
+              <ff-card-media [icon]="feature.icon" />
+              <div ffCardHeader>
+                <span ffCardTitle>{{ feature.title }}</span>
+                <p ffCardDescription>{{ feature.description }}</p>
+              </div>
+            </ff-card>
+          }
+        </ff-card-group>
+      </div>
+    </app-component-preview>
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — Card">
+    <app-props-table [props]="cardProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — CardGroup">
+    <app-props-table [props]="groupProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — Parts">
+    <app-props-table [props]="partProps" />
+  </app-doc-section>
+
+  <app-doc-section title="API Reference — CardButton">
+    <app-props-table [props]="buttonProps" />
+  </app-doc-section>
+</app-doc-page>

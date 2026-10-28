@@ -1,0 +1,80 @@
+<app-doc-page
+  title="Fluid Hover"
+  slug="fluid-hover"
+  description="Hover that never blinks and always follows your cursor to the nearest item."
+  [installUsage]="installUsage"
+  [installProps]="installProps"
+>
+  <app-doc-section title="Blink or glide">
+    <p class="text-site-body text-muted-foreground">
+      Watch both cursors. The left blinks off and on 9 times per pass, and each blink pulls your eye back to the
+      list. The right glides once, and your eye stays on the task.
+    </p>
+    <app-plain-vs-fluid-demo />
+  </app-doc-section>
+
+  <app-doc-section title="Show the math">
+    <p class="text-site-body text-muted-foreground">
+      1 rule, no dead zones: the nearest dot wins. Flip the switch and that is the whole algorithm.
+    </p>
+    <app-show-the-math-demo />
+  </app-doc-section>
+
+  <app-doc-section title="3 axes">
+    <p class="text-site-body text-muted-foreground">
+      Menus, tabs, and card grids all feel the same under the cursor. Pass
+      <app-code-chip>y</app-code-chip>, <app-code-chip>x</app-code-chip>, or <app-code-chip>xy</app-code-chip> and
+      the highlight follows you down the list, across the strip, or to the closest card.
+    </p>
+    <app-axes-demo />
+  </app-doc-section>
+
+  <app-doc-section title="When to split a list">
+    <p class="text-site-body text-muted-foreground">
+      Split at the divider. Rows that are alternatives to each other share 1 list, children included, and the
+      highlight never crosses into the next one.
+    </p>
+    <app-lists-demo />
+  </app-doc-section>
+
+  <app-doc-section title="What it costs">
+    <p class="text-site-body text-muted-foreground">
+      1 element, 1 transform, 1 loop per move. 200 rows below: hover and watch the meter.
+    </p>
+    <app-cost-demo />
+  </app-doc-section>
+
+  <!-- Two columns, no section title: the column headings carry it. Same rhythm
+       as a DocSection. -->
+  <div class="grid gap-6 pt-6 sm:grid-cols-2">
+    <app-use-list title="Use when" [items]="useWhen" />
+    <app-use-list title="Skip when" [items]="skipWhen" />
+  </div>
+
+  <app-doc-section title="Reduced motion">
+    <p class="text-site-body text-muted-foreground">
+      The highlight respects the OS setting on its own. Turn on reduced motion and the travel drops out: the
+      highlight still fades in on the nearest row, it just stops sliding between rows. No config needed —
+      <app-code-chip>ReducedMotion</app-code-chip> is read for you, so a copied component behaves the same in your
+      app.
+    </p>
+  </app-doc-section>
+
+  <app-doc-section title="Reference">
+    <p class="text-site-body text-muted-foreground">
+      <app-code-chip>[ffFluidHover]</app-code-chip> picks, the highlight draws. Focus, roles, and focus rings stay
+      with your rows.
+    </p>
+    <h3 class="mt-2 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">Options</h3>
+    <app-props-table [props]="directiveOptions" />
+    <h3 class="mt-6 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">Returns</h3>
+    <app-props-table [props]="controllerReturn" />
+    <h3 class="mt-6 text-site-subtitle text-foreground" [style.font-variation-settings]="semibold">
+      ff-fluid-hover-highlight
+    </h3>
+    <app-props-table [props]="highlightProps" />
+    <p class="text-site-body text-muted-foreground">
+      The highlight moves on a transform. Width and height only animate between items of different sizes.
+    </p>
+  </app-doc-section>
+</app-doc-page>

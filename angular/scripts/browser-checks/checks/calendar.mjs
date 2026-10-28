@@ -1,16 +1,16 @@
-// Browser checks for the calendar (see ../run.mjs): the measured day column
-// (week numbers at three quarters of a cell), the pressed day fill, and the
-// ghost band a replaced range leaves while it fades out. Each one drives the
-// showcase demo like a user and reads computed styles once per frame.
+// Browser checks for the calendar (see ../run.mjs), on /docs/calendar: the
+// measured day column (week numbers at three quarters of a cell), the pressed
+// day fill, and the ghost band a replaced range leaves while it fades out.
+// Each one drives the docs page's demo like a user and reads computed styles
+// once per frame.
 
-/** The calendar inside a demo section, as a page-side locator. */
 export const checks = [
   {
     // Week numbers take three quarters of a day cell, so they sit close to the
     // days instead of floating in a full column; DayPicker's own weekday row
     // never renders, and each month draws its own row from the first paint.
     name: 'calendar: week numbers take three quarters of a day cell and no second weekday row renders',
-    path: 'calendar',
+    path: 'docs/calendar',
     async run(page, h) {
       const section = h.section(page, 'Week numbers');
       await section.scrollIntoViewIfNeeded();
@@ -38,7 +38,7 @@ export const checks = [
     // same-color spread that insets it 1px at rest collapses, and the fill
     // steps to the active token. Releasing restores both.
     name: 'calendar: a held press presses the hover fill and steps to the active token',
-    path: 'calendar',
+    path: 'docs/calendar',
     async run(page, h) {
       const section = h.section(page, 'Single');
       const day = section.locator('[role=gridcell][data-day]').nth(10);
@@ -47,7 +47,7 @@ export const checks = [
       // The hover fill of the day under the pointer (the pressed class pair,
       // not the inner ring, which has no --day-press).
       const probe = () => {
-        const section = [...document.querySelectorAll('app-demo-section')].find(
+        const section = [...document.querySelectorAll('app-doc-section')].find(
           (x) => x.querySelector('h2')?.textContent.trim().toLowerCase() === 'single',
         );
         const cal = section?.querySelector('ff-calendar');
@@ -95,7 +95,7 @@ export const checks = [
     // its band slices and filled ends stay, opacity 1 → 0 on the moderate
     // exit, and they are gone well before a second pick could commit.
     name: 'calendar: replacing a committed range leaves a ghost band that fades out',
-    path: 'calendar',
+    path: 'docs/calendar',
     async run(page, h) {
       const section = h.section(page, 'Range');
       await section.scrollIntoViewIfNeeded();
@@ -106,7 +106,7 @@ export const checks = [
         await day.click();
       };
       const probe = () => {
-        const section = [...document.querySelectorAll('app-demo-section')].find(
+        const section = [...document.querySelectorAll('app-doc-section')].find(
           (x) => x.querySelector('h2')?.textContent.trim().toLowerCase() === 'range',
         );
         const cal = section?.querySelector('ff-calendar');
@@ -149,7 +149,7 @@ export const checks = [
     // it reads as sliding out of the first pick instead of fading in wherever
     // the pointer lands. Sampled per frame, its opacity never dips.
     name: 'calendar: picking an end glides the solid fill out of the range start without fading',
-    path: 'calendar',
+    path: 'docs/calendar',
     async run(page, h) {
       const section = h.section(page, 'Range');
       await section.scrollIntoViewIfNeeded();
@@ -164,7 +164,7 @@ export const checks = [
       await page.waitForTimeout(400);
 
       const probe = () => {
-        const section = [...document.querySelectorAll('app-demo-section')].find(
+        const section = [...document.querySelectorAll('app-doc-section')].find(
           (x) => x.querySelector('h2')?.textContent.trim().toLowerCase() === 'range',
         );
         const cal = section?.querySelector('ff-calendar');

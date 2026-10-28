@@ -16,7 +16,7 @@ Assumptions (not requested, revisit if wrong):
 - A1: React context providers become DI (`InjectionToken` + `provideFluid()`), React hooks become directives/services; `asChild` becomes attribute selectors or content projection.
 - A2: Icons default to lucide via `@lucide/angular` behind an icon-map token; the tabler/phosphor/hugeicons/untitledui packs are ported last and only if an Angular package exists.
 - A3: `@daypicker/react` is replaced by a custom calendar grid; Base UI NumberField/ScrollArea by custom implementations.
-- A4: The Next docs site (playgrounds, presets, changelog, OG, evals, skill) is out of scope.
+- A4 (superseded 2026-10-27): The Next docs site is out of scope ~~for the library port~~. `odd/tasks/docs-site.md` reverses it: the showcase now reproduces every page of the public docs site (specs S1-S10, decisions D1-D10).
 
 ## Tasks
 

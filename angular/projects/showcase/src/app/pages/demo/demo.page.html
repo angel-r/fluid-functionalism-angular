@@ -1,0 +1,120 @@
+<!-- The slug beside the arrow, as the reference's nav tooltips show it. -->
+<ng-template #prevTip>
+  <span>{{ prevSlide()?.name }} &ensp;<kbd class="font-mono opacity-50">&larr;</kbd></span>
+</ng-template>
+<ng-template #nextTip>
+  <span>{{ nextSlide()?.name }} &ensp;<kbd class="font-mono opacity-50">&rarr;</kbd></span>
+</ng-template>
+
+<!-- The page's settings sandbox: the settings slide drives these providers
+     instead of the site's, so leaving /demo leaves the site as it was. -->
+<div
+  class="w-screen flex flex-col items-center px-6 md:px-12"
+  appDemoSettingsScope
+  ffShapeProvider
+  [defaultShape]="initialShape"
+  ffSizeProvider
+  [defaultSize]="initialSize"
+>
+  <div class="w-full max-w-[1200px] pt-16 sm:pt-24 pb-8">
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex flex-col gap-2">
+        <h1 class="text-site-display text-foreground leading-none" [style.font-variation-settings]="bold">
+          Fluid Functionalism
+        </h1>
+        <p class="text-site-body text-muted-foreground">Refined UI components with satisfying hover.</p>
+        <div class="flex items-center gap-2 mt-2">
+          <a [routerLink]="'/docs'">
+            <button ffButton variant="primary" size="sm">Learn more</button>
+          </a>
+        </div>
+      </div>
+      <div class="flex items-center gap-1 shrink-0">
+        <ff-tooltip [content]="prevSlide() ? prevTip : 'No previous'">
+          <button
+            ffButton
+            variant="ghost"
+            [size]="iconSize()"
+            [disabled]="!prevSlide()"
+            (click)="goTo(index() - 1)"
+            aria-label="Previous slide"
+          >
+            <ff-icon name="arrow-right" class="rotate-180" />
+          </button>
+        </ff-tooltip>
+        <ff-tooltip [content]="nextSlide() ? nextTip : 'No next'">
+          <button
+            ffButton
+            variant="ghost"
+            [size]="iconSize()"
+            [disabled]="!nextSlide()"
+            (click)="goTo(index() + 1)"
+            aria-label="Next slide"
+          >
+            <ff-icon name="arrow-right" />
+          </button>
+        </ff-tooltip>
+      </div>
+    </div>
+  </div>
+
+  <div #card class="w-full max-w-[1200px]" [style.aspect-ratio]="aspectRatio">
+    <!-- Keyed by slug, so a nav mounts the next slide's card (and its preview)
+         fresh, as the reference's `key` does. -->
+    @for (slide of visible(); track slide.slug) {
+      <app-demo-card
+        [slug]="slide.slug === settingsSlug ? '' : slide.slug"
+        [name]="slide.name"
+        [isNew]="slide.isNew"
+      >
+        <!-- The scaling stage, shared by every slide type. Its own portals
+             keep tooltips and the color picker's menu inside the scaled box. -->
+        <div
+          #stage
+          class="w-full mx-auto flex justify-center relative"
+          [style.max-width.px]="slide.maxWidth"
+          style="transform-origin: center"
+          [ffTooltipPortalContainer]="stage"
+          [ffColorPickerPortalContainer]="stage"
+        >
+          @if (slide.preview; as preview) {
+            <ng-container *ngComponentOutlet="preview" />
+          } @else {
+            <app-settings-content [tooltipSide]="'right'" />
+          }
+        </div>
+
+        <!-- Footer actions: the scaling toggle. A playground-driven slide adds
+             its pen menu beside it. -->
+        <div demo-action class="flex items-center gap-1">
+          <ff-tooltip [content]="scaleOn() ? 'Actual size' : 'Scale to fit'" side="top">
+            <button
+              ffButton
+              variant="ghost"
+              size="icon-compact"
+              [attr.aria-label]="scaleOn() ? 'Show preview at actual size' : 'Scale preview to fit the card'"
+              [attr.aria-pressed]="scaleOn()"
+              [active]="scaleOn()"
+              (click)="toggleScale()"
+            >
+              <ff-icon name="scaling" />
+            </button>
+          </ff-tooltip>
+        </div>
+      </app-demo-card>
+    }
+  </div>
+
+  <!-- Progress indicator -->
+  <div class="flex items-center gap-2.5 mt-10 mb-12">
+    @for (slide of slides; track slide.slug; let i = $index) {
+      <button
+        (click)="goTo(i)"
+        class="h-1.5 rounded-full transition-all duration-150"
+        [style.width.px]="i === index() ? 24 : 6"
+        style="background-color: color-mix(in oklab, var(--foreground), transparent 60%)"
+        [attr.aria-label]="'Go to ' + slide.name"
+      ></button>
+    }
+  </div>
+</div>
