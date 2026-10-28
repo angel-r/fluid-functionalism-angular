@@ -78,7 +78,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 
 | ID | Specs | Route | Status | Evidence |
 |---|---|---|---|---|
-| T1 | S1, S6 | inline | todo | Build `angular/scripts/bundle-probe/` and record baseline numbers (RED) |
+| T1 | S1, S6 | inline | done | `angular/scripts/bundle-probe/probe.mjs` + `npm run probe:bundle`; baseline (a) 53.5 / 63.8 / 74.1 / 950.9 KB, (b) one 152.5 KB chunk with `ff-calendar` imported statically by main (RED) |
 | T2 | S3, D2 | inline (scratch copy) | todo | Spike: primary re-exports two secondaries; the bare import still splits |
 | T3 | S5 | inline | todo | Export the cross-entry internals from their owning `index.ts` |
 | T4 | S2, D1, D4 | inline | todo | `git mv` every folder to the package root and fix config; tests and builds green, still one FESM |
@@ -161,4 +161,8 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
   - **Showcase:** 211 import sites in 148 files, all by the bare name. `tsconfig.json:8` maps the bare name to `./projects/fluid-functionalism/src/public-api.ts`.
   - **CI:** `ci.yml` runs the test, lib build and showcase build. `publish.yml` checks the tag matches the version, runs the tests and lib build, and publishes from `angular/dist/fluid-functionalism`; it must keep its file name (npm trusted publishing). `pages.yml` runs `npm run build:showcase`.
   - **Not in scope, noted only:** `rxjs` is imported by 5 lib files but is not a peer dependency. `color-picker/popup-overlay.ts` duplicates the dropdown one.
-- **Next step:** T1.
+- **L5** (2026-10-28, T1): `angular/scripts/bundle-probe/probe.mjs`, run by `npm run probe:bundle` (it builds the lib first). It transforms every `dist/fluid-functionalism/**/fesm2022/*.mjs` with `JavaScriptTransformer({ advancedOptimizations: true, jit: false })` and bundles with esbuild 0.28.2 (minify, splitting, `ngDevMode=false`, third-party external). It discovers entry points from the dist manifest `exports`, so it works before and after the split.
+  - Baseline at `e593849` (RED): (a) `cn` 53.5 KB, `provideFluid` 63.8 KB, `provideFluid` + `Button` 74.1 KB, everything 950.9 KB. (b) main imports one 152.5 KB chunk that contains `ff-calendar`; the lazy chunk is 0.1 KB and re-imports that same chunk. Exit 1.
+  - The numbers sit ~2% under L3's (55 / 65 / 76 / 974 / 156 KB). Same harness shape, different esbuild/linker build; T7 compares with these, not with L3's.
+  - The sub-path runs (a and b) auto-skip while the package has no secondary entries; they activate in T5/T7.
+- **Next step:** T1 done, start T2.
