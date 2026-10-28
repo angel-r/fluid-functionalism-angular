@@ -18,8 +18,8 @@ import {
   type SizeVariant,
   SURFACE_LEVEL,
   surfaceClasses,
-} from '../core';
-import { Slider, type SliderStyle, type SliderValue } from '../slider';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { Slider, type SliderStyle, type SliderValue } from '@angel-r/fluid-functionalism-angular/slider';
 import {
   applyChannelEdit,
   buildParsed,

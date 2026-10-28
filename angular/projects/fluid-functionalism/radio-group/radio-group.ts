@@ -23,8 +23,8 @@ import {
   injectShape,
   injectSize,
   type SizeVariant,
-} from '../core';
-import { FLUID_HOVER, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { FLUID_HOVER, createFluidHover, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 import { GroupFocusRing, createGroupFocus, focusRowOnPress, groupRows } from './group-focus';
 
 // ---------------------------------------------------------------------------

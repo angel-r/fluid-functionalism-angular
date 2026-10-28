@@ -13,8 +13,8 @@ import {
   untracked,
 } from '@angular/core';
 import type { AnimationOptions } from 'motion';
-import { cn, spring, enterTransition, exitTransition, injectAnimateFluid } from '../core';
-import type { FluidHoverController, ItemRect } from '../fluid-hover';
+import { cn, spring, enterTransition, exitTransition, injectAnimateFluid } from '@angel-r/fluid-functionalism-angular/core';
+import type { FluidHoverController, ItemRect } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // ---------------------------------------------------------------------------
 // Shared plumbing of the row groups (radio group, checkbox group): one focus

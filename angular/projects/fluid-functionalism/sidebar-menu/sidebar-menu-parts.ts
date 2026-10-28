@@ -13,7 +13,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { cn, injectShape, injectSize, typeClass, fontWeights } from '../core';
+import { cn, injectShape, injectSize, typeClass, fontWeights } from '@angel-r/fluid-functionalism-angular/core';
 import { SIDEBAR_MENU_ACTIONS_CLUSTER, SidebarMenuRow } from './sidebar-menu-item';
 import { ACTION_TOP, BADGE_TOP } from './menu-utils';
 

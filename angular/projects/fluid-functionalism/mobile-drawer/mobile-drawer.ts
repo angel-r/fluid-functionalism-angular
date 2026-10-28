@@ -25,7 +25,7 @@ import {
   type FluidAnimation,
   SURFACE_LEVEL,
   surfaceClasses,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 
 // Built on the CDK Dialog: it provides everything the drawer needs — scroll
 // lock, focus trap, focus restore after close — while leaving the slide

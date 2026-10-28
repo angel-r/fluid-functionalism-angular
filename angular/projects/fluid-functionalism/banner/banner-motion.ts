@@ -1,5 +1,5 @@
 import { animate, motionValue, type MotionValue, type ValueAnimationTransition } from 'motion';
-import { spring } from '../core';
+import { spring } from '@angel-r/fluid-functionalism-angular/core';
 
 /** The fast tier's enter spring, as a value transition. */
 const fastEnter: ValueAnimationTransition<number> = {

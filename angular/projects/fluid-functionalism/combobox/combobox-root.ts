@@ -12,7 +12,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { SizeContext, type SizeVariant } from '../core';
+import { SizeContext, type SizeVariant } from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // Combobox

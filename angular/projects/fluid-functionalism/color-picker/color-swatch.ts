@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { cn, injectShape } from '../core';
+import { cn, injectShape } from '@angel-r/fluid-functionalism-angular/core';
 import { parseColor, resolveCssColor, rgbToHexStr } from './color-math';
 import { CHECKER_IMAGE, CHECKER_SIZE } from './shared';
 

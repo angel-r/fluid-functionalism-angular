@@ -17,7 +17,7 @@ import {
   exitTransition,
   injectAnimateFluid,
   type FluidAnimation,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // The popup half the dropdown and select share: a CDK overlay that carries an

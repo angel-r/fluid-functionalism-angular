@@ -1,5 +1,5 @@
 import { InjectionToken, type Signal } from '@angular/core';
-import type { ShapeClasses } from '../core';
+import type { ShapeClasses } from '@angel-r/fluid-functionalism-angular/core';
 
 export type CalendarNavDirection = 'previous' | 'next';
 

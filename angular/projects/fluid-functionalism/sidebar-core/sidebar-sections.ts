@@ -1,5 +1,5 @@
 import { Directive, computed, input } from '@angular/core';
-import { cn, injectShape, injectSize } from '../core';
+import { cn, injectShape, injectSize } from '@angel-r/fluid-functionalism-angular/core';
 
 /**
  * `<main ffSidebarInset>`: the main column beside the sidebar. Next to an

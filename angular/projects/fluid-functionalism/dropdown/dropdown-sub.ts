@@ -1,5 +1,5 @@
 import { DestroyRef, type Signal, inject, untracked } from '@angular/core';
-import type { FluidHoverController } from '../fluid-hover';
+import type { FluidHoverController } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // ---------------------------------------------------------------------------
 // Submenus inside a dropdown popup: the primitive-free half.

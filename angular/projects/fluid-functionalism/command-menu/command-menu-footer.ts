@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { cn, injectSizeVariant, typeClass } from '../core';
+import { cn, injectSizeVariant, typeClass } from '@angel-r/fluid-functionalism-angular/core';
 import { CommandMenu } from './command-menu';
 import { CommandMenuShortcut } from './command-menu-shortcut';
 

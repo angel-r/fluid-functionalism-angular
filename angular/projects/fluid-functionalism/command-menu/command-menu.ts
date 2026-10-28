@@ -25,9 +25,9 @@ import {
   ReducedMotion,
   isDisabledRow,
   type SizeVariant,
-} from '../core';
-import { createFluidHover } from '../fluid-hover';
-import { provideSizeOverride } from '../tabs';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { createFluidHover } from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { provideSizeOverride } from '@angel-r/fluid-functionalism-angular/tabs';
 import {
   defaultCommandMenuFilter,
   sectionRows,

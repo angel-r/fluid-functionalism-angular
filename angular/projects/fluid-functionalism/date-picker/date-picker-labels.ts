@@ -1,4 +1,4 @@
-import type { DateRange } from '../calendar';
+import type { DateRange } from '@angel-r/fluid-functionalism-angular/calendar';
 
 // ---------------------------------------------------------------------------
 // Date labels and the form value of the date picker (pure, exported for the

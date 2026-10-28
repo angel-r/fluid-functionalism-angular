@@ -33,8 +33,8 @@ import {
   exitTransition,
   injectAnimateFluid,
   type FluidAnimation,
-} from '../core';
-import { FLUID_HOVER, FluidHoverItem, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { FLUID_HOVER, FluidHoverItem, createFluidHover, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 import {
   Calendar,
   WEEK_COL_RATIO,
@@ -46,7 +46,7 @@ import {
   type WeekStartsOn,
   type CalendarFormatters,
   type CalendarLabels,
-} from '../calendar';
+} from '@angel-r/fluid-functionalism-angular/calendar';
 import { LAST_MINUTE, buildSlots, formatDuration, minutesToTime, resolveHourCycle, shiftEnd, timeToMinutes } from './date-picker-time';
 import {
   formValue,

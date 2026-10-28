@@ -42,7 +42,7 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 
 export type TooltipSide = 'top' | 'right' | 'bottom' | 'left';
 export type TooltipContent = string | number | TemplateRef<unknown> | null | undefined;

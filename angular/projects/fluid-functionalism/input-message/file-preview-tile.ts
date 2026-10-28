@@ -21,10 +21,10 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../core';
-import { FileThumbnail } from '../file-thumbnail';
-import { Tooltip } from '../tooltip';
-import { writeInitialStyles } from '../tabs';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { FileThumbnail } from '@angel-r/fluid-functionalism-angular/file-thumbnail';
+import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
+import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
 
 /**
  * Composer-row tile: a FileThumbnail with enter/exit motion and a

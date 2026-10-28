@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { cn } from '../../core';
-import { SidebarTrigger, injectSidebar } from '../../sidebar-core';
+import { cn } from '@angel-r/fluid-functionalism-angular/core';
+import { SidebarTrigger, injectSidebar } from '@angel-r/fluid-functionalism-angular/sidebar-core';
 
 // ---------------------------------------------------------------------------
 // The main region's topbar. While the sidebar is only PEEKED the trigger

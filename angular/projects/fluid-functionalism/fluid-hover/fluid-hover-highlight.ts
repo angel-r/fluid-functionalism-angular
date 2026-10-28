@@ -11,7 +11,7 @@ import {
   untracked,
 } from '@angular/core';
 import { animate, type AnimationOptions } from 'motion';
-import { cn, spring, ReducedMotion, exitTransition } from '../core';
+import { cn, spring, ReducedMotion, exitTransition } from '@angel-r/fluid-functionalism-angular/core';
 import { FLUID_HOVER, type FluidHoverController, type ItemRect } from './fluid-hover';
 
 // ---------------------------------------------------------------------------

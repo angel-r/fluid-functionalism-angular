@@ -9,8 +9,8 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, SURFACE_LEVEL } from '../core';
-import { ScrollArea } from '../scroll-area';
+import { cn, SURFACE_LEVEL } from '@angel-r/fluid-functionalism-angular/core';
+import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
 import {
   injectSidebar,
   type SidebarCollapsible,
@@ -18,7 +18,7 @@ import {
   type SidebarVariant,
   SidebarShell,
   injectSidebarContentLevel,
-} from '../sidebar-core';
+} from '@angel-r/fluid-functionalism-angular/sidebar-core';
 import { SidebarSheet, sheetLevel } from './sidebar-sheet';
 
 const pageLevel = signal(1).asReadonly();

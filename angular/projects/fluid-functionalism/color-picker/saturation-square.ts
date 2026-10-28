@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { injectShape, nestedRadius } from '../core';
+import { injectShape, nestedRadius } from '@angel-r/fluid-functionalism-angular/core';
 import { clamp01, hsvToRgb } from './color-math';
 import { SQUARE_HEIGHT } from './shared';
 

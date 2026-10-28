@@ -42,17 +42,17 @@ import {
   popupMotionClass,
   popupScrollAreaClass,
   popupViewportClass,
-} from '../core';
-import { createFluidHover, type ItemRect, FluidHoverHighlight } from '../fluid-hover';
-import { GroupFocusRing } from '../radio-group';
-import { ScrollArea } from '../scroll-area';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { createFluidHover, type ItemRect, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { GroupFocusRing } from '@angel-r/fluid-functionalism-angular/radio-group';
+import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
 import {
   createPopupOverlay,
   type PopupPlacement,
   PopupCheckedBackground,
   createPinnedSize,
   createRaisedSurface,
-} from '../dropdown';
+} from '@angel-r/fluid-functionalism-angular/dropdown';
 
 // ---------------------------------------------------------------------------
 // Select

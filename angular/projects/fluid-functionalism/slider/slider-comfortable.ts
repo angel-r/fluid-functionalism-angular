@@ -13,7 +13,7 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
-import { cn, spring, enterTransition, fontWeights, injectShape } from '../core';
+import { cn, spring, enterTransition, fontWeights, injectShape } from '@angel-r/fluid-functionalism-angular/core';
 import {
   HOVER_PREVIEW_BG,
   PIP_SIZE,

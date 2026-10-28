@@ -7,8 +7,8 @@ import {
   input,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, fontWeights, injectSizeVariant, typeClass } from '../core';
-import { Button, type ButtonIcon } from '../button';
+import { cn, fontWeights, injectSizeVariant, typeClass } from '@angel-r/fluid-functionalism-angular/core';
+import { Button, type ButtonIcon } from '@angel-r/fluid-functionalism-angular/button';
 
 // ── BannerTitle ──────────────────────────────────────────
 

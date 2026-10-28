@@ -1,6 +1,6 @@
 import { type AnimationCallbackEvent, DestroyRef, inject } from '@angular/core';
 import { animate, motionValue, type AnimationOptions, type MotionValue } from 'motion';
-import { injectAnimateFluid, enterTransition, exitTransition, spring } from '../core';
+import { injectAnimateFluid, enterTransition, exitTransition, spring } from '@angel-r/fluid-functionalism-angular/core';
 import { applyStyles } from './slider-math';
 
 /**

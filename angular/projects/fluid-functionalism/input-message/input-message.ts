@@ -32,10 +32,10 @@ import {
   SURFACE_LEVEL,
   surfaceClasses,
   fieldTouchClass,
-} from '../core';
-import { FluidHover, FluidHoverItem, FluidHoverHighlight } from '../fluid-hover';
-import { Button } from '../button';
-import { isFocusVisible, provideSizeOverride } from '../tabs';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { FluidHover, FluidHoverItem, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { Button } from '@angel-r/fluid-functionalism-angular/button';
+import { isFocusVisible, provideSizeOverride } from '@angel-r/fluid-functionalism-angular/tabs';
 import { InputMessageFileTile } from './file-preview-tile';
 import { InputMessageQueuedRow } from './queued-row';
 import { InputMessageSendGlyph } from './send-glyph';

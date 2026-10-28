@@ -19,7 +19,7 @@ import {
   Icon,
   type IconDefinition,
   type IconName,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import { SidebarMenu } from './sidebar-menu';
 import { SidebarMenuRow } from './sidebar-menu-item';
 import { SidebarMenuRowLabel } from './row-label';

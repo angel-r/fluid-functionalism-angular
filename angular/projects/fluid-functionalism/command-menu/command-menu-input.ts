@@ -9,7 +9,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn, injectSize, fieldTouchClass, Icon } from '../core';
+import { cn, injectSize, fieldTouchClass, Icon } from '@angel-r/fluid-functionalism-angular/core';
 import { CommandMenu } from './command-menu';
 import type { CommandMenuIcon } from './items';
 

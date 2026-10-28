@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { cn, Icon } from '../core';
+import { cn, Icon } from '@angel-r/fluid-functionalism-angular/core';
 
 // The footer ← / → icons hint at the ArrowLeft/ArrowRight keys, which mobile
 // has no equivalent for, so they render desktop-only. They are icon

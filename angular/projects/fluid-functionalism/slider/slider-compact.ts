@@ -17,7 +17,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, spring, enterTransition, fontWeights, injectShape } from '../core';
+import { cn, spring, enterTransition, fontWeights, injectShape } from '@angel-r/fluid-functionalism-angular/core';
 import {
   DOT_SIZE,
   HOVER_PREVIEW_BG,

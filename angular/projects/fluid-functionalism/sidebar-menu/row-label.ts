@@ -11,7 +11,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { cn, fontWeights } from '../core';
+import { cn, fontWeights } from '@angel-r/fluid-functionalism-angular/core';
 
 /**
  * A row's label with the ghost-span weight treatment. Leading text of the

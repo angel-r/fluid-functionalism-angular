@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, fontWeights, injectShape, injectSize, typeClass } from '../core';
+import { cn, fontWeights, injectShape, injectSize, typeClass } from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // ColorInput — one field of the panel's input row, two variants behind one

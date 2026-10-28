@@ -1,4 +1,4 @@
-import type { IconDefinition, IconName } from '../core';
+import type { IconDefinition, IconName } from '@angel-r/fluid-functionalism-angular/core';
 
 /** A row's icon: a role name from the icon map, or an icon definition. */
 export type CommandMenuIcon = IconName | IconDefinition;

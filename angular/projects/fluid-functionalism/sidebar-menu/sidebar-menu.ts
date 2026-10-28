@@ -24,8 +24,8 @@ import {
   injectShape,
   SizeContext,
   type SizeVariant,
-} from '../core';
-import { createFluidHover, type ItemRect, FluidHoverHighlight } from '../fluid-hover';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { createFluidHover, type ItemRect, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 import {
   NO_TARGET,
   ROOT_LEVEL_ID,

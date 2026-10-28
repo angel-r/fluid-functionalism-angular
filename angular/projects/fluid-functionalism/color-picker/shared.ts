@@ -1,5 +1,5 @@
 import { Directive, InjectionToken, type Signal, computed, inject, input } from '@angular/core';
-import { SizeContext, type SizeVariant } from '../core';
+import { SizeContext, type SizeVariant } from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // Shared pieces of the color picker: the portal container token, the size pin

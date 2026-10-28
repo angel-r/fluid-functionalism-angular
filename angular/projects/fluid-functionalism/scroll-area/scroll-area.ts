@@ -20,7 +20,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, injectShape, injectTouchPrimary } from '../core';
+import { cn, injectShape, injectTouchPrimary } from '@angel-r/fluid-functionalism-angular/core';
 
 export type ScrollAreaOrientation = 'vertical' | 'horizontal' | 'both';
 type Axis = 'vertical' | 'horizontal';

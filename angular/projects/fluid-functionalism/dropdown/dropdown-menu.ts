@@ -36,9 +36,9 @@ import {
   popupMotionClass,
   popupScrollAreaClass,
   popupViewportClass,
-} from '../core';
-import { createFluidHover, isOwnEvent, FluidHoverHighlight } from '../fluid-hover';
-import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { createFluidHover, isOwnEvent, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '@angel-r/fluid-functionalism-angular/merge-split';
 import {
   DROPDOWN_CONTEXT,
   MenuItem,
@@ -46,9 +46,9 @@ import {
   type DropdownContextValue,
   type MenuItemRenderOptions,
   type MenuItemTemplateContext,
-} from '../menu-item';
-import { DROPDOWN_SEARCH_HOST, createDropdownSearchHost } from '../dropdown-search';
-import { ScrollArea } from '../scroll-area';
+} from '@angel-r/fluid-functionalism-angular/menu-item';
+import { DROPDOWN_SEARCH_HOST, createDropdownSearchHost } from '@angel-r/fluid-functionalism-angular/dropdown-search';
+import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
 import { dropdownShape } from './dropdown';
 import { SUBMENU_ALIGN_OFFSET, SUBMENU_SIDE_OFFSET, createSubmenuHost } from './dropdown-sub';
 import { createPopupOverlay, type PopupAlign, type PopupPlacement, type PopupSide } from './popup-overlay';

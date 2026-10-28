@@ -11,7 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, fontWeights, fieldTouchClass, injectShape } from '../core';
+import { cn, fontWeights, fieldTouchClass, injectShape } from '@angel-r/fluid-functionalism-angular/core';
 import { nearestStepIndex } from './slider-math';
 
 /** A click-to-edit commit: which thumb and the clamped, snapped value. */

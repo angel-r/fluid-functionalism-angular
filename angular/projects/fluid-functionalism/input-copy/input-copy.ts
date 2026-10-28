@@ -30,8 +30,8 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../core';
-import { Tooltip } from '../tooltip';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
 
 // ---------------------------------------------------------------------------
 // InputCopy shows a value and copies it on click. The whole row is one

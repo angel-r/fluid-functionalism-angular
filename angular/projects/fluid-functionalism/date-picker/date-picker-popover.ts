@@ -1,6 +1,6 @@
 import { DOCUMENT, DestroyRef, type Signal, afterRenderEffect, computed, effect, inject, untracked } from '@angular/core';
-import { cn, popupMotionClass } from '../core';
-import { createPopupOverlay, type PopupAlign } from '../dropdown';
+import { cn, popupMotionClass } from '@angel-r/fluid-functionalism-angular/core';
+import { createPopupOverlay, type PopupAlign } from '@angel-r/fluid-functionalism-angular/dropdown';
 
 // ---------------------------------------------------------------------------
 // The popover both date picker popups share (the React flavor's Popover over

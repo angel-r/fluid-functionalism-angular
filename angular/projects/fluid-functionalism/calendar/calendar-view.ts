@@ -4,7 +4,7 @@
 // The React version spreads this over its Day and DayButton parts.
 // ---------------------------------------------------------------------------
 
-import { cn, fontWeights, typeClass } from '../core';
+import { cn, fontWeights, typeClass } from '@angel-r/fluid-functionalism-angular/core';
 import {
   addDays,
   dateMatchModifiers,

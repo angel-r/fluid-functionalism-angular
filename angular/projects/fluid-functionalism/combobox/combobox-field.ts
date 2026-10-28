@@ -31,7 +31,7 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import { Combobox, type ComboboxItemData, comboboxItemLabel } from './combobox-root';
 
 export type ComboboxFieldVariant = 'bordered' | 'borderless';

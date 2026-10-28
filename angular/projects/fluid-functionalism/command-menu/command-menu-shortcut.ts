@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { cn, injectSizeVariant, typeClass } from '../core';
+import { cn, injectSizeVariant, typeClass } from '@angel-r/fluid-functionalism-angular/core';
 import { formatShortcut, injectIsMac } from './shortcut';
 
 /**

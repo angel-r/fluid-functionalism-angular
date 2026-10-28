@@ -24,15 +24,15 @@ import {
   Elevated,
   Icon,
   type IconName,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import {
   FLUID_HOVER,
   FluidHoverItem,
   createFluidHover,
   type FluidHoverController,
   FluidHoverHighlight,
-} from '../fluid-hover';
-import { ScrollArea } from '../scroll-area';
+} from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
 import { formatDuration, formatTime, nearestSlotIndex, parseTime, type TimeSlot } from './date-picker-time';
 import {
   createDatePickerPopover,

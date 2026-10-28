@@ -31,9 +31,9 @@ import {
   Icon,
   type IconDefinition,
   type IconName,
-} from '../core';
-import { createFluidHover, type ItemRect } from '../fluid-hover';
-import { Layer, isFocusVisible, provideSizeOverride, writeInitialStyles, type Keyframes } from '../tabs';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { createFluidHover, type ItemRect } from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { Layer, isFocusVisible, provideSizeOverride, writeInitialStyles, type Keyframes } from '@angel-r/fluid-functionalism-angular/tabs';
 
 // ---------------------------------------------------------------------------
 // TabsSubtle is a pill tab strip: one filled pill under the selected tab, a

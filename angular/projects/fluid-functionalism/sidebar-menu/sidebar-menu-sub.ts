@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import type { AnimationOptions } from 'motion';
-import { cn, spring, enterTransition, exitTransition } from '../core';
+import { cn, spring, enterTransition, exitTransition } from '@angel-r/fluid-functionalism-angular/core';
 import { SidebarMenu } from './sidebar-menu';
 import { SIDEBAR_MENU_ANIMATE } from './menu-utils';
 

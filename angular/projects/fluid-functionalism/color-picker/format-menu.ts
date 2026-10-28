@@ -31,14 +31,14 @@ import {
   exitTransition,
   injectAnimateFluid,
   type SpringTier,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import {
   FLUID_HOVER,
   FluidHoverItem,
   type ItemRect,
   createFluidHover,
   FluidHoverHighlight,
-} from '../fluid-hover';
+} from '@angel-r/fluid-functionalism-angular/fluid-hover';
 import { FORMATS, FORMAT_LABELS, type ColorFormat } from './color-math';
 import { COLOR_PICKER_POPUP_SCOPE, COLOR_PICKER_PORTAL_CONTAINER } from './shared';
 import { PopupOverlay } from './popup-overlay';

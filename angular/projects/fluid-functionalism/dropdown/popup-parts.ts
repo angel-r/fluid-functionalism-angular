@@ -23,8 +23,8 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../core';
-import type { ItemRect } from '../fluid-hover';
+} from '@angel-r/fluid-functionalism-angular/core';
+import type { ItemRect } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // ---------------------------------------------------------------------------
 // Small pieces the dropdown and select popups share.

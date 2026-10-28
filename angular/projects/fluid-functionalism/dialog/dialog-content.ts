@@ -33,8 +33,8 @@ import {
   injectShape,
   injectSizeVariant,
   Icon,
-} from '../core';
-import { Button } from '../button';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { Button } from '@angel-r/fluid-functionalism-angular/button';
 import { Dialog } from './dialog';
 
 /** A dialog sits this many surface steps above its substrate. */

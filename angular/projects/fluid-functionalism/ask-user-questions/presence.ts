@@ -1,6 +1,6 @@
 import { DestroyRef, Directive, ElementRef, effect, inject, input, untracked } from '@angular/core';
 import type { AnimationOptions, DOMKeyframesDefinition } from 'motion';
-import { spring, animateFluid, ReducedMotion } from '../core';
+import { spring, animateFluid, ReducedMotion } from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // The React source wraps its small animated pieces (the footer buttons, the

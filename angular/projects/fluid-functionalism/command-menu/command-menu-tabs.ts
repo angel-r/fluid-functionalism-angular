@@ -12,8 +12,8 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn, SizeContext, injectSizeVariant, type SizeVariant } from '../core';
-import { TabsSubtle, TabsSubtleItem } from '../tabs-subtle';
+import { cn, SizeContext, injectSizeVariant, type SizeVariant } from '@angel-r/fluid-functionalism-angular/core';
+import { TabsSubtle, TabsSubtleItem } from '@angel-r/fluid-functionalism-angular/tabs-subtle';
 import { CommandMenu, type CommandMenuTab, type CommandMenuTabsHandle } from './command-menu';
 
 /**

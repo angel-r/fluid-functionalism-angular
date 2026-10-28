@@ -7,8 +7,8 @@ import {
   linkedSignal,
   untracked,
 } from '@angular/core';
-import { spring, ReducedMotion, type FluidAnimation, animateFluid, enterTransition } from '../core';
-import { writeInitialStyles } from '../tabs';
+import { spring, ReducedMotion, type FluidAnimation, animateFluid, enterTransition } from '@angel-r/fluid-functionalism-angular/core';
+import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
 
 // ---------------------------------------------------------------------------
 // Internal presence helpers of InputMessage (React `AnimatePresence`,

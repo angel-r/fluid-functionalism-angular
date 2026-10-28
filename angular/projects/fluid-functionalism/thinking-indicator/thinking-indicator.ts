@@ -19,7 +19,7 @@ import {
   ReducedMotion,
   injectSizeVariant,
   type SizeVariant,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 
 // The glyph is one path morphing circle → infinity → circle → infinity →
 // circle. All 3 shapes share the same commands (a move, 4 curves, a close),

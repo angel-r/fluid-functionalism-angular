@@ -18,7 +18,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { cn, Icon, injectSize, injectSurface, SURFACE_BG } from '../core';
+import { cn, Icon, injectSize, injectSurface, SURFACE_BG } from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // Search inside a dropdown menu.

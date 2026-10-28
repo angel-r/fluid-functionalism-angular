@@ -28,9 +28,9 @@ import {
   type FluidAnimation,
   enterTransition,
   injectAnimateFluid,
-} from '../core';
-import { provideSizeOverride } from '../tabs';
-import { Badge, type BadgeColor } from '../badge';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { provideSizeOverride } from '@angel-r/fluid-functionalism-angular/tabs';
+import { Badge, type BadgeColor } from '@angel-r/fluid-functionalism-angular/badge';
 import { ThinkingStepsPanel, ThinkingStepsTrigger } from './collapsible';
 
 export type StepStatus = 'complete' | 'active' | 'pending';

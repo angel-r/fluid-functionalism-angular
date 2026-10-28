@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, model } from '@angular/core';
-import { Icon, type IconName } from '../../core';
-import { Tooltip } from '../../tooltip';
-import { MenuItem } from '../../menu-item';
-import { Sidebar, SidebarContent } from '../../sidebar';
+import { Icon, type IconName } from '@angel-r/fluid-functionalism-angular/core';
+import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
+import { MenuItem } from '@angel-r/fluid-functionalism-angular/menu-item';
+import { Sidebar, SidebarContent } from '@angel-r/fluid-functionalism-angular/sidebar';
 import {
   SidebarFooter,
   SidebarGroup,
@@ -14,15 +14,15 @@ import {
   type SidebarCollapsible,
   type SidebarSide,
   type SidebarVariant,
-} from '../../sidebar-core';
-import { SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from '../../sidebar-menu';
+} from '@angel-r/fluid-functionalism-angular/sidebar-core';
+import { SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from '@angel-r/fluid-functionalism-angular/sidebar-menu';
 import {
   SidebarBlockMenu,
   SidebarSearchField,
   SidebarUserFooter,
   SidebarWorkspaceHeader,
   WorkspaceTile,
-} from '../sidebar';
+} from '@angel-r/fluid-functionalism-angular/blocks/sidebar';
 
 // ---------------------------------------------------------------------------
 // A complete app sidebar assembled from the workspace-header, search-field,

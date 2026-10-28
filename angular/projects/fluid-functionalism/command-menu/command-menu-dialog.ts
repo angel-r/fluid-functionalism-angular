@@ -12,8 +12,8 @@ import {
   output,
   untracked,
 } from '@angular/core';
-import { cn } from '../core';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../dialog';
+import { cn } from '@angel-r/fluid-functionalism-angular/core';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@angel-r/fluid-functionalism-angular/dialog';
 import { COMMAND_MENU_DIALOG, type CommandMenuDialogContext } from './command-menu';
 import { comboKey, hasModifier, isEditable, matchesShortcut, parseShortcut } from './shortcut';
 

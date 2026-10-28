@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DOCUMENT, computed, inject, output } from '@angular/core';
-import { cn, Icon, injectShape, injectSize } from '../core';
+import { cn, Icon, injectShape, injectSize } from '@angel-r/fluid-functionalism-angular/core';
 
 // Typed here because TypeScript's DOM lib doesn't ship EyeDropper.
 interface EyeDropperInstance {

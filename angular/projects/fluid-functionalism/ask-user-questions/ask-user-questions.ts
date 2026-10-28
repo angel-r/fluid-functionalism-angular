@@ -25,17 +25,17 @@ import {
   injectSize,
   type SizeVariant,
   typeClass,
-} from '../core';
-import { Button } from '../button';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { Button } from '@angel-r/fluid-functionalism-angular/button';
 import {
   FLUID_HOVER,
   FluidHoverItem,
   createFluidHover,
   type ItemRect,
   FluidHoverHighlight,
-} from '../fluid-hover';
-import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split';
-import { createGroupFocus } from '../radio-group';
+} from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '@angel-r/fluid-functionalism-angular/merge-split';
+import { createGroupFocus } from '@angel-r/fluid-functionalism-angular/radio-group';
 import { AskUserQuestionRow } from './row';
 import { AuqPresence, fastWithFade, type PresencePose } from './presence';
 import { AuqArrowLeftKey, AuqArrowRightKey } from './arrow-key-icon';

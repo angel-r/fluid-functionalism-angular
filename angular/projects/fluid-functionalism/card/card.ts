@@ -32,8 +32,8 @@ import {
   Icon,
   type IconDefinition,
   type IconName,
-} from '../core';
-import { createFluidHover, FluidHoverHighlight } from '../fluid-hover';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { createFluidHover, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // ---------------------------------------------------------------------------
 // Card is shadcn/ui's compositional card — the same parts and `data-slot`

@@ -31,10 +31,10 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../../core';
-import { FileThumbnail } from '../../file-thumbnail';
-import { Tooltip } from '../../tooltip';
-import { type QueuedMessage, type PresenceEntry, createPresenceList } from '../../input-message';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { FileThumbnail } from '@angel-r/fluid-functionalism-angular/file-thumbnail';
+import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
+import { type QueuedMessage, type PresenceEntry, createPresenceList } from '@angel-r/fluid-functionalism-angular/input-message';
 import { QueuedStackMorphRegistry, setInstant } from './queued-stack-morph';
 
 // ---------------------------------------------------------------------------

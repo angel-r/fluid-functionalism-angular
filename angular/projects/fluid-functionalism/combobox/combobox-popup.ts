@@ -50,10 +50,10 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../core';
-import { type ItemRect, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
-import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split';
-import { ScrollArea } from '../scroll-area';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { type ItemRect, createFluidHover, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '@angel-r/fluid-functionalism-angular/merge-split';
+import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
 import {
   COMBOBOX_CREATE_VALUE,
   Combobox,

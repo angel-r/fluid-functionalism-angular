@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, booleanAttribute, input, model, viewChild } from '@angular/core';
-import { Icon, injectSize } from '../../core';
-import { SidebarInput } from '../../sidebar-core';
+import { Icon, injectSize } from '@angel-r/fluid-functionalism-angular/core';
+import { SidebarInput } from '@angel-r/fluid-functionalism-angular/sidebar-core';
 
 // ---------------------------------------------------------------------------
 // The header's search field, on the menu rows' own rhythm. The leading icon

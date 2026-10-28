@@ -24,9 +24,9 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../core';
-import { Tooltip } from '../tooltip';
-import { writeInitialStyles } from '../tabs';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
+import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
 import { type QueuedMessage } from './input-message.types';
 
 /** Pointer travel (px) before a press on a row becomes a drag. */

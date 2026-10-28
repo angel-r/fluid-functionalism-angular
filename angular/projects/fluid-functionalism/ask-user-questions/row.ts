@@ -8,8 +8,8 @@ import {
   output,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, fontWeights, spring, typeClass, injectShape, Icon } from '../core';
-import { focusRowOnPress } from '../radio-group';
+import { cn, fontWeights, spring, typeClass, injectShape, Icon } from '@angel-r/fluid-functionalism-angular/core';
+import { focusRowOnPress } from '@angel-r/fluid-functionalism-angular/radio-group';
 import { AuqPresence, fastWithFade } from './presence';
 
 /**

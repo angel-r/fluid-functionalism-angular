@@ -9,7 +9,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { cn, injectSize } from '../core';
+import { cn, injectSize } from '@angel-r/fluid-functionalism-angular/core';
 import { rowHeightClass } from './menu-utils';
 import { SidebarMenu } from './sidebar-menu';
 

@@ -26,8 +26,8 @@ import {
   type FluidAnimation,
   SURFACE_LEVEL,
   surfaceClasses,
-} from '../core';
-import { injectSidebar, type SidebarSide } from '../sidebar-core';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { injectSidebar, type SidebarSide } from '@angel-r/fluid-functionalism-angular/sidebar-core';
 
 const pageLevel = signal(1).asReadonly();
 

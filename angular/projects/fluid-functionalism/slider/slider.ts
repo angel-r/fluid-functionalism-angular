@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, model } from '@angular/core';
-import { cn, injectSizeVariant, type SizeVariant } from '../core';
+import { cn, injectSizeVariant, type SizeVariant } from '@angel-r/fluid-functionalism-angular/core';
 import { SliderCompact } from './slider-compact';
 import { SliderComfortable } from './slider-comfortable';
 import type { SliderStyle, SliderValue, SliderVariant, ValuePosition } from './slider-math';

@@ -23,8 +23,8 @@ import {
   type FluidAnimation,
   enterTransition,
   injectAnimateFluid,
-} from '../core';
-import { FileThumbnail } from '../file-thumbnail';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { FileThumbnail } from '@angel-r/fluid-functionalism-angular/file-thumbnail';
 import { CHAT_MESSAGE_ENTRANCE_OVERRIDE } from './entrance';
 
 export type ChatMessageFrom = 'user' | 'assistant';

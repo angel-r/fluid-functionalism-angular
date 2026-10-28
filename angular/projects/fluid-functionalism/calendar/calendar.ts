@@ -34,15 +34,15 @@ import {
   createKeyboardNavGate,
   enterTransition,
   exitTransition,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import {
   createFluidHover,
   FluidHoverItem,
   FLUID_HOVER,
   type ItemRect,
   FluidHoverHighlight,
-} from '../fluid-hover';
-import { Layer, isFocusVisible } from '../tabs';
+} from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { Layer, isFocusVisible } from '@angel-r/fluid-functionalism-angular/tabs';
 import {
   addDays,
   addMonths,

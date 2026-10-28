@@ -8,8 +8,8 @@ import {
   input,
 } from '@angular/core';
 import { animate } from 'motion';
-import { exitFallbackMs, spring, ReducedMotion } from '../../core';
-import { CHAT_MESSAGE_ENTRANCE_OVERRIDE, type ChatMessageEntranceOverride } from '../../chat-message';
+import { exitFallbackMs, spring, ReducedMotion } from '@angel-r/fluid-functionalism-angular/core';
+import { CHAT_MESSAGE_ENTRANCE_OVERRIDE, type ChatMessageEntranceOverride } from '@angel-r/fluid-functionalism-angular/chat-message';
 
 // ---------------------------------------------------------------------------
 // The queued→sent morph (React: a shared framer `layoutId` between the stack

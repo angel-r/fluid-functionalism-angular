@@ -23,7 +23,7 @@ import {
   Icon,
   type IconDefinition,
   type IconName,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import { BannerPresence, bannerMotion, type BannerMotionConfig } from './banner-motion';
 import { BannerAction, BannerActions, BannerDescription, BannerTitle } from './banner-parts';
 

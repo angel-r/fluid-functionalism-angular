@@ -27,8 +27,8 @@ import {
   Icon,
   type IconDefinition,
   type IconName,
-} from '../core';
-import { FLUID_HOVER } from '../fluid-hover';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { FLUID_HOVER } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // MenuItem is only used inside Dropdown, which opts out of the global pill
 // shape — see the dropdown for the rationale.

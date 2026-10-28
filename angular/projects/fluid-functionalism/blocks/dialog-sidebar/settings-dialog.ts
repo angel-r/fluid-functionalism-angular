@@ -7,13 +7,13 @@ import {
   linkedSignal,
   output,
 } from '@angular/core';
-import { fontWeights, type IconName } from '../../core';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../../dialog';
-import { SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarProvider } from '../../sidebar-core';
-import { Sidebar, SidebarContent } from '../../sidebar';
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../sidebar-menu';
-import { ScrollArea } from '../../scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '../../select';
+import { fontWeights, type IconName } from '@angel-r/fluid-functionalism-angular/core';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@angel-r/fluid-functionalism-angular/dialog';
+import { SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarProvider } from '@angel-r/fluid-functionalism-angular/sidebar-core';
+import { Sidebar, SidebarContent } from '@angel-r/fluid-functionalism-angular/sidebar';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@angel-r/fluid-functionalism-angular/sidebar-menu';
+import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@angel-r/fluid-functionalism-angular/select';
 import {
   SettingsAppearancePanel,
   SettingsGeneralPanel,

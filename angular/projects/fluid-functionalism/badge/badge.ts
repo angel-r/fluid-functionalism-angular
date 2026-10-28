@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn, injectShape, injectSizeVariant } from '../core';
+import { cn, injectShape, injectSizeVariant } from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // Badge is a short label for status, category or metadata, in 2 variants:

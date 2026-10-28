@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { injectSizeVariant, Icon } from '../core';
-import { Button, type ButtonSize, type ButtonVariant } from '../button';
-import { Tooltip } from '../tooltip';
+import { injectSizeVariant, Icon } from '@angel-r/fluid-functionalism-angular/core';
+import { Button, type ButtonSize, type ButtonVariant } from '@angel-r/fluid-functionalism-angular/button';
+import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
 import { injectSidebar } from './sidebar-context';
 import { SIDEBAR_SHORTCUT_KBD_CLASS, injectSidebarShortcutKey } from './sidebar-rail';
 

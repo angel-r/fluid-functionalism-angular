@@ -6,8 +6,8 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { cn, fontWeights } from '../core';
-import { Tooltip } from '../tooltip';
+import { cn, fontWeights } from '@angel-r/fluid-functionalism-angular/core';
+import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
 import {
   SIDEBAR_COLLAPSE_SLOP,
   SIDEBAR_KEYBOARD_SHORTCUT,

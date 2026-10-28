@@ -82,7 +82,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 | T2 | S3, D2 | inline (scratch copy) | done | Spike in `dist/.spike` (never committed): ng-packagr 22.2 builds a primary that re-exports two secondaries; the bare import still splits (16.5 KB static core, 8.6 KB lazy button) — D2 holds |
 | T3 | S5 | inline | done | 573 cross-folder imports in 111 files now go through the folder `index.ts`; the S5 internals are exported from their entry; 1171 tests, lib and showcase builds green |
 | T4 | S2, D1, D4 | inline | done | 43 folders `git mv`'d to the package root; primary entry moved to `public-api.ts` (L8); tests 1171 (same count), lib and showcase builds green, still one FESM |
-| T5 | S2, S3, S4 | inline | todo | One `ng-package.json` per entry; cross-entry imports by package name; primary re-exports |
+| T5 | S2, S3, S4 | inline | done | 45 secondary entries (41 folders + 4 blocks) with `ng-package.json`; 221 cross-entry imports by package name; primary FESM is 45 re-exports; dist 46 `.mjs`, 28 tokens, 0 duplicates |
 | T6 | S6 | inline | todo | `/* @__PURE__ */` annotations |
 | T7 | S1, S3, S6, S7 | inline | todo | Probe GREEN plus showcase browser check |
 | T8 | S8 | inline | todo | Docs and generator paths |
@@ -181,4 +181,12 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
   - **Deviation:** the primary entry moved from `src/public-api.ts` to `public-api.ts` at the package root, and `ng-package.json` `lib.entryFile` follows. ng-packagr forces `rootDir` to `dirname(entryFilePath)` for every entry point (`ng-packagr/src/lib/ts/tsconfig.js`, `initializeTsConfig`), so keeping the entry in `src/` fails with TS6059 on every moved file. Angular Material has the same shape: its entry file sits next to the component folders. D1's "the primary keeps `src/public-api.ts`" was wrong on this point; the rest of D1 holds.
   - Config: `tsconfig.lib.json` `include: ["**/*.ts"]`; `tsconfig.spec.json` `include: ["**/*.d.ts", "**/*.spec.ts"]`; root `tsconfig.json` bare path → `./projects/fluid-functionalism/public-api.ts` and new `/*` → `./projects/fluid-functionalism/*`; `angular.json` `sourceRoot` → `projects/fluid-functionalism`; showcase `styles.css` `@source "../../fluid-functionalism"`; the generator writes `icon-packs/` and `core/lucide-icons.ts`.
   - Gate: 1171 tests in 61 files (same count as before the move), lib build emits a single FESM, showcase build passes. The Tailwind scan still sees library-only classes: `backdrop-blur-sm` (only in `card.ts`) is in the built `styles-*.css`.
-- **Next step:** T5.
+- **L9** (2026-10-28, T5): the package is split.
+  - 45 secondary entries, not 46: S2 miscounts the top-level folders (its list has 41; `blocks` and `styles` are not entries). 41 + 4 = 45 secondaries, plus the primary, so `dist/fluid-functionalism` holds 46 `.mjs` files and 46 bundled `.d.ts`. Each secondary has `{ "lib": { "entryFile": "index.ts" } }`; the primary keeps `allowedNonPeerDependencies` (the build never asked for a change).
+  - 221 import specifiers in 111 production files rewritten from a relative path to `@angel-r/fluid-functionalism-angular/<entry>`. No relative import leaves its entry folder any more; specs keep relative imports (D5).
+  - The primary FESM is the 45 `export * from '@angel-r/fluid-functionalism-angular/<entry>'` lines, in the old order.
+  - S4 check over the 46 `.mjs`: 28 `new InjectionToken(…)`, each in exactly one file; `class ShapeContext` and `class SizeContext` only in the core FESM; the four `providedIn: 'root'` services (`ThemeService`, `TouchPrimary`, `ReducedMotion`, `QueuedStackMorphRegistry`) each in one file.
+  - Gate: `ng build fluid-functionalism` lists every entry, 1171 tests pass, `ng build showcase` passes and emits the same CSS hash as before the split (`styles-I42FRRZG.css`), so Tailwind sees the same classes.
+  - The probe is GREEN here already: `cn` 3.3 KB (was 53.5), `provideFluid` 13.5 KB (63.8), `provideFluid` + `Button` 25.1 KB (74.1), everything 969.4 KB (950.9 — the entry wrappers cost ~2%). Splitting: `main` statically imports an 18.8 KB chunk; Calendar lives in an 87.7 KB lazy chunk, for the bare import and for sub-paths.
+  - One test run reported 1 of 1171 failing; the next three runs (same tree) were 61/61 files and 1171/1171 tests. The failing run's output was not captured, so the name is unknown; keep an eye on it in T7/T9.
+- **Next step:** T6.

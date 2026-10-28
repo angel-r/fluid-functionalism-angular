@@ -19,8 +19,8 @@ import {
   enterTransition,
   exitTransition,
   injectAnimateFluid,
-} from '../core';
-import { writeInitialStyles } from '../tabs';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
 
 export type SendGlyphMode = 'stop' | 'arrow';
 

@@ -27,7 +27,7 @@ import {
   injectShape,
   SURFACE_LEVEL,
   surfaceClasses,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import { injectSidebar, type SidebarSide, type SidebarVariant } from './sidebar-context';
 import { SidebarRail } from './sidebar-rail';
 

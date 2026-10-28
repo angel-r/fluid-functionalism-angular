@@ -1,7 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import { animate, type AnimationOptions, type DOMKeyframesDefinition } from 'motion';
-import { cn, type SizeVariant } from '../core';
-import type { ItemRect } from '../fluid-hover';
+import { cn, type SizeVariant } from '@angel-r/fluid-functionalism-angular/core';
+import type { ItemRect } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // ─── Motion seam ─────────────────────────────────────────────────────────────
 

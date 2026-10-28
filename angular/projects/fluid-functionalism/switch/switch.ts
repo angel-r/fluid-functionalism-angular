@@ -15,7 +15,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { animate, motionValue, type MotionValue, type ValueAnimationTransition } from 'motion';
-import { cn, spring, enterTransition, ReducedMotion, injectSize, type SizeVariant } from '../core';
+import { cn, spring, enterTransition, ReducedMotion, injectSize, type SizeVariant } from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // Switch is a whole labeled row: a click anywhere on it toggles, and the thumb

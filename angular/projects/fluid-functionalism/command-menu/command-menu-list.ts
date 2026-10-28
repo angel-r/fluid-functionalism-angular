@@ -17,9 +17,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, shapeMap, injectSize, typeClass, Icon } from '../core';
-import { ScrollArea } from '../scroll-area';
-import { FluidHoverHighlight } from '../fluid-hover';
+import { cn, shapeMap, injectSize, typeClass, Icon } from '@angel-r/fluid-functionalism-angular/core';
+import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
+import { FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 import { CommandMenu } from './command-menu';
 import { CommandMenuShortcut } from './command-menu-shortcut';
 import type { CommandMenuIcon, CommandMenuItemData } from './items';

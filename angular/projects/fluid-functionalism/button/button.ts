@@ -16,7 +16,7 @@ import {
   Icon,
   type IconDefinition,
   type IconName,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 
 export const buttonVariants = cva(
   [

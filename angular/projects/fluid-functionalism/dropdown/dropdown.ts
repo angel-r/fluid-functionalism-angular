@@ -16,11 +16,11 @@ import {
   surfaceClasses,
   typeClass,
   isDisabledRow,
-} from '../core';
-import { createFluidHover, FluidHoverHighlight } from '../fluid-hover';
-import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '../merge-split';
-import { DROPDOWN_CONTEXT, type DropdownContextValue } from '../menu-item';
-import { GroupFocusRing, createGroupFocus } from '../radio-group';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { createFluidHover, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
+import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '@angel-r/fluid-functionalism-angular/merge-split';
+import { DROPDOWN_CONTEXT, type DropdownContextValue } from '@angel-r/fluid-functionalism-angular/menu-item';
+import { GroupFocusRing, createGroupFocus } from '@angel-r/fluid-functionalism-angular/radio-group';
 import { PopupCheckedBackground, createPinnedSize, createRaisedSurface } from './popup-parts';
 
 // Dropdown opts out of the global pill/rounded shape context — popover surfaces

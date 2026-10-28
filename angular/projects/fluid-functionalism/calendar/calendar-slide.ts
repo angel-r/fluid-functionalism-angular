@@ -12,7 +12,7 @@ import {
   untracked,
 } from '@angular/core';
 import { animate, type AnimationOptions } from 'motion';
-import { spring, enterTransition, exitTransition } from '../core';
+import { spring, enterTransition, exitTransition } from '@angel-r/fluid-functionalism-angular/core';
 
 /**
  * A month change. Side by side: every grid travels a full stride, so the

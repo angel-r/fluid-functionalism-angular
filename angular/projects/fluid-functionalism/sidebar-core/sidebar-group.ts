@@ -31,7 +31,7 @@ import {
   injectSizeVariant,
   typeClass,
   Icon,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import { wrapLeadingText } from './leading-text';
 
 let nextId = 0;

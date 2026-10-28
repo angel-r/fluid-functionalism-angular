@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, contentChild, input } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cn, Icon, injectShape, injectSize, fontWeights } from '../../core';
-import { SidebarTrigger, injectSidebar } from '../../sidebar-core';
-import { SIDEBAR_MENU_POPUP, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../sidebar-menu';
-import { DropdownContent, DropdownMenu, DropdownTrigger } from '../../dropdown';
+import { cn, Icon, injectShape, injectSize, fontWeights } from '@angel-r/fluid-functionalism-angular/core';
+import { SidebarTrigger, injectSidebar } from '@angel-r/fluid-functionalism-angular/sidebar-core';
+import { SIDEBAR_MENU_POPUP, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@angel-r/fluid-functionalism-angular/sidebar-menu';
+import { DropdownContent, DropdownMenu, DropdownTrigger } from '@angel-r/fluid-functionalism-angular/dropdown';
 import { BlockMenuOutlet, SidebarBlockMenu } from './block-menu';
 
 // ---------------------------------------------------------------------------

@@ -22,8 +22,8 @@ import {
   injectShape,
   injectSize,
   type SizeVariant,
-} from '../core';
-import { FLUID_HOVER, createFluidHover } from '../fluid-hover';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { FLUID_HOVER, createFluidHover } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // ---------------------------------------------------------------------------
 // InputGroup stacks labelled text fields that share one fluid hover scope.

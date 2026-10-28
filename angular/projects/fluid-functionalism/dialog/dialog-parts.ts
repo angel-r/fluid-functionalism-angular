@@ -1,5 +1,5 @@
 import { DestroyRef, Directive, computed, effect, inject, input } from '@angular/core';
-import { cn, fontWeights, injectSizeVariant, typeClass } from '../core';
+import { cn, fontWeights, injectSizeVariant, typeClass } from '@angel-r/fluid-functionalism-angular/core';
 import { Dialog } from './dialog';
 
 let nextId = 0;

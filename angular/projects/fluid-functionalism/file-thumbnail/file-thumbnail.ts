@@ -9,7 +9,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { cn, injectShape } from '../core';
+import { cn, injectShape } from '@angel-r/fluid-functionalism-angular/core';
 
 // ─── PDF renderer ─────────────────────────────────────────────────────────
 // The library ships no PDF renderer, so it never imports pdfjs: a PDF shows

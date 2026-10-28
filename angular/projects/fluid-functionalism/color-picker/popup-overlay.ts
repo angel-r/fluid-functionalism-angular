@@ -15,7 +15,7 @@ import {
   enterTransition,
   exitTransition,
   type injectAnimateFluid,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 
 // ---------------------------------------------------------------------------
 // The overlay both color picker popups share (the format menu and the

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import { cn } from '../../core';
-import { Button } from '../../button';
-import { InputField, InputGroup } from '../../input-group';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '../../select';
-import { Switch } from '../../switch';
+import { cn } from '@angel-r/fluid-functionalism-angular/core';
+import { Button } from '@angel-r/fluid-functionalism-angular/button';
+import { InputField, InputGroup } from '@angel-r/fluid-functionalism-angular/input-group';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@angel-r/fluid-functionalism-angular/select';
+import { Switch } from '@angel-r/fluid-functionalism-angular/switch';
 
 // ---------------------------------------------------------------------------
 // Section panels of the settings dialog — placeholder settings built from the

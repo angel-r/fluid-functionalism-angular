@@ -10,8 +10,8 @@ import {
   input,
   untracked,
 } from '@angular/core';
-import { cn, fontWeights, SizeContext, injectSize, sizeMap, type SizeVariant } from '../core';
-import { createFluidHover, type FluidHoverController, FluidHoverHighlight } from '../fluid-hover';
+import { cn, fontWeights, SizeContext, injectSize, sizeMap, type SizeVariant } from '@angel-r/fluid-functionalism-angular/core';
+import { createFluidHover, type FluidHoverController, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // ---------------------------------------------------------------------------
 // Table is a plain HTML table with one fluid hover highlight drawn behind all

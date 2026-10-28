@@ -31,7 +31,7 @@ import {
   surfaceClasses,
   Icon,
   injectAnimateFluid,
-} from '../core';
+} from '@angel-r/fluid-functionalism-angular/core';
 import { parseColor, rgbToHexStr, type ColorFormat } from './color-math';
 import { ColorPicker, type ColorChange } from './color-picker';
 import { ColorTile } from './color-swatch';

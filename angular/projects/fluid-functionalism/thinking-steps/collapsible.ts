@@ -28,8 +28,8 @@ import {
   animateFluid,
   enterTransition,
   exitTransition,
-} from '../core';
-import { Layer, writeInitialStyles } from '../tabs';
+} from '@angel-r/fluid-functionalism-angular/core';
+import { Layer, writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
 
 // ─── Shared collapsible parts ───────────────────────────────────────────────
 //

@@ -16,7 +16,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { cn } from '../core';
+import { cn } from '@angel-r/fluid-functionalism-angular/core';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 

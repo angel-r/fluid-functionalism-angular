@@ -13,8 +13,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { animate, isMotionValue, motionValue, type MotionValue } from 'motion';
-import { cn, spring, enterTransition, ReducedMotion } from '../core';
-import { FLUID_HOVER, FluidHoverItem, createFluidHover, FluidHoverHighlight } from '../fluid-hover';
+import { cn, spring, enterTransition, ReducedMotion } from '@angel-r/fluid-functionalism-angular/core';
+import { FLUID_HOVER, FluidHoverItem, createFluidHover, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 
 // ─── CarouselDots ───────────────────────────────────────────────────────
 // A row of 6px dots, one per slide. The current one stretches into a 24px
