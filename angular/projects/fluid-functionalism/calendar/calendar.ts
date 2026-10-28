@@ -127,7 +127,7 @@ export const WEEK_COL = `calc(var(--cell-size) * ${WEEK_COL_RATIO})`;
  * the fade.
  */
 const STACKED_NAV_WIDTH = `calc(${COL} * 2)`;
-const stackedStripMask: Record<string, string> = (() => {
+const stackedStripMask: Record<string, string> = /* @__PURE__ */ (() => {
   const fade =
     'linear-gradient(to bottom, transparent calc(var(--strip-clip-top) + 16px), #000 calc(var(--strip-clip-top) + 16px + var(--cell-size) / 4), #000 calc(100% - 24px), transparent)';
   const holeLeft = 'linear-gradient(to left, #000 calc(100% - 16px), transparent)';
@@ -148,7 +148,7 @@ const stackedStripMask: Record<string, string> = (() => {
 
 /** The side-by-side strip's mask: content fades over 8px at the outer edges,
  *  which the strip reaches 8px past, so nothing at rest is dimmed. */
-const sideStripMask: Record<string, string> = (() => {
+const sideStripMask: Record<string, string> = /* @__PURE__ */ (() => {
   const mask = 'linear-gradient(to right, transparent, #000 8px, #000 calc(100% - 8px), transparent)';
   return { maskImage: mask, webkitMaskImage: mask };
 })();

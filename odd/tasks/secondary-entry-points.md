@@ -83,7 +83,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 | T3 | S5 | inline | done | 573 cross-folder imports in 111 files now go through the folder `index.ts`; the S5 internals are exported from their entry; 1171 tests, lib and showcase builds green |
 | T4 | S2, D1, D4 | inline | done | 43 folders `git mv`'d to the package root; primary entry moved to `public-api.ts` (L8); tests 1171 (same count), lib and showcase builds green, still one FESM |
 | T5 | S2, S3, S4 | inline | done | 45 secondary entries (41 folders + 4 blocks) with `ng-package.json`; 221 cross-entry imports by package name; primary FESM is 45 re-exports; dist 46 `.mjs`, 28 tokens, 0 duplicates |
-| T6 | S6 | inline | todo | `/* @__PURE__ */` annotations |
+| T6 | S6 | inline | done | 57 `perNodeStroke` (generated), 5 `cva`, 3 `cn`, `extendTailwindMerge`, 2 calendar IIFEs annotated; probe asserts `cn` keeps no icon pack and no component; 1171 tests |
 | T7 | S1, S3, S6, S7 | inline | todo | Probe GREEN plus showcase browser check |
 | T8 | S8 | inline | todo | Docs and generator paths |
 | T9 | S7, S9 | inline, then verifier | todo | Version 0.1.0, independent verification, PR; after the user merges, tag and publish |
@@ -189,4 +189,10 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
   - Gate: `ng build fluid-functionalism` lists every entry, 1171 tests pass, `ng build showcase` passes and emits the same CSS hash as before the split (`styles-I42FRRZG.css`), so Tailwind sees the same classes.
   - The probe is GREEN here already: `cn` 3.3 KB (was 53.5), `provideFluid` 13.5 KB (63.8), `provideFluid` + `Button` 25.1 KB (74.1), everything 969.4 KB (950.9 — the entry wrappers cost ~2%). Splitting: `main` statically imports an 18.8 KB chunk; Calendar lives in an 87.7 KB lazy chunk, for the bare import and for sub-paths.
   - One test run reported 1 of 1171 failing; the next three runs (same tree) were 61/61 files and 1171/1171 tests. The failing run's output was not captured, so the name is unknown; keep an eye on it in T7/T9.
-- **Next step:** T6.
+- **L10** (2026-10-28, T6): `/* @__PURE__ */` on every module-level call that has no observable side effect.
+  - 57 `perNodeStroke(...)` calls, added in `generate-icon-packs.mjs` (not by hand: the file is generated), then regenerated. S6 says 58; the generator reports 57 slots, so 57.
+  - `cva(...)` in badge, button, combobox-field, select, sidebar-menu-button; `cn(...)` in combobox-field (2) and date-picker-popover; `extendTailwindMerge(...)` in core/utils; the 2 calendar mask IIFEs. Deliberately left alone: `inject`/`signal`/`computed` (DI and signal registration are the side effect), `Promise.reject`, `clipboard.writeText`, and pure arithmetic helpers (`Math.*`, `Object.keys`) where the annotation buys nothing.
+  - The annotations survive the build: icon-packs FESM 57, calendar 6, combobox 7, core 2, badge 1.
+  - The probe now asserts S6, not just prints sizes: the `cn` bundle must contain no pack glyph and no `ff-` selector, with positive controls (provideFluid must keep a pack glyph, `everything` must keep selectors) so a broken detector cannot report green. `cn` keeps 3.3 KB, "no icon pack, no component".
+  - The generator also emits `@angel-r/fluid-functionalism-angular/core` for its imports now (S4); the regeneration changed only hugeicons.ts (57 lines) and left tabler, phosphor, untitledui, lucide-icons and index.ts byte-identical.
+- **Next step:** T7.

@@ -18,7 +18,7 @@ import {
   type IconName,
 } from '@angel-r/fluid-functionalism-angular/core';
 
-export const buttonVariants = cva(
+export const buttonVariants = /* @__PURE__ */ cva(
   [
     // whitespace-nowrap: a label never breaks onto 2 lines. It also makes
     // the label the button's narrowest width, so a tight row moves the

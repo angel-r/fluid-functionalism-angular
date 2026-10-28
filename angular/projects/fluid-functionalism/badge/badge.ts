@@ -34,7 +34,7 @@ export const badgeColors = {
 
 export type BadgeColor = keyof typeof badgeColors;
 
-export const badgeVariants = cva('inline-flex items-center whitespace-nowrap', {
+export const badgeVariants = /* @__PURE__ */ cva('inline-flex items-center whitespace-nowrap', {
   variants: {
     variant: {
       solid: '',

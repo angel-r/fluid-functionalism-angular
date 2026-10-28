@@ -289,7 +289,7 @@ export class Select {
 // SelectTrigger
 // ---------------------------------------------------------------------------
 
-export const selectTriggerVariants = cva(
+export const selectTriggerVariants = /* @__PURE__ */ cva(
   [
     'group inline-flex items-center justify-between outline-none cursor-pointer',
     'transition-all duration-80',

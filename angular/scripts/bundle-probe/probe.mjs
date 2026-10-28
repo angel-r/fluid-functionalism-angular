@@ -208,7 +208,8 @@ async function measure({ code }) {
     write: false,
     plugins: [libraryPlugin()],
   });
-  return result.outputFiles.reduce((sum, file) => sum + file.contents.length, 0);
+  const text = result.outputFiles.map((file) => file.text).join('');
+  return { bytes: text.length, text };
 }
 
 /** (b) Chunk layout of a main chunk plus one lazily loaded module. */
@@ -230,8 +231,8 @@ async function splitting({ main, lazy, label }) {
   const contents = new Map();
   result.outputFiles.forEach((file) => contents.set(file.path, file.text));
 
-  const mainKey = Object.keys(outputs).find(
-    (key) => (outputs[key].entryPoint ?? '').endsWith('main'),
+  const mainKey = Object.keys(outputs).find((key) =>
+    (outputs[key].entryPoint ?? '').endsWith('main'),
   );
   if (!mainKey) fail(`[${label}] esbuild emitted no main chunk`);
 
@@ -302,12 +303,12 @@ async function sizesFor(sub) {
     ['provideFluid', bareUse(`import { provideFluid } from '${coreFrom}';`, 'provideFluid')],
     [
       'provideFluid + Button',
-      bareUse(`import { provideFluid } from '${coreFrom}';\nimport { Button } from '${buttonFrom}';`, '[provideFluid, Button]'),
+      bareUse(
+        `import { provideFluid } from '${coreFrom}';\nimport { Button } from '${buttonFrom}';`,
+        '[provideFluid, Button]',
+      ),
     ],
-    [
-      'everything',
-      `import * as ff from '${PKG_NAME}';\nglobalThis.__probe = ff;\n`,
-    ],
+    ['everything', `import * as ff from '${PKG_NAME}';\nglobalThis.__probe = ff;\n`],
   ];
   const out = [];
   for (const [name, code] of rows) {
@@ -316,13 +317,83 @@ async function sizesFor(sub) {
   return { lazyFrom, rows: out, sub };
 }
 
+/**
+ * S6: importing only `cn` keeps no icon pack and no component.
+ *
+ * Both are detected by data that survives minification: one glyph path per
+ * pack (read from the pack sources, since identifiers are renamed) and the
+ * single-quoted or double-quoted `ff-` selectors in the component metadata.
+ */
+const PACK_SOURCES = {
+  lucide: 'core/lucide-icons.ts',
+  hugeicons: 'icon-packs/hugeicons.ts',
+  tabler: 'icon-packs/tabler.ts',
+  phosphor: 'icon-packs/phosphor.ts',
+  untitledui: 'icon-packs/untitledui.ts',
+};
+const sourceRoot = path.join(angularRoot, 'projects/fluid-functionalism');
+const packMarkers = Object.entries(PACK_SOURCES)
+  .map(([pack, relative]) => {
+    const file = path.join(sourceRoot, relative);
+    if (!existsSync(file)) return undefined;
+    const glyph = readFileSync(file, 'utf8').match(/"d":"([^"]{12,80})"/)?.[1];
+    return glyph ? [pack, glyph] : undefined;
+  })
+  .filter(Boolean);
+
+function purityOf(text) {
+  const iconPacks = packMarkers.filter(([, glyph]) => text.includes(glyph)).map(([pack]) => pack);
+  const selectors = [
+    ...new Set([...text.matchAll(/["']ff-[a-z-]+["']/g)].map((match) => match[0])),
+  ];
+  return { iconPacks, selectors };
+}
+
+function purityCheck(mode, result) {
+  const purity = purityOf(result.text);
+  scenarios.push({ kind: 'purity', label: `${mode} / cn keeps`, ...purity });
+  if (purity.iconPacks.length) {
+    failures.push(`${mode} import: cn keeps icon pack data (${purity.iconPacks.join(', ')})`);
+  }
+  if (purity.selectors.length) {
+    failures.push(`${mode} import: cn keeps component code (${purity.selectors.join(', ')})`);
+  }
+}
+
+/**
+ * Positive controls, so a green check cannot come from detection that stopped
+ * working: provideFluid() supplies the icon map, so it must keep a pack, and
+ * the everything bundle must show component selectors.
+ */
+function controlCheck(mode, rows) {
+  const byName = new Map(rows);
+  if (!purityOf(byName.get('provideFluid').text).iconPacks.length) {
+    failures.push(
+      `${mode} import: probe cannot see icon pack data in provideFluid (detection broken)`,
+    );
+  }
+  if (!purityOf(byName.get('everything').text).selectors.length) {
+    failures.push(
+      `${mode} import: probe cannot see component selectors in everything (detection broken)`,
+    );
+  }
+}
+
 const bareSizes = await sizesFor(null);
-bareSizes.rows.forEach(([name, bytes]) => sizeRow(`bare / ${name}`, bytes));
+for (const [name, result] of bareSizes.rows) {
+  sizeRow(`bare / ${name}`, result.bytes);
+  if (name === 'cn') purityCheck('bare', result);
+}
+controlCheck('bare', bareSizes.rows);
 
 let subSizes = null;
 if (hasSecondaryEntryPoints) {
   subSizes = await sizesFor('subpaths');
-  subSizes.rows.forEach(([name, bytes]) => sizeRow(`sub-paths / ${name}`, bytes));
+  for (const [name, result] of subSizes.rows) {
+    sizeRow(`sub-paths / ${name}`, result.bytes);
+    if (name === 'cn') purityCheck('sub-paths', result);
+  }
+  controlCheck('sub-paths', subSizes.rows);
 }
 
 // (b) splitting, through the bare import.
@@ -369,8 +440,16 @@ if (jsonOut) {
   for (const row of scenarios.filter((s) => s.kind === 'size')) {
     console.log(`  ${row.label.padEnd(28)} ${kb(row.bytes).padStart(9)}`);
   }
+  for (const purity of scenarios.filter((s) => s.kind === 'purity')) {
+    const keeps = [...purity.iconPacks, ...purity.selectors];
+    console.log(
+      `  ${purity.label.padEnd(28)} ${keeps.length ? keeps.join(', ') : 'no icon pack, no component'}`,
+    );
+  }
   for (const split of scenarios.filter((s) => s.kind === 'split')) {
-    console.log(`\n(b) splitting, ${split.label} import — ${split.ok ? 'PASS' : 'FAIL'}: ${split.detail}`);
+    console.log(
+      `\n(b) splitting, ${split.label} import — ${split.ok ? 'PASS' : 'FAIL'}: ${split.detail}`,
+    );
     for (const chunk of split.chunks) {
       console.log(
         `  ${chunk.staticFromMain ? 'static' : 'lazy  '} ${kb(chunk.bytes).padStart(9)}  ${

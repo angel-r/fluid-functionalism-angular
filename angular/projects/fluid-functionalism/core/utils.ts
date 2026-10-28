@@ -5,7 +5,7 @@ import { extendTailwindMerge } from "tailwind-merge";
 // tailwind-merge can't know that for custom classes — by default anything
 // text-<word> it doesn't recognize is treated as a text *color*, so
 // cn("text-body", "text-muted-foreground") would silently drop the size.
-const twMerge = extendTailwindMerge({
+const twMerge = /* @__PURE__ */ extendTailwindMerge({
   extend: {
     classGroups: {
       "font-size": [

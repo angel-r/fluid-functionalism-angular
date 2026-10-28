@@ -25,7 +25,7 @@ import { SidebarMenuRow } from './sidebar-menu-item';
 import { SidebarMenuRowLabel } from './row-label';
 import { rowGutter } from './menu-utils';
 
-export const sidebarMenuButtonVariants = cva(
+export const sidebarMenuButtonVariants = /* @__PURE__ */ cva(
   // The trailing gutter is an exact reservation published by the row (see
   // rowGutter): --row-gutter at rest, --row-gutter-hover once hover-revealed
   // actions are showing. One rule per state instead of a class per

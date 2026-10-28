@@ -37,7 +37,7 @@ import { Combobox, type ComboboxItemData, comboboxItemLabel } from './combobox-r
 export type ComboboxFieldVariant = 'bordered' | 'borderless';
 export type ComboboxIcon = IconName | IconDefinition;
 
-export const comboboxFieldVariants = cva(
+export const comboboxFieldVariants = /* @__PURE__ */ cva(
   [
     'group flex items-center ring-1 cursor-text',
     'transition-all duration-80',
@@ -67,9 +67,12 @@ const fieldButtonClass =
   'flex shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors duration-80 hover:text-foreground focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] data-[disabled]:pointer-events-none';
 // The clear ✕ is a real icon button: the hover fill says "press me", where
 // the chevron beside it only decorates the field it belongs to.
-const clearButtonClass = cn(fieldButtonClass, 'hover:bg-hover active:bg-active transition-[color,background-color]');
+const clearButtonClass = /* @__PURE__ */ cn(
+  fieldButtonClass,
+  'hover:bg-hover active:bg-active transition-[color,background-color]',
+);
 // A chip's ✕ sits on the chip's own hover-tinted fill, so it steps up a notch.
-const chipRemoveClass = cn(fieldButtonClass, 'rounded hover:bg-active');
+const chipRemoveClass = /* @__PURE__ */ cn(fieldButtonClass, 'rounded hover:bg-active');
 
 const errorClass = 'text-[length:var(--fs-caption,12px)] leading-[var(--lh-caption,16px)] text-destructive pl-3';
 const errorRingClass = 'ring-destructive/50 hover:ring-destructive/50 focus-within:ring-destructive/50';

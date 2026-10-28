@@ -44,7 +44,7 @@ export interface DatePickerPopoverOptions {
 /** The positioner's classes: above the page, exposing the available height. */
 export const datePickerPositionerClass = 'z-50 outline-none [--popup-available-height:var(--available-height)]';
 /** The motion wrapper's classes (the React frame's motion.div). */
-export const datePickerMotionClass = cn('outline-none', popupMotionClass);
+export const datePickerMotionClass = /* @__PURE__ */ cn('outline-none', popupMotionClass);
 /** The elevated popup's base classes (the React frame's Elevated). */
 export const datePickerPopupClass = 'rounded-xl outline-none select-none';
 
