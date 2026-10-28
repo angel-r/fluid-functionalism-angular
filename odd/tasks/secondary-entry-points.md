@@ -85,7 +85,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 | T5 | S2, S3, S4 | inline | done | 45 secondary entries (41 folders + 4 blocks) with `ng-package.json`; 221 cross-entry imports by package name; primary FESM is 45 re-exports; dist 46 `.mjs`, 28 tokens, 0 duplicates |
 | T6 | S6 | inline | done | 57 `perNodeStroke` (generated), 5 `cva`, 3 `cn`, `extendTailwindMerge`, 2 calendar IIFEs annotated; probe asserts `cn` keeps no icon pack and no component; 1171 tests |
 | T7 | S1, S3, S6, S7 | inline | done | Probe GREEN for bare and sub-paths; real showcase: `main`'s static closure has no `ff-calendar`; `/`, `/docs/button`, `/docs/input-message`, `/docs/calendar` render with classes and no console errors |
-| T8 | S8 | inline | todo | Docs and generator paths |
+| T8 | S8 | inline | done | PORTING target paths and the S4 import rule, entry-points notes in both READMEs, generator writes the moved paths and its output is byte-identical, `stack.mjs` still reads the workspace |
 | T9 | S7, S9 | inline, then verifier | todo | Version 0.1.0, independent verification, PR; after the user merges, tag and publish |
 
 ### Task notes
@@ -199,4 +199,10 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
   - Probe (`npm run probe:bundle`, bare / sub-paths identical): `cn` 3.3 KB (baseline 53.5), `provideFluid` 13.3 KB (63.8), `+ Button` 25.1 KB (74.1), everything 969.4 KB (950.9, +2%: the 46 entry wrappers and per-entry module ceremony; the library's own 46 FESMs total 1895 KB unminified). `cn` keeps no icon pack and no component. Splitting: main's static chunk 18.8 KB; Calendar lives only in the 87.7 KB lazy chunk, through the bare name and through `/calendar`.
   - Real app (`npm run build:showcase`): the built showcase has lazy routes (`loadComponent` on every page) and `provideFluid` eagerly. `index.html` loads `main-XDBTEEQR.js`, whose static import closure is 16 files / 994 KB and contains no `ff-calendar`. The calendar code sits in the lazy page chunks (e.g. 50.9 KB, 37.1 KB). This is S1 on a real app, not only in the probe.
   - Browser (headless Chrome via `playwright-core`, `channel: 'chrome'`, static server on 4317; 4310 is taken): `/` renders 2412 nodes, `--background` resolves, Inter loads, nav links work; `/docs/button` 19 `button[ffButton]`, heights exactly 28 and 36px (the ladder), 8px radius, flex layout; `/docs/input-message` the PDF attachment draws a 160×207 data-URL thumbnail with `object-cover`; `/docs/calendar` 544px wide, 4 grid containers, 63 day buttons. No console errors on any page.
-- **Next step:** T8.
+- **L12** (2026-10-28, T8): docs follow the layout.
+  - `angular/PORTING.md`: the target paths are `<name>/<name>.ts` and `<name>/<name>.spec.ts`, and the import rule is now S4 in prose: relative inside an entry, package name across entries, with the reason (ng-packagr inlines a second copy or fails).
+  - Entry points section in `angular/projects/fluid-functionalism/README.md` (the npm README) and a short paragraph in the root `README.md`: the bare import stays recommended, sub-paths (`/calendar`, `/core`, `/blocks/sidebar`) are allowed, both split.
+  - `CONTRIBUTING.md` and the skill's source path (`projects/fluid-functionalism/<folder>/**`); `angular/README.md` states the sub-path alias and the per-entry FESM layout.
+  - `node angular/scripts/generate-icon-packs.mjs` leaves the tree unchanged (byte-identical output for all five packs, `index.ts` and `core/lucide-icons.ts`).
+  - `node skills/fluid-functionalism-angular/scripts/stack.mjs angular` still reads the workspace: alias at `tsconfig.json:8`, `@source "../../fluid-functionalism"` at `styles.css:24`, `provideFluid()` wired. No change needed there.
+- **Next step:** T9.

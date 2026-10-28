@@ -48,6 +48,23 @@ You need Angular 22 and Tailwind CSS 4.
 
 Reduced motion follows the OS setting: transforms jump, fades stay.
 
+## Entry points
+
+The package ships one entry point per component folder (`core`, `button`, `calendar`, `dialog`, …, `blocks/sidebar`, `blocks/sidebar-app`), the way Angular Material does, plus `styles/theme.css`. The bare import is still recommended: it re-exports every entry, so nothing you imported before changes.
+
+```ts
+import { Button, provideFluid } from '@angel-r/fluid-functionalism-angular';
+```
+
+Sub-path imports are allowed too, and pin a page to one entry:
+
+```ts
+import { Calendar } from '@angel-r/fluid-functionalism-angular/calendar';
+import { provideFluid } from '@angel-r/fluid-functionalism-angular/core';
+```
+
+Either form tree-shakes and splits: a component a page never loads stays out of the bundle that loads first. Importing the same symbol through both forms in one app still yields one copy.
+
 ## PDF thumbnails
 
 `ff-file-thumbnail` (used by `ff-input-message` and `ff-chat-message`) shows a PDF as a generic file icon. The library ships no PDF renderer, so it never pulls in pdfjs. To show a PDF's first page, provide a renderer. With `pdfjs-dist` (`npm i pdfjs-dist`):

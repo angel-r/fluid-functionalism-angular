@@ -45,7 +45,7 @@ The per-component differences (and why) are recorded in `odd/tasks/angular-port.
 | Publish to npm | bump `version` in `projects/fluid-functionalism/package.json`, commit, then push a matching tag (`git tag v0.1.0 && git push origin v0.1.0`). The `Publish Angular library` workflow tests, builds and publishes with npm trusted publishing. |
 | Regenerate the icon packs | `node scripts/generate-icon-packs.mjs` |
 
-In the workspace, the `@angel-r/fluid-functionalism-angular` import path points at the library source, so the showcase needs no library build.
+In the workspace, both the bare `@angel-r/fluid-functionalism-angular` import path and its `<entry>` sub-paths point at the library source (`projects/fluid-functionalism/*/index.ts`), so the showcase needs no library build. The build writes one FESM per entry plus the primary re-export file into `dist/fluid-functionalism/fesm2022`.
 
 ## Agent and SEO files
 

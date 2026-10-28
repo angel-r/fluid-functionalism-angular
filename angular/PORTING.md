@@ -6,12 +6,12 @@ How a fluid-functionalism component is ported into `projects/fluid-functionalism
 
 | React source | Angular target |
 |---|---|
-| `registry/base/<name>.tsx` (preferred flavor) + the `registry/default/*` cores it imports | `projects/fluid-functionalism/src/lib/<name>/<name>.ts` (split into more files when it helps) |
+| `registry/base/<name>.tsx` (preferred flavor) + the `registry/default/*` cores it imports | `projects/fluid-functionalism/<name>/<name>.ts` (split into more files when it helps) |
 | `lib/docs/api/<name>.ts` (props reference) | inputs/outputs with the same names and defaults |
-| `tests/<name>*.test.tsx` | `src/lib/<name>/<name>.spec.ts` |
+| `tests/<name>*.test.tsx` | `<name>/<name>.spec.ts` |
 | docs page demos (`app/docs/<name>/page.tsx`) | `projects/showcase/src/app/demos/<name>/<name>.demo.ts` |
 
-Each `src/lib/<name>/index.ts` re-exports the public pieces; `public-api.ts` already exports every component folder. Import foundations relatively (`../core`, `../fluid-hover`, `../merge-split`), never from `@angel-r/fluid-functionalism-angular`.
+Every folder at the package root is its own entry point, so `<name>/index.ts` re-exports the pieces other entries may use, and `public-api.ts` re-exports every entry by package name. Inside an entry, import relatively (`./x`). Code in one entry that needs another imports it by package name — `@angel-r/fluid-functionalism-angular/core`, `@angel-r/fluid-functionalism-angular/fluid-hover` — never by a relative path that leaves its own folder: ng-packagr would inline a second copy, or fail. A piece another entry needs that is not exported yet belongs in the owning `index.ts`.
 
 The Base UI and Radix flavors share one behavior: port it once.
 

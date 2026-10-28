@@ -53,6 +53,8 @@ You need Angular 22 and Tailwind CSS 4.
    </ff-select>
    ```
 
+Every component folder is also a sub-path import, so a lazily loaded page can take one entry and nothing else: `@angel-r/fluid-functionalism-angular/calendar`, `/core`, `/dialog`, `/blocks/sidebar`. The bare import above is still the recommended one: it re-exports every entry, and the bundler keeps only what the page uses and moves the rest into the lazy chunks.
+
 ## Options
 
 | Need | Use |

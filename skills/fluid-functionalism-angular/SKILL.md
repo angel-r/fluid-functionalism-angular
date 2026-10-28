@@ -435,7 +435,7 @@ order of reach:
   geometry; select acknowledges a pick for 300ms; the panel already snaps
   under a collapsing child).
 - **The installed types are the final word.** In this repository the sources
-  are `angular/projects/fluid-functionalism/src/lib/**`; in a consuming app
+  are `angular/projects/fluid-functionalism/<folder>/**`; in a consuming app
   the published `.d.ts` files under
   `node_modules/@angel-r/fluid-functionalism-angular` list every input and
   output, and the docs page lists the same. Before modifying or wrapping a
