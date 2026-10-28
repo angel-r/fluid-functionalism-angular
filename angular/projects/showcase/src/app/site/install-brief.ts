@@ -20,7 +20,7 @@ export const THEME_IMPORT = `@import "tailwindcss";
 /** The craft (exact behaviors and values) ships in the skill, not in the
  *  brief: one pointer instead of a page of bullets (D9). */
 export const SKILL_LINE =
-  'For the design details behind it (exact behaviors and values), add the Fluid Functionalism Angular skill: npx skills add angel-r/fluid-functionalism-angular';
+  'For the design details behind it (exact behaviors and values), add the Fluid Functionalism Angular skill: npx skills add angel-r/fluid-functionalism-angular --skill fluid-functionalism-angular';
 
 /** Where an agent checks for changes later: every month's release, with
  *  migration steps for anything breaking. */

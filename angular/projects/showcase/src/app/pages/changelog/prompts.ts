@@ -15,7 +15,7 @@ import { inlineToText, monthLabel, type EntryView } from './changelog-data';
 const UPDATE_COMMAND = `npm i ${PACKAGE}@latest`;
 
 /** The Angular skill, installed by the `skills` CLI (D9). */
-export const SKILL_INSTALL = 'npx skills add angel-r/fluid-functionalism-angular';
+export const SKILL_INSTALL = 'npx skills add angel-r/fluid-functionalism-angular --skill fluid-functionalism-angular';
 
 /** What an entry installs, as the current library spells it: the skill, or the
  *  package every component ships in. */

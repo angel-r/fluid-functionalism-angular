@@ -145,7 +145,7 @@ const tabSelector = (side: Side) => `[data-side="${side}"] [role="tab"]`;
 // ---------------------------------------------------------------------------
 
 /** The Angular skill's install command, the value every copy example shows. */
-const COMMAND = 'npx skills add angel-r/fluid-functionalism-angular';
+const COMMAND = 'npx skills add angel-r/fluid-functionalism-angular --skill fluid-functionalism-angular';
 
 /** The generic read-only field: the command, truncated, with the copy action
  *  inside on the right, like shadcn's copy input. */

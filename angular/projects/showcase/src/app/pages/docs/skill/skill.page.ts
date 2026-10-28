@@ -23,7 +23,7 @@ const JOBS: readonly TimelineStep[] = [
  *  agent goes on to run the skill once on the project (D9). Global (-g) keeps
  *  the skill out of the user's repo; -y skips the CLI's prompts, which an
  *  agent shell can't answer. */
-const SKILL_INSTALL_COMMAND = 'npx skills add angel-r/fluid-functionalism-angular -g -y';
+const SKILL_INSTALL_COMMAND = 'npx skills add angel-r/fluid-functionalism-angular --skill fluid-functionalism-angular -g -y';
 const SKILL_INSTALL_PROMPT = `Install the fluid-functionalism-angular skill with \`${SKILL_INSTALL_COMMAND}\` (skip this if you already have it). Then read its SKILL.md and use it to audit this project.`;
 
 @Component({
