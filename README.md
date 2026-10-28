@@ -61,7 +61,7 @@ You need Angular 22 and Tailwind CSS 4.
 | Change shape or size for one region | `[ffShapeProvider]`, `[ffSizeProvider]` |
 | Another icon set | `provideFluid({ icons: tablerIcons })`, also `phosphorIcons`, `hugeiconsIcons`, `untitleduiIcons` |
 | Light and dark | `ThemeService` (`setTheme`, `cycle`); `provideFluidTheme({ shortcut: true })` adds the T key |
-| PDF thumbnails | install the optional peer `pdfjs-dist` |
+| PDF thumbnails | provide a `FILE_THUMBNAIL_PDF_RENDERER` (see the [package README](angular/projects/fluid-functionalism/README.md#pdf-thumbnails)); the package never imports pdfjs |
 
 Reduced motion follows the OS setting: transforms jump, fades stay.
 

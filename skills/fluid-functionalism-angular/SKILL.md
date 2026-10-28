@@ -248,13 +248,13 @@ The stack read tells you which of these are already done. Skip those.
    relative `url()` here, because the theme's `/fonts/` paths are root
    absolute.
 
-5. **Optional: PDF thumbnails.** `ff-file-thumbnail` renders a PDF's first
-   page through `pdfjs-dist`, an optional peer. Install it only when that
-   component is in play:
-
-   ```bash
-   npm i pdfjs-dist
-   ```
+5. **Optional: PDF thumbnails.** `ff-file-thumbnail` shows a PDF as a
+   generic file icon: the package ships no PDF renderer and never imports
+   pdfjs. Only when the app wants a PDF's first page, install `pdfjs-dist`
+   and provide a `FILE_THUMBNAIL_PDF_RENDERER`, with the worker copied into
+   the app's assets so it works offline and under a strict CSP. The package
+   README ("PDF thumbnails") has the renderer and the `angular.json` asset
+   entry.
 
 ## Using the components
 

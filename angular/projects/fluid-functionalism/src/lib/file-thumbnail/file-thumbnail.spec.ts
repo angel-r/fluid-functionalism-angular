@@ -192,3 +192,14 @@ describe('FileThumbnail: other files', () => {
     expect(thumbs()[0].querySelector('svg')!.getAttribute('width')).toBe('16');
   });
 });
+
+describe('FileThumbnail: no PDF renderer provided', () => {
+  it('shows a PDF as the generic glyph, with no spinner', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.files.set([pdf]);
+    fixture.detectChanges();
+    const thumb = (fixture.nativeElement as HTMLElement).querySelector('[data-testid="thumb"]')!;
+    expect(thumb.querySelector('[role="status"]')).toBeNull();
+    expect(thumb.querySelector('[role="img"]')!.getAttribute('aria-label')).toBe('report.pdf');
+  });
+});

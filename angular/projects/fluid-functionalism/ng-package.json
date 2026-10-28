@@ -13,7 +13,6 @@
     "tailwind-merge",
     "motion",
     "lucide",
-    "class-variance-authority",
-    "pdfjs-dist"
+    "class-variance-authority"
   ]
 }
