@@ -7,62 +7,73 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Injectable,
   afterRenderEffect,
+  computed,
+  inject,
   input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { Button, Icon, enterTransition, exitTransition, injectAnimateFluid, spring } from '@angel-r/fluid-functionalism-angular';
-
-/** One cell the size of the glyph, so the button's layout never moves. */
-const GLYPH = 16;
+import {
+  Button,
+  type ButtonSize,
+  Icon,
+  cn,
+  enterTransition,
+  exitTransition,
+  injectAnimateFluid,
+  spring,
+} from '@angel-r/fluid-functionalism-angular';
 
 const SHOWN = { opacity: 1, scale: 1, filter: 'blur(0px)' };
 const HIDDEN = { opacity: 0, scale: 0.6, filter: 'blur(4px)' };
 
+/** The button's copied state, read by its glyph (React's CopiedContext). */
+@Injectable()
+class CopiedState {
+  readonly copied = signal(false);
+}
+
+/**
+ * The leading glyph: copy, or a check while the prompt was just copied. An
+ * icon component (the `size` / `strokeWidth` / `class` icon contract), so it
+ * goes through the Button's icon slot and takes its icon-side padding, gap
+ * and size step. Both glyphs share one cell the size of the icon, so the slot
+ * the Button lays out never changes.
+ */
 @Component({
-  selector: 'app-copy-prompt-button',
-  imports: [Button, Icon],
+  selector: 'app-copy-prompt-icon',
+  imports: [Icon],
   template: `
-    <button ffButton [variant]="variant()" [class]="userClass()" (click)="copy()">
-      <span class="inline-flex items-center gap-2">
-        <span class="grid shrink-0" [style.width.px]="glyph" [style.height.px]="glyph">
-          <span #copyGlyph class="col-start-1 row-start-1 flex">
-            <ff-icon name="copy" [size]="glyph" [strokeWidth]="1.5" />
-          </span>
-          <span #checkGlyph class="col-start-1 row-start-1 flex" [style]="hiddenStyle">
-            <ff-icon name="check" [size]="glyph" [strokeWidth]="1.5" />
-          </span>
-        </span>
-        <span>{{ label() }}</span>
+    <span class="grid shrink-0" [style.width.px]="size()" [style.height.px]="size()">
+      <span #copyGlyph class="col-start-1 row-start-1 flex">
+        <ff-icon name="copy" [size]="size()" [strokeWidth]="strokeWidth()" [class]="userClass()" />
       </span>
-      <span class="sr-only" aria-live="polite">{{ copied() ? 'Copied' : '' }}</span>
-    </button>
+      <span #checkGlyph class="col-start-1 row-start-1 flex" [style]="hiddenStyle">
+        <ff-icon name="check" [size]="size()" [strokeWidth]="strokeWidth()" [class]="userClass()" />
+      </span>
+    </span>
   `,
+  host: { style: 'display: contents' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CopyPromptButton {
-  /** The prompt text written to the clipboard. */
-  readonly prompt = input.required<string>();
-  readonly label = input('Copy prompt');
-  readonly variant = input<'primary' | 'secondary' | 'tertiary' | 'ghost'>('primary');
-  readonly userClass = input<string>('', { alias: 'class' });
-  /** Emitted after a successful copy (the toast, or analytics). */
-  readonly copiedPrompt = output<void>();
+class CopyPromptIcon {
+  readonly size = input<number | string>(16);
+  readonly strokeWidth = input<number | string | undefined>(1.5);
+  readonly userClass = input('', { alias: 'class' });
 
-  protected readonly glyph = GLYPH;
-  protected readonly copied = signal(false);
   protected readonly hiddenStyle = {
     opacity: HIDDEN.opacity,
     transform: `scale(${HIDDEN.scale})`,
     filter: HIDDEN.filter,
   };
 
+  private readonly copied = inject(CopiedState).copied;
   private readonly animate = injectAnimateFluid();
   private readonly copyGlyph = viewChild<ElementRef<HTMLElement>>('copyGlyph');
   private readonly checkGlyph = viewChild<ElementRef<HTMLElement>>('checkGlyph');
-  private timeout: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     // The glyph arriving outlasts the one leaving (0.08s against 0.06s), so
@@ -76,6 +87,36 @@ export class CopyPromptButton {
       this.animate(check, copied ? SHOWN : HIDDEN, copied ? enterTransition(spring.fast) : exitTransition(spring.fast));
     });
   }
+}
+
+@Component({
+  selector: 'app-copy-prompt-button',
+  imports: [Button],
+  providers: [CopiedState],
+  template: `
+    <button ffButton [variant]="variant()" [size]="size()" [leadingIcon]="icon" [class]="buttonClass()" (click)="copy()">
+      {{ label() }}
+      <span class="sr-only" aria-live="polite">{{ copied() ? 'Copied' : '' }}</span>
+    </button>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class CopyPromptButton {
+  /** The prompt text written to the clipboard. */
+  readonly prompt = input.required<string>();
+  readonly label = input('Copy prompt');
+  readonly variant = input<'primary' | 'secondary' | 'tertiary' | 'ghost'>('primary');
+  /** Omitted, it follows the surrounding SizeProvider. */
+  readonly size = input<ButtonSize | undefined>(undefined);
+  readonly userClass = input<string>('', { alias: 'class' });
+  /** Emitted after a successful copy (the toast, or analytics). */
+  readonly copiedPrompt = output<void>();
+
+  protected readonly icon = CopyPromptIcon;
+  protected readonly copied = inject(CopiedState).copied;
+  protected readonly buttonClass = computed(() => cn('w-fit shrink-0', this.userClass()));
+
+  private timeout: ReturnType<typeof setTimeout> | undefined;
 
   protected async copy(): Promise<void> {
     try {
