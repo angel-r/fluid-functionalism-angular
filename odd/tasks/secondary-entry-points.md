@@ -84,7 +84,7 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
 | T4 | S2, D1, D4 | inline | done | 43 folders `git mv`'d to the package root; primary entry moved to `public-api.ts` (L8); tests 1171 (same count), lib and showcase builds green, still one FESM |
 | T5 | S2, S3, S4 | inline | done | 45 secondary entries (41 folders + 4 blocks) with `ng-package.json`; 221 cross-entry imports by package name; primary FESM is 45 re-exports; dist 46 `.mjs`, 28 tokens, 0 duplicates |
 | T6 | S6 | inline | done | 57 `perNodeStroke` (generated), 5 `cva`, 3 `cn`, `extendTailwindMerge`, 2 calendar IIFEs annotated; probe asserts `cn` keeps no icon pack and no component; 1171 tests |
-| T7 | S1, S3, S6, S7 | inline | todo | Probe GREEN plus showcase browser check |
+| T7 | S1, S3, S6, S7 | inline | done | Probe GREEN for bare and sub-paths; real showcase: `main`'s static closure has no `ff-calendar`; `/`, `/docs/button`, `/docs/input-message`, `/docs/calendar` render with classes and no console errors |
 | T8 | S8 | inline | todo | Docs and generator paths |
 | T9 | S7, S9 | inline, then verifier | todo | Version 0.1.0, independent verification, PR; after the user merges, tag and publish |
 
@@ -195,4 +195,8 @@ Branch: `feat/secondary-entry-points`, created from `main` at `e593849` (after P
   - The annotations survive the build: icon-packs FESM 57, calendar 6, combobox 7, core 2, badge 1.
   - The probe now asserts S6, not just prints sizes: the `cn` bundle must contain no pack glyph and no `ff-` selector, with positive controls (provideFluid must keep a pack glyph, `everything` must keep selectors) so a broken detector cannot report green. `cn` keeps 3.3 KB, "no icon pack, no component".
   - The generator also emits `@angel-r/fluid-functionalism-angular/core` for its imports now (S4); the regeneration changed only hugeicons.ts (57 lines) and left tabler, phosphor, untitledui, lucide-icons and index.ts byte-identical.
-- **Next step:** T7.
+- **L11** (2026-10-28, T7): GREEN, measured on the real pipeline and the real app.
+  - Probe (`npm run probe:bundle`, bare / sub-paths identical): `cn` 3.3 KB (baseline 53.5), `provideFluid` 13.3 KB (63.8), `+ Button` 25.1 KB (74.1), everything 969.4 KB (950.9, +2%: the 46 entry wrappers and per-entry module ceremony; the library's own 46 FESMs total 1895 KB unminified). `cn` keeps no icon pack and no component. Splitting: main's static chunk 18.8 KB; Calendar lives only in the 87.7 KB lazy chunk, through the bare name and through `/calendar`.
+  - Real app (`npm run build:showcase`): the built showcase has lazy routes (`loadComponent` on every page) and `provideFluid` eagerly. `index.html` loads `main-XDBTEEQR.js`, whose static import closure is 16 files / 994 KB and contains no `ff-calendar`. The calendar code sits in the lazy page chunks (e.g. 50.9 KB, 37.1 KB). This is S1 on a real app, not only in the probe.
+  - Browser (headless Chrome via `playwright-core`, `channel: 'chrome'`, static server on 4317; 4310 is taken): `/` renders 2412 nodes, `--background` resolves, Inter loads, nav links work; `/docs/button` 19 `button[ffButton]`, heights exactly 28 and 36px (the ladder), 8px radius, flex layout; `/docs/input-message` the PDF attachment draws a 160×207 data-URL thumbnail with `object-cover`; `/docs/calendar` 544px wide, 4 grid containers, 63 day buttons. No console errors on any page.
+- **Next step:** T8.
