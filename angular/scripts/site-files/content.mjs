@@ -21,7 +21,7 @@ export const REPO = 'https://github.com/angel-r/fluid-functionalism-angular';
 /** The Angular skill (D9), and the files it ships. */
 export const SKILL_DIR = `${REPO}/blob/main/skills/fluid-functionalism-angular`;
 const CRAFT = `${SKILL_DIR}/references/craft.md`;
-const SKILL_COMMAND = 'npx skills add angel-r/fluid-functionalism-angular';
+const SKILL_COMMAND = 'npx skills add angel-r/fluid-functionalism-angular --skill fluid-functionalism-angular';
 
 /** Where the changelog's refs link: the upstream repository whose commits and
  *  pull requests those refs name (the same target as the changelog page). */

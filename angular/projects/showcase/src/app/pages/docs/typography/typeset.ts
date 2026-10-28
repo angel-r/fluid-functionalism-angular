@@ -45,7 +45,7 @@ export const MARKDOWN_SAMPLE = [
   '</tbody></table>',
   '<h2>Install</h2>',
   '<p>Each piece is a package. We planned to <s>ship one big bundle</s> ship one item per component, so you only add what you use:</p>',
-  '<pre><code class="language-bash"># One component\nnpm i @angel-r/fluid-functionalism-angular\n\n# The skill for your coding agent\nnpx skills add angel-r/fluid-functionalism-angular</code></pre>',
+  '<pre><code class="language-bash"># One component\nnpm i @angel-r/fluid-functionalism-angular\n\n# The skill for your coding agent\nnpx skills add angel-r/fluid-functionalism-angular --skill fluid-functionalism-angular</code></pre>',
   '<h3>Next steps</h3>',
   '<ol>',
   '<li><p>Read the craft notes for each component</p></li>',
