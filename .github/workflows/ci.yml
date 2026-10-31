@@ -24,5 +24,7 @@ jobs:
         run: npx ng test fluid-functionalism --watch=false
       - name: Build the library
         run: npx ng build fluid-functionalism
+      - name: Probe the bundle
+        run: node scripts/bundle-probe/probe.mjs
       - name: Build the showcase
         run: npx ng build showcase
