@@ -511,6 +511,22 @@ html.transitioning *::after {
   }
 }
 
+/* Browser autofill: the UA paints an autofilled input with its own
+   background (forced with !important, so no author rule can replace it) and
+   FieldText. InputField's input is narrower than its rounded container, so
+   that fill reads as a second square box inside the field. The background
+   can't be overridden, only delayed: a zero-length transition behind a
+   ~7-day delay holds the input on its own transparent value (a long duration
+   instead would creep the fill in over the hours), so the container's own
+   surface shows through. The !important and the (0,2,1) specificity outrank
+   the theme cross-fade's `html.transitioning *` tween, which would otherwise
+   let the fill in. */
+[data-slot="input-container"] input:-webkit-autofill {
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+  transition: background-color 0s 600000s, color 0s 600000s !important;
+}
+
 /* ============================================================================
    5. NATIVE SCROLLBAR THEME
    ----------------------------------------------------------------------------
