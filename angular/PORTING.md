@@ -120,7 +120,9 @@ jsdom has no layout, so FLIP moves, springs, measured centring, popup orientatio
 
 `node scripts/browser-checks/run.mjs --url http://localhost:4200 [--only <name substring>] [--headed]`
 
-Checks live in `scripts/browser-checks/checks/*.mjs` (`messages`, `popups`, `layout`); each exports `{ name, path, run(page, h) }` and uses `helpers.mjs` (`section`, `sample` per frame, `assert`, `near`, `frames`). A check must be shown to bite — sabotage the page (reduced motion, instant WAAPI, fast clock, ignored `scrollTop`) and watch it fail — and then pass three runs in a row. Add one whenever a fix touches behaviour only the browser can prove.
+Checks live in `scripts/browser-checks/checks/*.mjs` (`messages`, `popups`, `layout`, `forms`); each exports `{ name, path, run(page, h) }` and uses `helpers.mjs` (`section`, `sample` per frame, `assert`, `near`, `frames`). A check must be shown to bite — sabotage the page (reduced motion, instant WAAPI, fast clock, ignored `scrollTop`, a dropped `!important`) and watch it fail — and then pass three runs in a row. Add one whenever a fix touches behaviour only the browser can prove.
+
+- **Browser autofill:** `:-webkit-autofill` is a UA state no test can reach by filling a form, and CDP `Autofill.trigger` reports "Field not found" in Playwright. `CSS.forcePseudoState` with `autofill` applies the same UA rules, so `forms.mjs` forces it on the field's input.
 
 - **Reduced motion and FLIP:** `animateFluid`'s reduced path paints its jump on the next frame. A FLIP that re-targets on the next mutation stops that jump unlanded and strands the element on its first keyframe, and the following FLIP compounds the offset. Under reduced motion, skip the FLIP instead: React's `layout` animations are transform-based and instant there, so the element is already on its layout box (`chat-message` `watchLayout`).
 

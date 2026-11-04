@@ -5,16 +5,24 @@
  * Proves the two claims behind the secondary entry point split:
  *   (a) tree shaking: importing one symbol keeps only that symbol's code;
  *   (b) splitting: a component imported only by a lazily loaded module is not
- *       in the static closure of the app's main chunk.
+ *       in the static closure of the app's main chunk, and that closure stays
+ *       within a byte budget.
  *
  * It uses the real Angular pipeline. Plain esbuild without the linker
  * overstates the cost of `cn` alone by ~20x, so every FESM file goes through
  * `JavaScriptTransformer` (linker + advanced optimizations) before esbuild
  * bundles it.
  *
+ * Third-party dependencies (motion, tailwind-merge, clsx, …) are bundled, so
+ * every size includes what the library drags in. esbuild assigns code to
+ * chunks per file, so one lazy use of `cn` or motion pulls the whole core FESM
+ * and its dependencies into the main chunk's closure; only the byte budget
+ * catches that. The framework (`@angular/*`, `rxjs`, `tslib`) stays external:
+ * every Angular app already ships it.
+ *
  * Usage, from `angular/`:
  *   npm run probe:bundle            # builds the library, then probes
- *   node scripts/bundle-probe/probe.mjs [--dist <dir>] [--json]
+ *   node scripts/bundle-probe/probe.mjs [--dist <dir>] [--json] [--initial-budget <KB>]
  *
  * Exit code 1 means the split does not hold (or the probe cannot run).
  */
@@ -51,6 +59,18 @@ const LAZY = {
   entry: flag('--lazy-entry', 'calendar'),
   marker: flag('--lazy-marker', 'ff-calendar'),
 };
+
+/**
+ * Most minified bytes (KB) the main chunk may load statically when it uses
+ * `provideFluid` and a lazy module uses LAZY.symbol. Measured 2026-10-30 at
+ * ~111 KB: the whole core FESM plus motion-dom and tailwind-merge, because
+ * the lazy module needs them from the same file.
+ */
+const INITIAL_BUDGET_KB = Number(flag('--initial-budget', '120'));
+if (!(INITIAL_BUDGET_KB > 0)) fail('--initial-budget must be a positive number of KB');
+
+/** Packages every Angular app already ships; kept out of the measured bytes. */
+const FRAMEWORK = /^(@angular\/|rxjs(\/|$)|tslib$)/;
 
 if (!existsSync(path.join(distDir, 'package.json'))) {
   fail(`No built library at ${distDir}. Run \`npm run probe:bundle\`, which builds it first.`);
@@ -171,11 +191,15 @@ function libraryPlugin() {
         return { path: file, namespace: 'ff', sideEffects: PACKAGE_SIDE_EFFECTS };
       });
       build.onResolve({ filter: /.*/ }, (a) => {
+        if (FRAMEWORK.test(a.path)) return { path: a.path, external: true };
+        // Inside a dependency, esbuild's own resolution (extensions, exports,
+        // sideEffects) applies.
+        if (a.namespace === 'file') return undefined;
         if (a.path.startsWith('.') || path.isAbsolute(a.path)) {
           return { path: path.resolve(a.resolveDir, a.path) };
         }
-        // Everything else stays external: the probe measures library bytes only.
-        return { path: a.path, external: true };
+        // A third-party import from the library: bundled, resolved from node_modules.
+        return undefined;
       });
       build.onLoad({ filter: /.*/, namespace: 'probe' }, (a) => ({
         contents: virtualModules.get(a.path),
@@ -263,12 +287,27 @@ async function splitting({ main, lazy, label }) {
 
   const lazyHasSymbol = chunks.some((c) => !c.staticFromMain && c.hasLazy);
   const staticHasSymbol = chunks.some((c) => c.staticFromMain && c.hasLazy);
+  const initialBytes = chunks.filter((c) => c.staticFromMain).reduce((sum, c) => sum + c.bytes, 0);
+
+  // Where the initial bytes come from: the library, or a dependency by package.
+  const initialByPackage = {};
+  for (const key of staticClosure) {
+    for (const [input, { bytesInOutput }] of Object.entries(outputs[key].inputs)) {
+      const pkg =
+        input.match(/node_modules[\\/]((?:@[^\\/]+[\\/])?[^\\/]+)/)?.[1].replace('\\', '/') ??
+        (input.startsWith('ff:') ? 'library' : 'probe');
+      initialByPackage[pkg] = (initialByPackage[pkg] ?? 0) + bytesInOutput;
+    }
+  }
 
   return {
     label,
     chunks,
     lazyHasSymbol,
     staticHasSymbol,
+    initialBytes,
+    initialByPackage,
+    initialOk: initialBytes <= INITIAL_BUDGET_KB * 1024,
     ok: staticHasSymbol === false && lazyHasSymbol === true,
     detail: staticHasSymbol
       ? `${LAZY.symbol} is in a chunk the main chunk imports statically`
@@ -404,6 +443,7 @@ const bareSplit = await splitting({
 });
 scenarios.push({ kind: 'split', ...bareSplit });
 if (!bareSplit.ok) failures.push(`bare import: ${bareSplit.detail}`);
+budgetCheck('bare import', bareSplit);
 
 // (b) splitting, through sub-paths.
 let subSplit = null;
@@ -415,6 +455,14 @@ if (subSizes && subSizes.lazyFrom) {
   });
   scenarios.push({ kind: 'split', ...subSplit });
   if (!subSplit.ok) failures.push(`sub-path import: ${subSplit.detail}`);
+  budgetCheck('sub-path import', subSplit);
+}
+
+function budgetCheck(mode, split) {
+  if (split.initialOk) return;
+  failures.push(
+    `${mode}: main loads ${(split.initialBytes / 1024).toFixed(1)} KB statically, over the ${INITIAL_BUDGET_KB} KB budget`,
+  );
 }
 
 await transformer.close();
@@ -436,7 +484,9 @@ if (jsonOut) {
         : 'none (one FESM, pre-split)'
     }`,
   );
-  console.log('\n(a) minified library bytes kept by an import');
+  console.log(
+    '\n(a) minified bytes kept by an import (library + dependencies, framework excluded)',
+  );
   for (const row of scenarios.filter((s) => s.kind === 'size')) {
     console.log(`  ${row.label.padEnd(28)} ${kb(row.bytes).padStart(9)}`);
   }
@@ -449,6 +499,16 @@ if (jsonOut) {
   for (const split of scenarios.filter((s) => s.kind === 'split')) {
     console.log(
       `\n(b) splitting, ${split.label} import — ${split.ok ? 'PASS' : 'FAIL'}: ${split.detail}`,
+    );
+    const byPackage = Object.entries(split.initialByPackage)
+      .filter(([, bytes]) => bytes > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([pkg, bytes]) => `${pkg} ${kb(bytes)}`)
+      .join(', ');
+    console.log(
+      `  initial ${kb(split.initialBytes)} (budget ${INITIAL_BUDGET_KB} KB, ${
+        split.initialOk ? 'PASS' : 'FAIL'
+      }): ${byPackage}`,
     );
     for (const chunk of split.chunks) {
       console.log(
