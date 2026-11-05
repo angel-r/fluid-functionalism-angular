@@ -70,6 +70,7 @@ export const componentList: ComponentEntry[] = [
   { slug: 'thinking-indicator', name: 'ThinkingIndicator', description: 'Animated status indicator with morphing SVG and cycling text.', gridSize: 'small' },
   { slug: 'thinking-steps', name: 'ThinkingSteps', description: 'Chain-of-thought display with sequential animation and collapsible steps.', gridSize: 'large' },
   { slug: 'tooltip', name: 'Tooltip', description: 'Floating tooltip with spring-based animations and configurable placement.', gridSize: 'small' },
+  { slug: 'virtual-scroll', name: 'VirtualScroll', description: 'Renders only the rows and columns in view, for long lists, dense tables and two-axis grids.', gridSize: 'medium' },
 ];
 
 /** The skill page. It sits with the systems in navigation but stays out of

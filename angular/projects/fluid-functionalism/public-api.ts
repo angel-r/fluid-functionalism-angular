@@ -25,6 +25,7 @@ export * from '@angel-r/fluid-functionalism-angular/menu-item';
 export * from '@angel-r/fluid-functionalism-angular/dropdown-search';
 export * from '@angel-r/fluid-functionalism-angular/mobile-drawer';
 export * from '@angel-r/fluid-functionalism-angular/table';
+export * from '@angel-r/fluid-functionalism-angular/virtual-scroll';
 export * from '@angel-r/fluid-functionalism-angular/banner';
 export * from '@angel-r/fluid-functionalism-angular/dialog';
 export * from '@angel-r/fluid-functionalism-angular/input-copy';

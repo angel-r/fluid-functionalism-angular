@@ -5,11 +5,14 @@
 // ---------------------------------------------------------------------------
 
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import type { ChangeRef } from './changelog-data';
+import type { ChangeRef, ChangeSource } from './changelog-data';
 
-/** Where the reference links its refs: the upstream repository the releases
- *  shipped in, whose commits and pull requests these refs name. */
-const REPO = 'https://github.com/mickadesign/fluid-functionalism';
+/** Where a ref links: the repository its entry's change shipped in, the
+ *  original library's or, for a port-only change, this port's. */
+const REPO: Record<ChangeSource, string> = {
+  upstream: 'https://github.com/mickadesign/fluid-functionalism',
+  angular: 'https://github.com/angel-r/fluid-functionalism-angular',
+};
 
 @Component({
   selector: 'app-changelog-ref',
@@ -29,10 +32,12 @@ const REPO = 'https://github.com/mickadesign/fluid-functionalism';
 })
 export class ChangelogRef {
   readonly gitRef = input.required<ChangeRef>();
+  readonly source = input<ChangeSource>('upstream');
 
   protected readonly href = computed(() => {
     const ref = this.gitRef();
-    return ref.type === 'pr' ? `${REPO}/pull/${ref.number}` : `${REPO}/commit/${ref.sha}`;
+    const repo = REPO[this.source()];
+    return ref.type === 'pr' ? `${repo}/pull/${ref.number}` : `${repo}/commit/${ref.sha}`;
   });
 
   protected readonly label = computed(() => {
