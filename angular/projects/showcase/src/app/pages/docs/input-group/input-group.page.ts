@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // /docs/input-group, ported from app/docs/input-group/page.tsx: a single
-// field, a stack of two, and the validation state, plus the two API
-// reference tables. The group owns one fluid hover scope, so the sections
+// field, a stack of two, the validation state and the multiline variant
+// (Angular-only, issue #12), plus the two API reference tables. The group owns one fluid hover scope, so the sections
 // keep their own group instead of sharing rows.
 // ---------------------------------------------------------------------------
 
@@ -79,6 +79,20 @@ function promptProps(props: readonly PropDef[]): string[] {
         </app-component-preview>
       </app-doc-section>
 
+      <app-doc-section title="Multiline">
+        <app-component-preview [code]="multilineCode">
+          <ff-input-group>
+            <ff-input-field
+              [index]="0"
+              label="Detail"
+              placeholder="What happened, and what did you do?"
+              multiline
+              [(value)]="detail"
+            />
+          </ff-input-group>
+        </app-component-preview>
+      </app-doc-section>
+
       <app-doc-section title="API Reference — InputGroup">
         <app-props-table [props]="groupTable" />
       </app-doc-section>
@@ -139,6 +153,22 @@ readonly errorEmail = signal('bad@');
   />
 </ff-input-group>`;
 
+  protected readonly multilineCode = `import { InputGroup, InputField } from '@angel-r/fluid-functionalism-angular';
+import { signal } from '@angular/core';
+
+readonly detail = signal('');
+
+<!-- Grows from minRows (3) to maxRows (8), then scrolls. Enter adds a line. -->
+<ff-input-group>
+  <ff-input-field
+    [index]="0"
+    label="Detail"
+    placeholder="What happened, and what did you do?"
+    multiline
+    [(value)]="detail"
+  />
+</ff-input-group>`;
+
   protected readonly installProps = promptProps([...groupProps, ...fieldProps]);
   protected readonly groupTable = groupProps;
   protected readonly fieldTable = fieldProps;
@@ -147,4 +177,5 @@ readonly errorEmail = signal('bad@');
   protected readonly name = signal('');
   protected readonly email = signal('');
   protected readonly errorEmail = signal('bad@');
+  protected readonly detail = signal('');
 }

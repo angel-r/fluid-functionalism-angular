@@ -1,4 +1,6 @@
 // Browser checks for form fields (see ../run.mjs), on /docs/input-group.
+// The multiline field's auto-grow reads real line heights and scrollHeight,
+// which jsdom does not lay out, so it is measured here.
 // Browser autofill is a UA stylesheet state jsdom has no notion of, so it is
 // forced over CDP (`CSS.forcePseudoState`), which applies the same
 // `:-webkit-autofill` rules a real autofill does.
@@ -87,6 +89,51 @@ export const checks = [
       await page.evaluate(() => document.documentElement.classList.remove('transitioning'));
       await h.frames(page);
       assertOwnLook(h, await look(page), 'after the cross-fade');
+    },
+  },
+  {
+    name: 'input-field multiline: Enter adds lines, the field grows from 3 rows to 8, then scrolls',
+    path: 'docs/input-group',
+    async run(page, h) {
+      const area = h.section(page, 'Multiline').locator('ff-input-field textarea');
+      const measure = () =>
+        area.evaluate((el) => {
+          const box = el.closest('[data-slot="input-container"]');
+          return {
+            value: el.value,
+            height: el.getBoundingClientRect().height,
+            box: box.getBoundingClientRect().height,
+            lineHeight: parseFloat(getComputedStyle(el).lineHeight),
+            overflowY: getComputedStyle(el).overflowY,
+            scrolls: el.scrollHeight > el.clientHeight,
+          };
+        });
+
+      const rest = await measure();
+      h.near(rest.height, 3 * rest.lineHeight, 0.5, 'empty: the textarea is not 3 rows tall');
+      // The box pads one row up to the control height: 8px above and below.
+      h.near(rest.box - rest.height, 16, 0.5, 'the box does not pad the textarea by 8px each side');
+
+      await area.click();
+      await page.keyboard.type('The door was blocked by a box.');
+      for (const line of ['Closed it.', 'Checked the seal.', 'Logged it.']) {
+        await page.keyboard.press('Enter');
+        await page.keyboard.type(line);
+      }
+      await h.frames(page);
+      const four = await measure();
+      h.assert(four.value.split('\n').length === 4, 'Enter did not insert new lines', four);
+      h.near(four.height, 4 * four.lineHeight, 0.5, 'four lines: the textarea did not grow to 4 rows');
+      h.assert(four.overflowY === 'hidden' && !four.scrolls, 'four lines: the textarea scrolls before maxRows', four);
+
+      for (let i = 0; i < 8; i++) {
+        await page.keyboard.press('Enter');
+        await page.keyboard.type(`Line ${i + 5}`);
+      }
+      await h.frames(page);
+      const full = await measure();
+      h.near(full.height, 8 * full.lineHeight, 0.5, 'twelve lines: the textarea is not capped at 8 rows');
+      h.assert(full.overflowY === 'auto' && full.scrolls, 'twelve lines: the textarea does not scroll past maxRows', full);
     },
   },
 ];

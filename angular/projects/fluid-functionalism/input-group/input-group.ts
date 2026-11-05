@@ -3,11 +3,13 @@ import {
   booleanAttribute,
   Component,
   ElementRef,
+  afterRenderEffect,
   computed,
   effect,
   inject,
   input,
   model,
+  numberAttribute,
   output,
   signal,
   untracked,
@@ -85,24 +87,46 @@ let nextId = 0;
       } @else if (icon()) {
         <ff-icon [icon]="iconDefinition()" [size]="sizeClasses().icon" [strokeWidth]="iconStroke()" [class]="iconClass()" />
       }
-      <input
-        #control
-        [id]="inputId"
-        [type]="type()"
-        [attr.name]="name() || null"
-        [attr.autocomplete]="autocomplete() ?? null"
-        [value]="value()"
-        [placeholder]="placeholder()"
-        [disabled]="disabled()"
-        [attr.aria-invalid]="error() ? 'true' : null"
-        [attr.aria-describedby]="error() ? errorId : null"
-        [attr.data-invalid]="error() ? '' : null"
-        [class]="inputClass()"
-        [style.font-variation-settings]="normal"
-        (input)="onInput($event)"
-        (focus)="isFocused.set(true)"
-        (blur)="onBlur()"
-      />
+      @if (multiline()) {
+        <!-- Enter keeps its native meaning here: a new line, never a submit. -->
+        <textarea
+          #control
+          [id]="inputId"
+          [rows]="minRows()"
+          [attr.name]="name() || null"
+          [attr.autocomplete]="autocomplete() ?? null"
+          [value]="value()"
+          [placeholder]="placeholder()"
+          [disabled]="disabled()"
+          [attr.aria-invalid]="error() ? 'true' : null"
+          [attr.aria-describedby]="error() ? errorId : null"
+          [attr.data-invalid]="error() ? '' : null"
+          [class]="inputClass()"
+          [style.font-variation-settings]="normal"
+          (input)="onInput($event)"
+          (focus)="isFocused.set(true)"
+          (blur)="onBlur()"
+        ></textarea>
+      } @else {
+        <input
+          #control
+          [id]="inputId"
+          [type]="type()"
+          [attr.name]="name() || null"
+          [attr.autocomplete]="autocomplete() ?? null"
+          [value]="value()"
+          [placeholder]="placeholder()"
+          [disabled]="disabled()"
+          [attr.aria-invalid]="error() ? 'true' : null"
+          [attr.aria-describedby]="error() ? errorId : null"
+          [attr.data-invalid]="error() ? '' : null"
+          [class]="inputClass()"
+          [style.font-variation-settings]="normal"
+          (input)="onInput($event)"
+          (focus)="isFocused.set(true)"
+          (blur)="onBlur()"
+        />
+      }
     </div>
 
     <!-- Error message, pinned visible while the error input stands. Same inset
@@ -142,7 +166,15 @@ export class InputField {
   readonly error = input<string | undefined>(undefined);
   /** Disables the input. */
   readonly disabled = input(false, { transform: booleanAttribute });
-  /** The input's `type` (text by default). */
+  /** Renders a textarea instead of the input, for free-text notes: it grows
+   *  with its content from `minRows` to `maxRows`, then scrolls, and Enter
+   *  inserts a new line. Label, placeholder, error and states are unchanged. */
+  readonly multiline = input(false, { transform: booleanAttribute });
+  /** With `multiline`, the rows the textarea shows when empty. */
+  readonly minRows = input(3, { transform: numberAttribute });
+  /** With `multiline`, the rows it grows to before it scrolls. */
+  readonly maxRows = input(8, { transform: numberAttribute });
+  /** The input's `type` (text by default). Ignored with `multiline`. */
   readonly type = input('text');
   /** The input's `name`, for native forms. */
   readonly name = input('');
@@ -162,7 +194,7 @@ export class InputField {
   private readonly hover = inject(FLUID_HOVER, { optional: true });
   private readonly group = inject(InputGroup, { optional: true });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly control = viewChild.required<ElementRef<HTMLInputElement>>('control');
+  private readonly control = viewChild.required<ElementRef<HTMLInputElement | HTMLTextAreaElement>>('control');
   private readonly shape = injectShape();
   protected readonly sizeClasses = injectSize(() => this.group?.size());
   private readonly compact = computed(() => this.sizeClasses().variant === 'compact');
@@ -226,9 +258,15 @@ export class InputField {
       ring = 'ring-transparent';
     }
     const size = this.sizeClasses();
+    const px = this.compact() ? 'px-2' : 'px-2.5';
     return cn(
-      // Fixed height so the field sits exactly on the ladder's control height.
-      `flex items-center ${size.gap} ${this.shape().input} ${this.compact() ? 'px-2' : 'px-2.5'} ${size.control} ring-1 transition-all duration-80`,
+      this.multiline()
+        ? // Grows with the textarea. The vertical padding adds one row of the
+          // body leading (20px, compact 18px) back up to the control height
+          // (36px, compact 28px), so a one-row field lines up with the rest.
+          `flex items-start ${size.gap} ${this.shape().input} ${px} ${this.compact() ? 'py-[5px]' : 'py-2'} ring-1 transition-all duration-80`
+        : // Fixed height so the field sits exactly on the ladder's control height.
+          `flex items-center ${size.gap} ${this.shape().input} ${px} ${size.control} ring-1 transition-all duration-80`,
       bg,
       ring,
     );
@@ -238,6 +276,8 @@ export class InputField {
   protected readonly iconClass = computed(() =>
     cn(
       'shrink-0 transition-[color,stroke-width] duration-80',
+      // Centred on the first line: (20 - 16) / 2, and (18 - 14) / 2 compact.
+      this.multiline() && 'mt-0.5',
       this.labelActive() ? 'text-foreground' : 'text-muted-foreground',
     ),
   );
@@ -245,6 +285,7 @@ export class InputField {
   protected readonly inputClass = computed(() =>
     cn(
       'w-full rounded-none bg-transparent text-foreground placeholder:text-muted-foreground outline-none font-[inherit]',
+      this.multiline() && 'block resize-none',
       this.sizeClasses().field,
     ),
   );
@@ -265,6 +306,47 @@ export class InputField {
       if (!hover) return;
       untracked(() => hover.registerItem(index, this.host));
       onCleanup(() => hover.unregisterItem(index, this.host));
+    });
+
+    // Multiline auto-grow: minRows to maxRows of the line height, scrolling
+    // past maxRows (the same rule as input-message's composer).
+    let lineHeight: { el: HTMLTextAreaElement; compact: boolean; value: number } | null = null;
+    const resize = (el: HTMLTextAreaElement) => {
+      el.style.height = 'auto';
+      const compact = untracked(this.compact);
+      if (!lineHeight || lineHeight.el !== el || lineHeight.compact !== compact) {
+        // Cached: it only changes with the size step, the font or zoom.
+        const parsed = parseFloat(getComputedStyle(el).lineHeight);
+        lineHeight = { el, compact, value: Number.isNaN(parsed) ? (compact ? 18 : 20) : parsed };
+      }
+      const min = lineHeight.value * untracked(this.minRows);
+      const max = lineHeight.value * untracked(this.maxRows);
+      el.style.height = `${Math.min(Math.max(el.scrollHeight, min), max)}px`;
+      el.style.overflowY = el.scrollHeight > max ? 'auto' : 'hidden';
+    };
+    afterRenderEffect(() => {
+      if (!this.multiline()) return;
+      const el = this.control().nativeElement as HTMLTextAreaElement;
+      this.value();
+      this.minRows();
+      this.maxRows();
+      this.compact();
+      untracked(() => resize(el));
+    });
+    // Re-measure when the width changes (a dialog opening, a phone rotating):
+    // the same text wraps to a different number of lines. Width-gated so the
+    // observer never loops on its own height writes.
+    afterRenderEffect((onCleanup) => {
+      if (!this.multiline() || typeof ResizeObserver === 'undefined') return;
+      const el = this.control().nativeElement as HTMLTextAreaElement;
+      let lastWidth = el.offsetWidth;
+      const observer = new ResizeObserver(() => {
+        if (el.offsetWidth === lastWidth) return;
+        lastWidth = el.offsetWidth;
+        resize(el);
+      });
+      observer.observe(el);
+      onCleanup(() => observer.disconnect());
     });
   }
 

@@ -520,8 +520,9 @@ html.transitioning *::after {
    instead would creep the fill in over the hours), so the container's own
    surface shows through. The !important and the (0,2,1) specificity outrank
    the theme cross-fade's `html.transitioning *` tween, which would otherwise
-   let the fill in. */
-[data-slot="input-container"] input:-webkit-autofill {
+   let the fill in. The multiline field's textarea gets the same rule. */
+[data-slot="input-container"] input:-webkit-autofill,
+[data-slot="input-container"] textarea:-webkit-autofill {
   -webkit-text-fill-color: var(--foreground);
   caret-color: var(--foreground);
   transition: background-color 0s 600000s, color 0s 600000s !important;

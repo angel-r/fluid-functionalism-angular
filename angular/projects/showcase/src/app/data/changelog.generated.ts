@@ -206,6 +206,50 @@ export const RELEASES: Release[] = [
           },
           {
             "kind": "updated",
+            "name": "InputGroup",
+            "href": "/docs/input-group",
+            "text": [
+              {
+                "type": "text",
+                "value": "A "
+              },
+              {
+                "type": "code",
+                "value": "multiline"
+              },
+              {
+                "type": "text",
+                "value": " field renders a textarea for free-text notes. It grows with its text from "
+              },
+              {
+                "type": "code",
+                "value": "minRows"
+              },
+              {
+                "type": "text",
+                "value": " (3) to "
+              },
+              {
+                "type": "code",
+                "value": "maxRows"
+              },
+              {
+                "type": "text",
+                "value": " (8) rows and then scrolls, Enter adds a line, and it keeps the field's label, error and states."
+              }
+            ],
+            "refs": [
+              {
+                "type": "pr",
+                "number": 19
+              }
+            ],
+            "diff": null,
+            "diffLang": null,
+            "source": "angular"
+          },
+          {
+            "kind": "updated",
             "name": "Icon packs",
             "href": null,
             "text": [
