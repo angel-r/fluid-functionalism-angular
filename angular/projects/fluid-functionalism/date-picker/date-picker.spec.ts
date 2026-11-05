@@ -40,6 +40,7 @@ const plain = (s: string | null | undefined) => (s ?? '').replace(/[  ]/g, ' 
         [presets]="presets()"
         [hourCycle]="hourCycle()"
         [locale]="locale()"
+        [timeZone]="timeZone()"
         [name]="name()"
         [clearable]="clearable()"
         [disabled]="disabled()"
@@ -67,6 +68,7 @@ class Host {
   readonly presets = signal<DatePickerPreset[] | undefined>(undefined);
   readonly hourCycle = signal<12 | 24 | undefined>(undefined);
   readonly locale = signal<string | undefined>('en-US');
+  readonly timeZone = signal<string | undefined>(undefined);
   readonly name = signal<string | undefined>(undefined);
   readonly clearable = signal(true);
   readonly disabled = signal(false);
@@ -797,5 +799,91 @@ describe('date picker auto orientation', () => {
       await t.open();
       expect(document.querySelector('[data-slot=calendar-months]')!.getAttribute('data-orientation')).toBe('vertical');
     });
+  });
+});
+
+describe('date picker time zone', () => {
+  // Kiritimati is UTC+14: its Oct 21 starts at Oct 20 10:00 UTC, which the
+  // browser running the suite reads as Oct 20.
+  const KIRITIMATI = 'Pacific/Kiritimati';
+
+  it('reads the value as a day in the zone and opens on it', async () => {
+    const t = setup((h) => {
+      h.timeZone.set(KIRITIMATI);
+      h.value.set(new Date('2026-10-20T10:00:00Z'));
+    });
+    expect(t.trigger().textContent).toContain('Oct 21');
+    await t.open();
+    await vi.waitFor(() => expect(document.activeElement?.getAttribute('aria-label')).toMatch(/October 21st, 2026/));
+  });
+
+  it('emits a picked day as the instant it starts in the zone: ISO 8601 UTC in UTC', async () => {
+    const t = setup((h) => {
+      h.timeZone.set('UTC');
+      h.value.set(new Date('2026-10-21T00:00:00Z'));
+    });
+    await t.open();
+    t.click(t.dayButton(/October 23rd, 2026/));
+    expect((t.host.values.at(-1) as Date).toISOString()).toBe('2026-10-23T00:00:00.000Z');
+    await vi.waitFor(() => expect(t.trigger().getAttribute('aria-expanded')).toBe('false'), { timeout: CLOSE_MS });
+    expect(t.trigger().textContent).toContain('Oct 23');
+  });
+
+  it('emits a range as the instants its days start in the zone', async () => {
+    const t = setup((h) => {
+      h.timeZone.set(KIRITIMATI);
+      h.mode.set('range');
+      h.value.set(undefined);
+    });
+    await t.open();
+    t.click(t.dayButton(/October 21st, 2026/));
+    t.click(t.dayButton(/October 24th, 2026/));
+    const range = t.host.values.at(-1) as DateRange;
+    expect(range.from?.toISOString()).toBe('2026-10-20T10:00:00.000Z');
+    expect(range.to?.toISOString()).toBe('2026-10-23T10:00:00.000Z');
+    await vi.waitFor(() => expect(t.trigger().getAttribute('aria-expanded')).toBe('false'), { timeout: CLOSE_MS });
+    expect(t.trigger().querySelector('span > span')!.textContent).toBe('Oct 21 → Oct 24');
+  });
+
+  it('disables the days a predicate rejects, handing it the instant each day starts in the zone', async () => {
+    const t = setup((h) => {
+      h.timeZone.set('UTC');
+      h.mode.set('range');
+      h.value.set(undefined);
+      h.calendarProps.set({ disabled: (date: Date) => date.getUTCDay() === 0 || date.getUTCDay() === 6 });
+    });
+    await t.open();
+    expect(t.dayButton(/Saturday, October 24th, 2026/).disabled).toBe(true);
+    expect(t.dayButton(/Sunday, October 25th, 2026/).disabled).toBe(true);
+    expect(t.dayButton(/Friday, October 23rd, 2026/).disabled).toBe(false);
+  });
+
+  it('marks today as the day it is in the zone', async () => {
+    // 10:07 UTC: still Oct 19 for any browser west of UTC+13, Oct 20 in Kiritimati.
+    vi.setSystemTime(new Date('2026-10-19T10:07:00Z'));
+    const t = setup((h) => {
+      h.timeZone.set(KIRITIMATI);
+      h.value.set(undefined);
+    });
+    await t.open();
+    expect(t.dayButton(/^Today, Tuesday, October 20th, 2026$/)).toBeTruthy();
+  });
+
+  it('submits each time with the zone offset on that date', () => {
+    const t = setup((h) => {
+      h.name.set('when');
+      h.timeZone.set('Europe/Madrid');
+      h.value.set(new Date('2026-10-20T22:00:00Z'));
+      h.time.set('11:00');
+    });
+    const form = t.el.querySelector('form')!;
+    expect(new FormData(form).get('when')).toBe('2026-10-21T11:00:00+02:00');
+    t.host.timeZone.set('UTC');
+    t.host.value.set(new Date('2026-10-21T00:00:00Z'));
+    TestBed.tick();
+    expect(new FormData(form).get('when')).toBe('2026-10-21T11:00:00Z');
+    t.host.time.set(undefined);
+    TestBed.tick();
+    expect(new FormData(form).get('when')).toBe('2026-10-21');
   });
 });

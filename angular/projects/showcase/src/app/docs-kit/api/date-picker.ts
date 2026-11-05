@@ -87,6 +87,11 @@ export const datePickerCalendarProps: PropDef[] = [
     type: "string",
     description: "BCP 47 locale for dates and times. Defaults to the browser's.",
   },
+  {
+    name: "timeZone",
+    type: "string",
+    description: "An IANA zone (`\"UTC\"`, `\"Europe/Madrid\"`) the days and today are read in, ignoring the browser's. A picked day is the instant it starts there (`2026-10-21T00:00:00.000Z` in UTC), and times submit with the zone's offset.",
+  },
 ];
 
 /** How the trigger looks and behaves. */

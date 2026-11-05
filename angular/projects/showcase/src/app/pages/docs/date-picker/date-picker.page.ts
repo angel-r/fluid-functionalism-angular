@@ -13,6 +13,7 @@ import {
   fontWeights,
   type DatePickerCalendarProps,
   type DatePickerValue,
+  type DateRange,
   type TimeRange,
 } from '@angel-r/fluid-functionalism-angular';
 import { API_REFERENCE } from '../../../docs-kit/api';
@@ -350,6 +351,29 @@ const DEFAULT_CODE = signal(DATE_PICKER_DEFAULT_CODE);
         </app-component-preview>
       </app-doc-section>
 
+      <app-doc-section title="Time zone">
+        <p class="text-site-body text-muted-foreground">
+          <code>timeZone</code> reads the days and today in one IANA zone, whatever the
+          browser's. A picked day is the instant it starts there, so in <code>UTC</code> it
+          serializes as a strict ISO 8601 date. A predicate in <code>disabled</code> gets the same
+          instants: here, weekends.
+        </p>
+        <app-component-preview [code]="zoneCode" [minHeightClass]="'min-h-[460px]'" align="top">
+          <div class="flex w-full flex-col gap-2">
+            <ff-date-picker
+              mode="range"
+              timeZone="UTC"
+              placeholder="Start → end"
+              [(value)]="utcRange"
+              [calendarProps]="weekdaysOnly"
+            />
+            <p class="px-2 text-site-body text-muted-foreground" data-testid="utc-range">
+              <code>{{ utcRangeIso() }}</code>
+            </p>
+          </div>
+        </app-component-preview>
+      </app-doc-section>
+
       <app-doc-section title="API Reference">
         <app-props-table [groups]="apiTables" />
       </app-doc-section>
@@ -378,6 +402,16 @@ export default class DatePickerPage {
     booked: demoBooking(),
     disabled: { before: new Date() },
   };
+
+  protected readonly utcRange = signal<DatePickerValue>(undefined);
+  protected readonly weekdaysOnly: DatePickerCalendarProps = {
+    disabled: (date: Date) => date.getUTCDay() === 0 || date.getUTCDay() === 6,
+  };
+  protected readonly utcRangeIso = computed(() => {
+    const range = this.utcRange() as DateRange | undefined;
+    if (!range?.from || !range.to) return 'Pick a start and an end';
+    return `${range.from.toISOString()} → ${range.to.toISOString()}`;
+  });
 
   // ── Playground ──────────────────────────────────────────
   protected readonly state = signal<DatePickerPlayState>(DEFAULT_DATE_PICKER_STATE);
@@ -583,4 +617,21 @@ const calendarProps: DatePickerCalendarProps = {
   placeholder="Check in → check out"
   [calendarProps]="calendarProps"
 />`;
+
+  protected readonly zoneCode = `import { signal } from '@angular/core';
+import { DatePicker, type DateRange, type DatePickerCalendarProps } from '@angel-r/fluid-functionalism-angular';
+
+const range = signal<DateRange | undefined>(undefined);
+// Predicates get the instant each day starts in the zone.
+const calendarProps: DatePickerCalendarProps = {
+  disabled: (date: Date) => date.getUTCDay() === 0 || date.getUTCDay() === 6,
+};
+
+<ff-date-picker
+  mode="range"
+  timeZone="UTC"
+  [(value)]="range"
+  [calendarProps]="calendarProps"
+/>
+<!-- range().from.toISOString() → "2026-10-21T00:00:00.000Z" -->`;
 }
