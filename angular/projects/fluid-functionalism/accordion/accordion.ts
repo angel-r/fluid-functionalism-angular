@@ -32,7 +32,7 @@ import {
   Icon,
 } from '@angel-r/fluid-functionalism-angular/core';
 import { createFluidHover, type ItemRect, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
-import { Layer, isFocusVisible, provideSizeOverride, writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
+import { Layer, isFocusVisible, provideSizeOverride, writeInitialStyles } from '@angel-r/fluid-functionalism-angular/layer';
 
 // ---------------------------------------------------------------------------
 // Collapsible sections with a sprung height animation and a chevron that

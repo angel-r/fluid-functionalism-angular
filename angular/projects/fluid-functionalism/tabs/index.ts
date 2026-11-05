@@ -5,4 +5,4 @@ export {
   provideSizeOverride,
   writeInitialStyles,
   type Keyframes,
-} from './layer';
+} from '@angel-r/fluid-functionalism-angular/layer';

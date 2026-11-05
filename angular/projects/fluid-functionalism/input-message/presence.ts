@@ -8,7 +8,7 @@ import {
   untracked,
 } from '@angular/core';
 import { spring, ReducedMotion, type FluidAnimation, animateFluid, enterTransition } from '@angel-r/fluid-functionalism-angular/core';
-import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
+import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/layer';
 
 // ---------------------------------------------------------------------------
 // Internal presence helpers of InputMessage (React `AnimatePresence`,

@@ -1,0 +1,11 @@
+/* The `development` build (and so `ng serve showcase`) compiles the library
+   from source through the root alias, so library edits reload without a
+   library rebuild. Production builds use tsconfig.app.json (the package). */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": []
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts"]
+}

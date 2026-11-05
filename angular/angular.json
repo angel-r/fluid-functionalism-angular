@@ -75,6 +75,7 @@
               "outputHashing": "all"
             },
             "development": {
+              "tsConfig": "projects/showcase/tsconfig.source.json",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true

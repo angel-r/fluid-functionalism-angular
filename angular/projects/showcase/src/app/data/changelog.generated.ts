@@ -247,6 +247,78 @@ export const RELEASES: Release[] = [
             "diff": null,
             "diffLang": null,
             "source": "angular"
+          },
+          {
+            "kind": "updated",
+            "name": "All components",
+            "href": null,
+            "text": [
+              {
+                "type": "code",
+                "value": "Layer"
+              },
+              {
+                "type": "text",
+                "value": ", the group focus ring and the popup overlay have their own entry points ("
+              },
+              {
+                "type": "code",
+                "value": "/layer"
+              },
+              {
+                "type": "text",
+                "value": ", "
+              },
+              {
+                "type": "code",
+                "value": "/group-focus"
+              },
+              {
+                "type": "text",
+                "value": ", "
+              },
+              {
+                "type": "code",
+                "value": "/popup"
+              },
+              {
+                "type": "text",
+                "value": "), so a Select or a CommandMenu loaded up front no longer brings Tabs, RadioGroup or DropdownMenu into the first chunk of an app that loads those later. "
+              },
+              {
+                "type": "code",
+                "value": "/tabs"
+              },
+              {
+                "type": "text",
+                "value": ", "
+              },
+              {
+                "type": "code",
+                "value": "/radio-group"
+              },
+              {
+                "type": "text",
+                "value": " and "
+              },
+              {
+                "type": "code",
+                "value": "/dropdown"
+              },
+              {
+                "type": "text",
+                "value": " still export them."
+              }
+            ],
+            "refs": [
+              {
+                "type": "pr",
+                "number": 17
+              }
+            ],
+            "diff": null,
+            "diffLang": null,
+            "source": "angular"
           }
         ]
       }

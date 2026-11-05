@@ -20,8 +20,8 @@ import {
 import { createFluidHover, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '@angel-r/fluid-functionalism-angular/merge-split';
 import { DROPDOWN_CONTEXT, type DropdownContextValue } from '@angel-r/fluid-functionalism-angular/menu-item';
-import { GroupFocusRing, createGroupFocus } from '@angel-r/fluid-functionalism-angular/radio-group';
-import { PopupCheckedBackground, createPinnedSize, createRaisedSurface } from './popup-parts';
+import { GroupFocusRing, createGroupFocus } from '@angel-r/fluid-functionalism-angular/group-focus';
+import { PopupCheckedBackground, createPinnedSize, createRaisedSurface } from '@angel-r/fluid-functionalism-angular/popup';
 
 // Dropdown opts out of the global pill/rounded shape context — popover surfaces
 // look cleaner with the smaller "rounded" radii regardless of how the rest of

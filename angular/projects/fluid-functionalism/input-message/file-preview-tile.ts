@@ -24,7 +24,7 @@ import {
 } from '@angel-r/fluid-functionalism-angular/core';
 import { FileThumbnail } from '@angel-r/fluid-functionalism-angular/file-thumbnail';
 import { Tooltip } from '@angel-r/fluid-functionalism-angular/tooltip';
-import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
+import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/layer';
 
 /**
  * Composer-row tile: a FileThumbnail with enter/exit motion and a

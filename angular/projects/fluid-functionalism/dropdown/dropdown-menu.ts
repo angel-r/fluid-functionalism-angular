@@ -51,8 +51,9 @@ import { DROPDOWN_SEARCH_HOST, createDropdownSearchHost } from '@angel-r/fluid-f
 import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
 import { dropdownShape } from './dropdown';
 import { SUBMENU_ALIGN_OFFSET, SUBMENU_SIDE_OFFSET, createSubmenuHost } from './dropdown-sub';
-import { createPopupOverlay, type PopupAlign, type PopupPlacement, type PopupSide } from './popup-overlay';
-import { PopupCheckedBackground, createControllableOpen, createPinnedSize, createRaisedSurface } from './popup-parts';
+import { createPopupOverlay, type PopupAlign, type PopupPlacement, type PopupSide } from '@angel-r/fluid-functionalism-angular/popup';
+import { PopupCheckedBackground, createPinnedSize, createRaisedSurface } from '@angel-r/fluid-functionalism-angular/popup';
+import { createControllableOpen } from './controllable-open';
 
 const shape = dropdownShape;
 

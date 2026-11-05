@@ -16,7 +16,7 @@ import { animate } from 'motion';
 import { cn, fontWeights, injectShape, injectSize, type SizeVariant } from '@angel-r/fluid-functionalism-angular/core';
 import { FLUID_HOVER, createFluidHover, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '@angel-r/fluid-functionalism-angular/merge-split';
-import { GroupFocusRing, createGroupFocus, focusRowOnPress, groupRows } from '@angel-r/fluid-functionalism-angular/radio-group';
+import { GroupFocusRing, createGroupFocus, focusRowOnPress, groupRows } from '@angel-r/fluid-functionalism-angular/group-focus';
 
 // ---------------------------------------------------------------------------
 // CheckboxGroup is a vertical list of CheckboxItem rows sharing one fluid

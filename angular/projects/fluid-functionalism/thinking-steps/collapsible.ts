@@ -29,7 +29,7 @@ import {
   enterTransition,
   exitTransition,
 } from '@angel-r/fluid-functionalism-angular/core';
-import { Layer, writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
+import { Layer, writeInitialStyles } from '@angel-r/fluid-functionalism-angular/layer';
 
 // ─── Shared collapsible parts ───────────────────────────────────────────────
 //
