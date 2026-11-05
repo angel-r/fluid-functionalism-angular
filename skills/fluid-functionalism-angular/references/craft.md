@@ -51,6 +51,7 @@ Systems first. Their craft applies across every component below.
 - [ThinkingIndicator](#thinking-indicator)
 - [ThinkingSteps](#thinking-steps)
 - [Tooltip](#tooltip)
+- [VirtualScroll](#virtual-scroll)
 - [Queued message stack (queued-stack)](#queued-stack)
 - [App Sidebar (sidebar-app)](#sidebar-app)
 - [Settings Dialog (dialog-sidebar)](#dialog-sidebar)
@@ -526,6 +527,17 @@ Systems first. Their craft applies across every component below.
 - The bubble is an inverted surface (`bg-foreground text-background`), 12px at regular weight (`fontVariationSettings`); `text-box: trim-both cap alphabetic` recentres the label, with the padding bump applied only where text-box is supported so overall height stays around 24px on untrimmed browsers.
 - `contentClass` styles the popup wrapper, which is where a z-index utility must go to lift the whole tooltip above other fixed layers (default z-50). `class` styles the bubble itself.
 - `forceOpen` pins the tooltip open (or closed) over the hover and focus behaviour; `openChange` still reports the internal state before `forceOpen` is applied.
+
+<a id="virtual-scroll"></a>
+## VirtualScroll
+
+- Angular-only: the original library has no virtualization. `<ff-virtual-scroll>` is the bounded scroll container (give it a height); every `*ffVirtualFor` inside renders the slice of its data in view plus `buffer` items (default 4) beyond each edge.
+- Fixed item sizes: `itemSize` px per row or column. Omitted, the size is the pitch measured between the first two rendered items (the ladder's control height stands in until then), so borders count: a `tr[ffTableRow]` is 37px, its 36px step plus the 1px bottom border. Variable heights are not supported.
+- `axis: 'x'` nested inside a row's `*ffVirtualFor` virtualizes both axes at once; rows need `w-max` so a `sticky left-0` label column stays pinned across the full width.
+- Spacers stand in for the rest: `<tr>` inside a table section, `<td>` inside a row, `<div>` elsewhere, so an `ff-table` keeps its semantics and its fluid hover (rows register by their data index). A column axis needs a flex row (or table row), not CSS grid.
+- Each window measures its own start offset once (a sticky header above the rows, a label column before the cells) through the `offsetParent` chain, and again on resize.
+- Views are recycled by slot: a row scrolling out is reused for the one scrolling in, so per-row state belongs in the data, and a focused row that scrolls out of the window loses focus.
+- Scrolling only writes signals from a passive listener, so it never marks the page for change detection; only windows whose range changes do work. A changed item re-runs the bindings of the declaring template (Angular's embedded views share its reactive consumer), and an OnPush cell component with unchanged inputs is skipped. For a single-cell write with no list work at all, give each cell its own signal and read it inside an OnPush cell component.
 
 # Blocks
 
