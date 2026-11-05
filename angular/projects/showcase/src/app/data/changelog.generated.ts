@@ -114,6 +114,78 @@ export const RELEASES: Release[] = [
         "entries": [
           {
             "kind": "updated",
+            "name": "Calendar",
+            "href": "/docs/calendar",
+            "text": [
+              {
+                "type": "text",
+                "value": "A "
+              },
+              {
+                "type": "code",
+                "value": "timeZone"
+              },
+              {
+                "type": "text",
+                "value": " input reads the days, today and every date it is given in one IANA zone, whatever the browser's, and hands each day out as the instant it starts there."
+              }
+            ],
+            "refs": [
+              {
+                "type": "pr",
+                "number": 14
+              }
+            ],
+            "diff": null,
+            "diffLang": null,
+            "source": "angular"
+          },
+          {
+            "kind": "updated",
+            "name": "DatePicker",
+            "href": "/docs/date-picker",
+            "text": [
+              {
+                "type": "text",
+                "value": "A "
+              },
+              {
+                "type": "code",
+                "value": "timeZone"
+              },
+              {
+                "type": "text",
+                "value": " input picks days in one IANA zone, whatever the browser's: in "
+              },
+              {
+                "type": "code",
+                "value": "\"UTC\""
+              },
+              {
+                "type": "text",
+                "value": " a picked day serializes as "
+              },
+              {
+                "type": "code",
+                "value": "2026-10-21T00:00:00.000Z"
+              },
+              {
+                "type": "text",
+                "value": ", and a named picker submits each time with the zone's offset."
+              }
+            ],
+            "refs": [
+              {
+                "type": "pr",
+                "number": 14
+              }
+            ],
+            "diff": null,
+            "diffLang": null,
+            "source": "angular"
+          },
+          {
+            "kind": "updated",
             "name": "InputGroup",
             "href": "/docs/input-group",
             "text": [
