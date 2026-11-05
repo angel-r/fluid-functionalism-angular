@@ -207,10 +207,182 @@ describe('InputGroup', () => {
     expect(field(1).icon!.getAttribute('width')).toBe('14');
   });
 
+  it('stays a single-line input on the control height by default', () => {
+    const { field } = setup();
+    const { root, box, icon } = field(1);
+    expect(root.querySelector('textarea')).toBeNull();
+    expect(box.classList).toContain('h-9');
+    expect(box.classList).toContain('items-center');
+    expect(box.classList).not.toContain('py-2');
+    expect(icon!.classList).not.toContain('mt-0.5');
+  });
+
   it('emits touch when the input loses focus', () => {
     const { field, host } = setup();
     field(0).input.focus();
     field(0).input.blur();
     expect(host.touches).toBe(1);
+  });
+});
+
+@Component({
+  imports: [InputGroup, InputField],
+  template: `
+    <ff-input-group [size]="size()">
+      <ff-input-field
+        [index]="0"
+        label="Detail"
+        placeholder="What did you do?"
+        icon="pencil"
+        multiline
+        [minRows]="minRows()"
+        [maxRows]="maxRows()"
+        name="detail"
+        [(value)]="detail"
+        [error]="error()"
+        (touch)="touches = touches + 1"
+      />
+    </ff-input-group>
+  `,
+})
+class MultilineHost {
+  readonly detail = signal('');
+  readonly minRows = signal(3);
+  readonly maxRows = signal(8);
+  readonly error = signal<string | undefined>(undefined);
+  readonly size = signal<SizeVariant | undefined>(undefined);
+  touches = 0;
+}
+
+function setupMultiline(configure: (host: MultilineHost) => void = () => {}) {
+  const fixture = TestBed.createComponent(MultilineHost);
+  configure(fixture.componentInstance);
+  fixture.detectChanges();
+  const el = fixture.nativeElement as HTMLElement;
+  const root = el.querySelector<HTMLElement>('ff-input-field')!;
+  const group = fixture.debugElement.query(By.directive(InputGroup)).componentInstance as InputGroup;
+  return {
+    fixture,
+    host: fixture.componentInstance,
+    root,
+    group,
+    label: root.querySelector<HTMLLabelElement>('label')!,
+    textarea: () => root.querySelector<HTMLTextAreaElement>('textarea')!,
+    box: root.querySelector<HTMLElement>('[data-slot="input-container"]')!,
+    icon: () => root.querySelector<SVGSVGElement>('[data-slot="input-container"] svg'),
+    flush: () => fixture.detectChanges(),
+  };
+}
+
+describe('InputField multiline', () => {
+  it('renders a labelled textarea instead of an input', () => {
+    const { root, label, textarea } = setupMultiline();
+    expect(root.querySelector('input')).toBeNull();
+    const area = textarea();
+    expect(area).not.toBeNull();
+    expect(label.htmlFor).toBe(area.id);
+    expect(area.placeholder).toBe('What did you do?');
+    expect(area.name).toBe('detail');
+    expect(area.getAttribute('rows')).toBe('3');
+    expect(area.classList).toContain('resize-none');
+  });
+
+  it('typing writes the value model, and the model writes the textarea', () => {
+    const { host, textarea, flush } = setupMultiline();
+    textarea().value = 'The door was blocked.\nClosed it.';
+    textarea().dispatchEvent(new Event('input'));
+    flush();
+    expect(host.detail()).toBe('The door was blocked.\nClosed it.');
+    host.detail.set('Checked the seal.');
+    flush();
+    expect(textarea().value).toBe('Checked the seal.');
+  });
+
+  it('Enter inserts a new line: the keydown is not prevented', () => {
+    const { textarea } = setupMultiline();
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    textarea().dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(false);
+  });
+
+  it('grows from minRows to maxRows, then scrolls', () => {
+    const scroll = vi.spyOn(HTMLTextAreaElement.prototype, 'scrollHeight', 'get').mockReturnValue(0);
+    try {
+      const { host, textarea, flush } = setupMultiline((h) => h.minRows.set(2));
+      // jsdom has no line height: the body role's 20px leading applies.
+      expect(textarea().style.height).toBe('40px');
+      expect(textarea().style.overflowY).toBe('hidden');
+      scroll.mockReturnValue(60);
+      host.detail.set('a\nb\nc');
+      flush();
+      expect(textarea().style.height).toBe('60px');
+      expect(textarea().style.overflowY).toBe('hidden');
+      scroll.mockReturnValue(500);
+      host.maxRows.set(4);
+      host.detail.set('a\nb\nc\nd\ne\nf');
+      flush();
+      expect(textarea().style.height).toBe('80px');
+      expect(textarea().style.overflowY).toBe('auto');
+    } finally {
+      scroll.mockRestore();
+    }
+  });
+
+  it('drops the fixed control height and pads one row to it, icon on the first line', () => {
+    const { box, icon } = setupMultiline();
+    expect(box.classList).not.toContain('h-9');
+    expect(box.classList).not.toContain('items-center');
+    expect(box.classList).toContain('items-start');
+    // 8px + a 20px row + 8px = the 36px control height.
+    expect(box.classList).toContain('py-2');
+    expect(icon()!.classList).toContain('mt-0.5');
+  });
+
+  it('the compact step pads a row to 28px', () => {
+    const scroll = vi.spyOn(HTMLTextAreaElement.prototype, 'scrollHeight', 'get').mockReturnValue(0);
+    try {
+      const { box, textarea } = setupMultiline((h) => {
+        h.size.set('compact');
+        h.minRows.set(1);
+      });
+      expect(box.classList).not.toContain('h-7');
+      // 5px + an 18px row + 5px = the 28px compact control height.
+      expect(box.classList).toContain('py-[5px]');
+      expect(textarea().style.height).toBe('18px');
+      expect(textarea().className.split(/\s+/)).toContain(fieldTouchClass);
+    } finally {
+      scroll.mockRestore();
+    }
+  });
+
+  it('keeps the field states: hover tint, focus lift, error ring and aria, touch on blur', () => {
+    const { group, box, textarea, flush, host, root } = setupMultiline();
+    expect(box.classList).toContain('bg-transparent');
+    group.hover.setActiveIndex(0);
+    flush();
+    expect(box.classList).toContain('bg-muted/50');
+    group.hover.setActiveIndex(null);
+    textarea().focus();
+    flush();
+    expect(box.classList).toContain('bg-card');
+    expect(root.hasAttribute('data-focused')).toBe(true);
+    textarea().blur();
+    flush();
+    expect(host.touches).toBe(1);
+
+    host.error.set('Required for the HACCP log.');
+    flush();
+    const error = root.querySelector<HTMLElement>('[data-slot="input-error"]')!;
+    expect(error.textContent?.trim()).toBe('Required for the HACCP log.');
+    expect(textarea().getAttribute('aria-invalid')).toBe('true');
+    expect(textarea().getAttribute('aria-describedby')).toBe(error.id);
+  });
+
+  it('a press on the field box focuses the textarea', () => {
+    const { box, textarea } = setupMultiline();
+    const press = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    box.dispatchEvent(press);
+    expect(press.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(textarea());
   });
 });
