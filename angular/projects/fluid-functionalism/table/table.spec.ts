@@ -10,7 +10,18 @@ import { TestBed } from '@angular/core/testing';
 import { fontWeights } from '../core/font-weight';
 import { SizeProvider, sizeMap, type SizeVariant } from '../core/size';
 import { ACTIVE_ATTR } from '../fluid-hover/fluid-hover';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TablePagination,
+  TableRow,
+  TableRows,
+  type TableQuery,
+  type TableSort,
+} from './table';
 
 @Component({
   imports: [Table, TableHeader, TableBody, TableRow, TableHead, TableCell, SizeProvider],
@@ -167,5 +178,236 @@ describe('table: size', () => {
       p.size.set('default');
     });
     expect(get('row-0').querySelector('td')!.classList).toContain('px-3');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server-driven data (#11): rows come from the `data` input, and sorting and
+// paging only emit a query. The table never reorders or slices rows itself:
+// what it renders changes only when `data` changes from outside.
+// ---------------------------------------------------------------------------
+
+interface Person {
+  name: string;
+  role: string;
+}
+
+const firstPage: Person[] = [
+  { name: 'Alice', role: 'Engineer' },
+  { name: 'Bob', role: 'Designer' },
+];
+
+@Component({
+  imports: [Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableRows, TablePagination],
+  template: `
+    <ff-table
+      #table
+      [data]="rows()"
+      [sort]="sort()"
+      [pageSize]="pageSize()"
+      [total]="total()"
+      (sortChange)="sortEvents.push($event)"
+      (pageChange)="pageEvents.push($event)"
+    >
+      <thead ffTableHeader [sticky]="sticky()">
+        <tr ffTableRow>
+          <th ffTableHead sortKey="name" data-testid="name-head">Name</th>
+          <th ffTableHead data-testid="role-head">Role</th>
+        </tr>
+      </thead>
+      <tbody ffTableBody>
+        <tr ffTableRow *ffTableRows="let person of table; let i = index" [index]="i" [attr.data-testid]="'row-' + i">
+          <td ffTableCell>{{ person.name }}</td>
+          <td ffTableCell>{{ person.role }}</td>
+        </tr>
+      </tbody>
+      <ff-table-pagination />
+    </ff-table>
+  `,
+})
+class ServerPeople {
+  readonly rows = signal<Person[]>(firstPage);
+  readonly sort = signal<TableSort | null>(null);
+  readonly pageSize = signal<number | undefined>(2);
+  readonly total = signal<number | undefined>(5);
+  readonly sticky = signal(false);
+  readonly sortEvents: TableQuery[] = [];
+  readonly pageEvents: TableQuery[] = [];
+}
+
+function serverSetup(configure: (p: ServerPeople) => void = () => {}) {
+  const fixture = TestBed.createComponent(ServerPeople);
+  configure(fixture.componentInstance);
+  fixture.detectChanges();
+  const el = fixture.nativeElement as HTMLElement;
+  const get = (id: string) => el.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+  const names = () => [...el.querySelectorAll('tbody tr')].map((tr) => tr.querySelector('td')!.textContent!.trim());
+  const sortButton = () => get('name-head')!.querySelector('button')!;
+  const pager = () => el.querySelector<HTMLElement>('ff-table-pagination')!;
+  const pagerButton = (label: string) => pager().querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)!;
+  const click = (button: HTMLElement) => {
+    button.click();
+    fixture.detectChanges();
+  };
+  return { fixture, el, get, names, sortButton, pager, pagerButton, click };
+}
+
+describe('table: data input', () => {
+  it('renders one row per item of data, with the row index in the template context', () => {
+    const { names, get } = serverSetup();
+    expect(names()).toEqual(['Alice', 'Bob']);
+    expect(get('row-1')!.getAttribute('data-fluid-hover-index')).toBe('1');
+  });
+
+  it('re-renders when data changes, adding and removing rows', () => {
+    const { fixture, names } = serverSetup();
+    fixture.componentInstance.rows.set([
+      { name: 'Carol', role: 'Manager' },
+      { name: 'Dave', role: 'Engineer' },
+      { name: 'Erin', role: 'Designer' },
+    ]);
+    fixture.detectChanges();
+    expect(names()).toEqual(['Carol', 'Dave', 'Erin']);
+    fixture.componentInstance.rows.set([{ name: 'Frank', role: 'Support' }]);
+    fixture.detectChanges();
+    expect(names()).toEqual(['Frank']);
+  });
+
+  it('renders no body rows for empty data', () => {
+    const { fixture, el } = serverSetup((p) => p.rows.set([]));
+    expect(el.querySelectorAll('tbody tr').length).toBe(0);
+    fixture.componentInstance.rows.set(firstPage);
+    fixture.detectChanges();
+    expect(el.querySelectorAll('tbody tr').length).toBe(2);
+  });
+});
+
+describe('table: sortChange', () => {
+  it('a sortable header renders a button and aria-sort; a plain header does not', () => {
+    const { get, sortButton } = serverSetup();
+    expect(sortButton().getAttribute('type')).toBe('button');
+    expect(sortButton().textContent).toContain('Name');
+    expect(get('name-head')!.getAttribute('aria-sort')).toBe('none');
+    expect(get('role-head')!.querySelector('button')).toBeNull();
+    expect(get('role-head')!.hasAttribute('aria-sort')).toBe(false);
+  });
+
+  it('emits the column, ASC and offset 0 on the first click, without touching the rows', () => {
+    const { fixture, sortButton, click, names } = serverSetup();
+    click(sortButton());
+    expect(fixture.componentInstance.sortEvents).toEqual([{ column: 'name', direction: 'ASC', offset: 0, limit: 2 }]);
+    expect(names()).toEqual(['Alice', 'Bob']);
+  });
+
+  it('toggles to DESC on the same column and marks aria-sort', () => {
+    const { fixture, sortButton, click, get } = serverSetup();
+    click(sortButton());
+    expect(get('name-head')!.getAttribute('aria-sort')).toBe('ascending');
+    click(sortButton());
+    expect(get('name-head')!.getAttribute('aria-sort')).toBe('descending');
+    expect(fixture.componentInstance.sortEvents.map((e) => e.direction)).toEqual(['ASC', 'DESC']);
+  });
+
+  it('a bound sort sets the starting state and the next click toggles from it', () => {
+    const { fixture, sortButton, click, get } = serverSetup((p) => p.sort.set({ column: 'name', direction: 'DESC' }));
+    expect(get('name-head')!.getAttribute('aria-sort')).toBe('descending');
+    click(sortButton());
+    expect(fixture.componentInstance.sortEvents.at(-1)!.direction).toBe('ASC');
+  });
+
+  it('sorting goes back to the first page', () => {
+    const { fixture, sortButton, pagerButton, click } = serverSetup();
+    click(pagerButton('Next page'));
+    click(sortButton());
+    expect(fixture.componentInstance.sortEvents.at(-1)!.offset).toBe(0);
+  });
+
+  it('marks the table busy from the event until data changes', () => {
+    const { fixture, sortButton, click, el } = serverSetup();
+    const table = el.querySelector('table')!;
+    expect(table.hasAttribute('aria-busy')).toBe(false);
+    click(sortButton());
+    expect(table.getAttribute('aria-busy')).toBe('true');
+    fixture.componentInstance.rows.set([...firstPage].reverse());
+    fixture.detectChanges();
+    expect(table.hasAttribute('aria-busy')).toBe(false);
+  });
+});
+
+describe('table: pageChange', () => {
+  it('shows the range and total, with previous disabled on the first page', () => {
+    const { pager, pagerButton } = serverSetup();
+    expect(pager().textContent).toContain('1–2 of 5');
+    expect(pagerButton('Previous page').disabled).toBe(true);
+    expect(pagerButton('Next page').disabled).toBe(false);
+  });
+
+  it('emits the next offset with the current sort, without touching the rows', () => {
+    const { fixture, sortButton, pagerButton, click, names } = serverSetup();
+    click(sortButton());
+    click(pagerButton('Next page'));
+    expect(fixture.componentInstance.pageEvents).toEqual([{ column: 'name', direction: 'ASC', offset: 2, limit: 2 }]);
+    expect(names()).toEqual(['Alice', 'Bob']);
+  });
+
+  it('emits null column and direction when nothing is sorted', () => {
+    const { fixture, pagerButton, click } = serverSetup();
+    click(pagerButton('Next page'));
+    expect(fixture.componentInstance.pageEvents[0]).toEqual({ column: null, direction: null, offset: 2, limit: 2 });
+  });
+
+  it('goes back with previous and disables next on the last page', () => {
+    const { fixture, pager, pagerButton, click } = serverSetup();
+    click(pagerButton('Next page'));
+    click(pagerButton('Next page'));
+    expect(pager().textContent).toContain('5–5 of 5');
+    expect(pagerButton('Next page').disabled).toBe(true);
+    click(pagerButton('Previous page'));
+    expect(fixture.componentInstance.pageEvents.map((e) => e.offset)).toEqual([2, 4, 2]);
+  });
+
+  it('without a total, next stays enabled while a full page came back', () => {
+    const { fixture, pager, pagerButton } = serverSetup((p) => p.total.set(undefined));
+    expect(pager().textContent).toContain('1–2');
+    expect(pager().textContent).not.toContain('of');
+    expect(pagerButton('Next page').disabled).toBe(false);
+    fixture.componentInstance.rows.set([firstPage[0]]);
+    fixture.detectChanges();
+    expect(pagerButton('Next page').disabled).toBe(true);
+  });
+
+  it('renders nothing without a page size', () => {
+    const { pager } = serverSetup((p) => p.pageSize.set(undefined));
+    expect(pager().querySelector('button')).toBeNull();
+  });
+});
+
+describe('table: sticky header', () => {
+  it('pins the header to the top of the scroll container on the surface background', () => {
+    const { fixture, el } = serverSetup((p) => p.sticky.set(true));
+    const thead = el.querySelector('thead')!;
+    for (const cls of ['sticky', 'top-0', 'z-20', 'bg-surface-1']) expect(thead.classList).toContain(cls);
+    fixture.componentInstance.sticky.set(false);
+    fixture.detectChanges();
+    expect(thead.classList).not.toContain('sticky');
+  });
+
+  it('draws the header rule inside the row, so it travels with the stuck header', () => {
+    const { fixture, el } = serverSetup((p) => p.sticky.set(true));
+    const header = el.querySelector('thead tr')!;
+    for (const cls of ['border-transparent', 'after:absolute', 'after:-bottom-px', 'after:h-px', 'after:bg-accent/40']) {
+      expect(header.classList).toContain(cls);
+    }
+    const table = fixture.debugElement.query((d) => d.name === 'ff-table').componentInstance as Table;
+    table.hover.setActiveIndex(0);
+    fixture.detectChanges();
+    expect(header.classList).toContain('after:bg-transparent');
+    expect(header.classList).not.toContain('after:bg-accent/40');
+  });
+
+  it('a body row keeps its border when the header is sticky', () => {
+    const { get } = serverSetup((p) => p.sticky.set(true));
+    expect(get('row-0')!.classList).toContain('border-accent/40');
+    expect(get('row-0')!.classList).not.toContain('after:absolute');
   });
 });
