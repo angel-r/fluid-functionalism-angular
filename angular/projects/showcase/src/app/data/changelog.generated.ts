@@ -240,8 +240,8 @@ export const RELEASES: Release[] = [
             ],
             "refs": [
               {
-                "type": "commit",
-                "sha": "76eda93"
+                "type": "pr",
+                "number": 19
               }
             ],
             "diff": null,
