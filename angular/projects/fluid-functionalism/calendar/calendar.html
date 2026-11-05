@@ -271,7 +271,7 @@
                   [style.font-variation-settings]="normalWeight"
                   >@if (dayDetailTemplate(); as template) {<ng-container
                       [ngTemplateOutlet]="template"
-                      [ngTemplateOutletContext]="{ $implicit: d.detail, date: d.day.date }"
+                      [ngTemplateOutletContext]="{ $implicit: d.detail, date: toInstant(d.day.date) }"
                     />} @else {<ng-container>{{ d.detail }}</ng-container>}</span
                 >
               }

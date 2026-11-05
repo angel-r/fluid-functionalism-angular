@@ -44,7 +44,11 @@ if (!selected.length) {
 const browser = await chromium.launch({ channel: 'chrome', headless: !HEADED });
 let failed = 0;
 for (const check of selected) {
-  const page = await browser.newPage({ viewport: check.viewport ?? { width: 1280, height: 900 } });
+  const page = await browser.newPage({
+    viewport: check.viewport ?? { width: 1280, height: 900 },
+    // A check can run the browser in another time zone than the machine's.
+    ...(check.timezoneId ? { timezoneId: check.timezoneId } : {}),
+  });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const started = Date.now();
