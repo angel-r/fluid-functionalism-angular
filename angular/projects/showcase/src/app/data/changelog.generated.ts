@@ -131,6 +131,50 @@ export const RELEASES: Release[] = [
             "diff": null,
             "diffLang": null,
             "source": "angular"
+          },
+          {
+            "kind": "updated",
+            "name": "Icon packs",
+            "href": null,
+            "text": [
+              {
+                "type": "text",
+                "value": "Every icon is its own export, named for its slot, such as "
+              },
+              {
+                "type": "code",
+                "value": "phosphorCheck"
+              },
+              {
+                "type": "text",
+                "value": " from "
+              },
+              {
+                "type": "code",
+                "value": "@angel-r/fluid-functionalism-angular/icon-packs/phosphor"
+              },
+              {
+                "type": "text",
+                "value": ", so an app that swaps a few slots bundles those glyphs alone instead of the whole pack (9 to 46 KB minified). The pack maps such as "
+              },
+              {
+                "type": "code",
+                "value": "phosphorIcons"
+              },
+              {
+                "type": "text",
+                "value": " still work."
+              }
+            ],
+            "refs": [
+              {
+                "type": "commit",
+                "sha": "6e1baf4"
+              }
+            ],
+            "diff": null,
+            "diffLang": null,
+            "source": "angular"
           }
         ]
       }
