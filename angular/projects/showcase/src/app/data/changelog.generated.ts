@@ -249,7 +249,7 @@ export const RELEASES: Release[] = [
             "refs": [
               {
                 "type": "pr",
-                "number": 11
+                "number": 18
               }
             ],
             "diff": null,
