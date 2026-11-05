@@ -36,6 +36,7 @@ import { apiReference as tabsApi } from './tabs';
 import { apiReference as thinkingIndicatorApi } from './thinking-indicator';
 import { apiReference as thinkingStepsApi } from './thinking-steps';
 import { apiReference as tooltipApi } from './tooltip';
+import { apiReference as virtualScrollApi } from './virtual-scroll';
 
 export const API_REFERENCE: Record<string, ApiTable[]> = {
   'accordion': accordionApi,
@@ -72,4 +73,5 @@ export const API_REFERENCE: Record<string, ApiTable[]> = {
   'thinking-indicator': thinkingIndicatorApi,
   'thinking-steps': thinkingStepsApi,
   'tooltip': tooltipApi,
+  'virtual-scroll': virtualScrollApi,
 };
