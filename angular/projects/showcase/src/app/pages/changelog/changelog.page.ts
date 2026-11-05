@@ -27,6 +27,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 import {
+  Badge,
   Button,
   Icon,
   ReducedMotion,
@@ -90,6 +91,7 @@ const MIGRATION_PROMPTS: Readonly<Record<string, string>> = Object.fromEntries(
   selector: 'app-changelog-page',
   imports: [
     RouterLink,
+    Badge,
     Button,
     Icon,
     Tooltip,
