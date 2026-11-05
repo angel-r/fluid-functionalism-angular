@@ -372,6 +372,59 @@ export const checks = [
     },
   },
 
+  // With timeZone="UTC", a browser 14 hours ahead (Kiritimati) still picks
+  // the days it shows: the range comes out as UTC midnights on those days,
+  // and the weekend predicate, handed those instants, disables Saturdays
+  // and Sundays only.
+  {
+    name: 'date-picker: timeZone="UTC" emits UTC midnights and disables weekends, in a browser at UTC+14',
+    path: 'docs/date-picker',
+    timezoneId: 'Pacific/Kiritimati',
+    async run(page, h) {
+      const zone = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
+      h.assert(zone === 'Pacific/Kiritimati', 'the browser should run in Kiritimati', zone);
+      const section = h.section(page, 'Time zone');
+      await section.locator('[data-slot="date-picker-trigger"]').click();
+      await page.waitForTimeout(300);
+      const days = await page
+        .locator('[data-slot="date-picker-popup"] button[aria-label]')
+        .evaluateAll((buttons) =>
+          buttons
+            .filter((b) => !b.closest('[aria-hidden="true"]') && /\d{4}/.test(b.getAttribute('aria-label') ?? ''))
+            .map((b) => ({ label: b.getAttribute('aria-label').replace(/^Today, /, ''), disabled: b.disabled })),
+        );
+      h.assert(days.length >= 28, 'the popup should list the days', days.length);
+      const weekend = days.filter((d) => /^(Saturday|Sunday),/.test(d.label));
+      h.assert(weekend.length > 0 && weekend.every((d) => d.disabled), 'every weekend day should be disabled', weekend);
+      const weekdays = days.filter((d) => !/^(Saturday|Sunday),/.test(d.label));
+      h.assert(weekdays.every((d) => !d.disabled), 'every weekday should stay open', weekdays.filter((d) => d.disabled));
+
+      const monday = days.findIndex((d) => /^Monday,/.test(d.label));
+      const wednesday = days.findIndex((d, i) => i > monday && /^Wednesday,/.test(d.label));
+      const popup = page.locator('[data-slot="date-picker-popup"]');
+      await popup.getByRole('button', { name: days[monday].label, exact: true }).click();
+      await popup.getByRole('button', { name: days[wednesday].label, exact: true }).click();
+      await page.waitForTimeout(400);
+
+      const text = (await section.locator('[data-testid="utc-range"]').textContent()).trim();
+      const match = /^(\S+) → (\S+)$/.exec(text);
+      h.assert(match, 'the readout should show the picked range', text);
+      const [from, to] = [new Date(match[1]), new Date(match[2])];
+      h.assert(
+        match[1].endsWith('T00:00:00.000Z') && match[2].endsWith('T00:00:00.000Z'),
+        'both ends should be UTC midnights',
+        text,
+      );
+      h.assert(from.getUTCDay() === 1 && to.getUTCDay() === 3, 'the ends should be the Monday and Wednesday picked', text);
+      const dayOf = (label) => Number(/(\d+)(st|nd|rd|th),/.exec(label)[1]);
+      h.assert(
+        from.getUTCDate() === dayOf(days[monday].label) && to.getUTCDate() === dayOf(days[wednesday].label),
+        'the ends should fall on the days shown',
+        { text, from: days[monday].label, to: days[wednesday].label },
+      );
+    },
+  },
+
   // Focusing a time field opens its slot list scrolled so the selected time
   // (the field's own value) sits at the centre of the list's scroll box,
   // within a pixel, for the start time and for the end time.

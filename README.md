@@ -61,7 +61,7 @@ Import from the sub-path of each component folder (`@angel-r/fluid-functionalism
 |---|---|
 | Pill corners or the compact size everywhere | `provideFluid({ shape: 'pill', size: 'compact' })` |
 | Change shape or size for one region | `[ffShapeProvider]`, `[ffSizeProvider]` |
-| Another icon set | `provideFluid({ icons: tablerIcons })`, also `phosphorIcons`, `hugeiconsIcons`, `untitleduiIcons` |
+| Another icon set | single icons per slot from the pack's sub-path, `provideFluid({ icons: { check: phosphorCheck } })` with `phosphorCheck` from `/icon-packs/phosphor`, so unused icons stay out of the bundle; or a whole pack, `provideFluid({ icons: tablerIcons })`. See [Icon packs](angular/projects/fluid-functionalism/README.md#icon-packs) |
 | Light and dark | `ThemeService` (`setTheme`, `cycle`); `provideFluidTheme({ shortcut: true })` adds the T key |
 | PDF thumbnails | provide a `FILE_THUMBNAIL_PDF_RENDERER` (see the [package README](angular/projects/fluid-functionalism/README.md#pdf-thumbnails)); the package never imports pdfjs |
 
@@ -71,7 +71,7 @@ Reduced motion follows the OS setting: transforms jump, fades stay.
 
 | Group | Items |
 |---|---|
-| Components | accordion, ask-user-questions, badge, banner, button, calendar, card, carousel-dots, chat-message, checkbox-group, color-picker, combobox, command-menu, date-picker, dialog, dropdown (with submenus and search), file-thumbnail, input-copy, input-group, input-message, menu-item, mobile-drawer, radio-group, scroll-area, select, sidebar (core, menu, shell), slider, switch, table, tabs, tabs-subtle, thinking-indicator, thinking-steps, tooltip |
+| Components | accordion, ask-user-questions, badge, banner, button, calendar, card, carousel-dots, chat-message, checkbox-group, color-picker, combobox, command-menu, date-picker, dialog, dropdown (with submenus and search), file-thumbnail, input-copy, input-group, input-message, menu-item, mobile-drawer, radio-group, scroll-area, select, sidebar (core, menu, shell), slider, switch, table, tabs, tabs-subtle, thinking-indicator, thinking-steps, tooltip, virtual-scroll |
 | Blocks | queued-stack, dialog-sidebar, sidebar workspace header, user footer, search field, inset topbar, sidebar-app |
 | Systems | theme tokens, surfaces, type scale, shape and size context, `[ffElevated]`, `<ff-icon>`, fluid hover, merged selection backgrounds, spring tiers |
 | Icon packs | Lucide (default), Tabler, Phosphor, Hugeicons, Untitled UI |

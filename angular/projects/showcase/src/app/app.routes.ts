@@ -68,6 +68,7 @@ export const routes: Routes = [
   { path: 'docs/thinking-indicator', title: 'ThinkingIndicator · Fluid Functionalism', loadComponent: () => import('./pages/docs/thinking-indicator/thinking-indicator.page') },
   { path: 'docs/thinking-steps', title: 'ThinkingSteps · Fluid Functionalism', loadComponent: () => import('./pages/docs/thinking-steps/thinking-steps.page') },
   { path: 'docs/tooltip', title: 'Tooltip · Fluid Functionalism', loadComponent: () => import('./pages/docs/tooltip/tooltip.page') },
+  { path: 'docs/virtual-scroll', title: 'VirtualScroll · Fluid Functionalism', loadComponent: () => import('./pages/docs/virtual-scroll/virtual-scroll.page') },
 
   // Full-screen: no shell, no right panel.
   {

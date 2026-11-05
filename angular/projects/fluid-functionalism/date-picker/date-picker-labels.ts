@@ -1,4 +1,10 @@
-import type { DateRange } from '@angel-r/fluid-functionalism-angular/calendar';
+import {
+  dayInTimeZone,
+  startOfDayInTimeZone,
+  timeZoneOffset,
+  type DateRange,
+} from '@angel-r/fluid-functionalism-angular/calendar';
+import { timeToMinutes } from './date-picker-time';
 
 // ---------------------------------------------------------------------------
 // Date labels and the form value of the date picker (pure, exported for the
@@ -66,18 +72,30 @@ function isoDate(date: Date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-/** The hidden input's value for `name` (exported for the unit tests). */
+/**
+ * The hidden input's value for `name` (exported for the unit tests). The days
+ * are read in `timeZone` when one is given, and each time then carries the
+ * zone's offset on that date, so the value is a complete ISO 8601 date-time:
+ * `2026-10-21T11:00:00+02:00`, `2026-10-21T11:00:00Z` in UTC.
+ */
 export function formValue(
   value: Date | DateRange | undefined,
   time?: string | null,
   timeRange?: TimeRange | null,
+  timeZone?: string,
 ): string {
+  const day = (date: Date) => dayInTimeZone(date, timeZone);
+  const at = (date: Date, hhmm: string) => {
+    if (!timeZone) return `${isoDate(date)}T${hhmm}`;
+    const instant = startOfDayInTimeZone(date, timeZone, timeToMinutes(hhmm) ?? 0);
+    return `${isoDate(date)}T${hhmm}:00${timeZoneOffset(instant, timeZone)}`;
+  };
   if (value instanceof Date) {
-    const day = isoDate(value);
-    if (timeRange) return `${day}T${timeRange.start}/${day}T${timeRange.end}`;
-    return time ? `${day}T${time}` : day;
+    const date = day(value);
+    if (timeRange) return `${at(date, timeRange.start)}/${at(date, timeRange.end)}`;
+    return time ? at(date, time) : isoDate(date);
   }
-  if (value?.from && value.to) return `${isoDate(value.from)}/${isoDate(value.to)}`;
+  if (value?.from && value.to) return `${isoDate(day(value.from))}/${isoDate(day(value.to))}`;
   return '';
 }
 
@@ -86,9 +104,9 @@ export function rangeWithYear(range: DateRange, now: Date): boolean {
   return (!!range.from && range.from.getFullYear() !== year) || (!!range.to && range.to.getFullYear() !== year);
 }
 
-/** Whether two dates fall on the same calendar day. */
-export function sameDay(a?: Date, b?: Date): boolean {
-  return !!a && !!b && a.toDateString() === b.toDateString();
+/** Whether two dates fall on the same calendar day, in `timeZone` if given. */
+export function sameDay(a?: Date, b?: Date, timeZone?: string): boolean {
+  return !!a && !!b && dayInTimeZone(a, timeZone).toDateString() === dayInTimeZone(b, timeZone).toDateString();
 }
 
 /**

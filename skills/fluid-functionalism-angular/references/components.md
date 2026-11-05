@@ -59,6 +59,7 @@ or `<a href>`, `li[ffSidebarMenuItem]` needs an `<li>`).
 | [ThinkingIndicator](https://angel-r.github.io/fluid-functionalism-angular/docs/thinking-indicator) | `ThinkingIndicator` (`ff-thinking-indicator`) | Animated status indicator with morphing SVG and cycling text | [ThinkingIndicator](craft.md#thinking-indicator) |
 | [ThinkingSteps](https://angel-r.github.io/fluid-functionalism-angular/docs/thinking-steps) | `ThinkingSteps`, `ThinkingStepsHeader`, `ThinkingStepsTrigger`, `ThinkingStepsContent`, `ThinkingStepsPanel`, `ThinkingStep`, `ThinkingStepDetails`, `ThinkingStepSources`, `ThinkingStepSource`, `ThinkingStepImage` (`ff-thinking-steps`, `ff-thinking-steps-header`, `ff-thinking-steps-trigger`, `ff-thinking-steps-content`, `ff-thinking-steps-panel`, `ff-thinking-step`, `ff-thinking-step-details`, `ff-thinking-step-sources`, `ff-thinking-step-source`, `ff-thinking-step-image`) | Chain-of-thought display with sequential animation and collapsible steps | [ThinkingSteps](craft.md#thinking-steps) |
 | [Tooltip](https://angel-r.github.io/fluid-functionalism-angular/docs/tooltip) | `Tooltip`, `TooltipProvider`, `TooltipGroup`, `TooltipPortalContainer` (`ff-tooltip`, `[ffTooltipProvider]`, `[ffTooltipPortalContainer]`) | Spring-based floating tooltip with configurable placement and an optional follow-cursor axis | [Tooltip](craft.md#tooltip) |
+| [VirtualScroll](https://angel-r.github.io/fluid-functionalism-angular/docs/virtual-scroll) | `VirtualScroll`, `VirtualFor` (`ff-virtual-scroll`, `*ffVirtualFor`) | Renders only the rows and columns in view, plus a buffer, for long lists, dense tables and two-axis grids | [VirtualScroll](craft.md#virtual-scroll) |
 
 ## Systems
 
@@ -87,7 +88,7 @@ Wiring for a whole app rather than one component.
 | `[ffSizeProvider]` | Pins one ladder step for a region (`size` or `defaultSize` input) |
 | `[ffElevated]` | Raises a floating surface `offset` steps above its substrate; `shadowLevel` pins the shadow |
 | `<ff-icon>` | Every icon slot, by Lucide name or a component from an icon pack |
-| Icon packs | `tablerIcons`, `phosphorIcons`, `hugeiconsIcons`, `untitleduiIcons`, passed to `provideFluid({ icons })` or a directive-level `provideIcons()` |
+| Icon packs | One constant per slot from the pack's entry (`phosphorCheck` from `/icon-packs/phosphor`, `tablerChevronDown` from `/icon-packs/tabler`), so unused icons tree-shake; or the whole map (`tablerIcons`, `phosphorIcons`, `hugeiconsIcons`, `untitleduiIcons`). Either goes to `provideFluid({ icons })` or a directive-level `provideIcons()` |
 
 ## Blocks
 
@@ -120,6 +121,8 @@ the installed source for the part itself.
 - Booking, scheduling, availability -> `Calendar` (`booked`, `available`),
   `DatePicker` (ranges, times)
 - Data display -> `Table`, `Card` (grid layout has 2-D fluid hover), `Badge`
+- Thousands of rows, or a matrix of hundreds of columns (Gantt, time grids) ->
+  `VirtualScroll` + `*ffVirtualFor` around the list, `Table` or grid
 - Custom list/menu/grid you are writing yourself -> `[ffFluidHover]` +
   `spring`, then follow [custom-motion.md](custom-motion.md)
 - Text in custom UI -> `typeClass(role, variant)` or `injectSize().type`, never

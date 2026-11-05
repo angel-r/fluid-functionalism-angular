@@ -137,7 +137,7 @@
                        4px under the name, 12px above a diff or a stage. -->
                   <article [class]="first ? '' : 'pt-6'">
                     <div class="flex items-center justify-between gap-4 pt-2">
-                      <h5 class="relative text-site-body text-foreground">
+                      <h5 class="relative flex items-center gap-2 text-site-body text-foreground">
                         <!-- The kind's color on the timeline, level with the
                              entry's name. The name line starts 24px right of the
                              line, so -24px puts this 5px dot's center on it; the
@@ -162,12 +162,16 @@
                             />
                           </a>
                         } @else {
-                          {{ entry.name }}
+                          <span>{{ entry.name }}</span>
+                        }
+                        @if (entry.source === 'angular') {
+                          <!-- Port-only: the original library has no such change. -->
+                          <ff-badge size="compact" data-testid="port-badge">Angular</ff-badge>
                         }
                       </h5>
                       <div class="-mr-1.5 flex items-center">
                         @for (ref of entry.refs; track $index) {
-                          <app-changelog-ref [gitRef]="ref" />
+                          <app-changelog-ref [gitRef]="ref" [source]="entry.source" />
                         }
                       </div>
                     </div>

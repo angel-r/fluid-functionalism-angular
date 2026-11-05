@@ -11,7 +11,7 @@ How a fluid-functionalism component is ported into `projects/fluid-functionalism
 | `tests/<name>*.test.tsx` | `<name>/<name>.spec.ts` |
 | docs page demos (`app/docs/<name>/page.tsx`) | `projects/showcase/src/app/demos/<name>/<name>.demo.ts` |
 
-Every folder at the package root is its own entry point, so `<name>/index.ts` re-exports the pieces other entries may use, and `public-api.ts` re-exports every entry by package name. Inside an entry, import relatively (`./x`). Code in one entry that needs another imports it by package name — `@angel-r/fluid-functionalism-angular/core`, `@angel-r/fluid-functionalism-angular/fluid-hover` — never by a relative path that leaves its own folder: ng-packagr would inline a second copy, or fail. A piece another entry needs that is not exported yet belongs in the owning `index.ts`.
+Every folder at the package root is its own entry point, so `<name>/index.ts` re-exports the pieces other entries may use, and `public-api.ts` re-exports every entry by package name. Inside an entry, import relatively (`./x`). Code in one entry that needs another imports it by package name — `@angel-r/fluid-functionalism-angular/core`, `@angel-r/fluid-functionalism-angular/fluid-hover` — never by a relative path that leaves its own folder: ng-packagr would inline a second copy, or fail. A piece another entry needs that is not exported yet belongs in the owning `index.ts`. The icon packs nest one level deeper: each `icon-packs/<pack>/` is its own entry point, written by `scripts/generate-icon-packs.mjs` with one `<pack><Slot>` constant per slot plus the pack map, and `icon-packs/index.ts` re-exports them by package name.
 
 The Base UI and Radix flavors share one behavior: port it once.
 
@@ -99,7 +99,7 @@ repo root is the reference, D1-D10 in `odd/tasks/docs-site.md`). Its shape:
 | `src/app/shell/` | The chrome: sidebar (1280px sheet), right panel, site command menu, 404. `app.ts` renders it and the router outlet. |
 | `src/app/docs-kit/` | `DocPage`, `ComponentPreview` (tabs, shiki, inspect overlay, header action slot), `PropsTable`, the playground primitives, the preset codec and Share dialog, and `api/` with every page's props tables. |
 | `src/app/pages/` | One folder per route: `home/`, `intro/`, `changelog/`, `demo/`, `docs/<slug>/`. |
-| `scripts/changelog/` | `content/changelog/*.md` → `src/app/data/changelog.generated.ts`. `npm run build:showcase` runs it first. |
+| `scripts/changelog/` | `content/changelog/*.md` (upstream) + `angular/content/changelog/*.md` (port-only) → `src/app/data/changelog.generated.ts`, merged by month in `merge.mjs` (`node --test scripts/changelog/merge.test.mjs`). `npm run build:showcase` runs it first. |
 
 Rules that keep it coherent:
 
@@ -135,6 +135,8 @@ The React source stays in place so upstream merges keep working; the port drifts
 Last sync: `1dd8931..3699f84` (2026-10-27): calendar range picking (measured day column, pressed fill, ghost band, masks, weeks height), date-picker two rows for narrow parents, sidebar `--row-h` centring, `fadeIn` on the hover highlight. The browser checks that guard it live in `scripts/browser-checks/checks/calendar.mjs` (week column, pressed fill, ghost fade, pick-start glide), `popups.mjs` (two-row date picker) and `layout.mjs` (sidebar trailing centring).
 
 These files at the root belong to the fork and describe the Angular port, so a merge from upstream keeps our side (`git checkout --ours <path>`): `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `LICENSE` and everything under `.github/`. Read upstream's change to them first, in case it carries something the port should copy.
+
+The changelog has two sources in one format (`scripts/changelog/parse.mjs` validates both). `content/changelog/` at the root is upstream's: it arrives with the sync, so never write port changes there. A change only this port has (an Angular-only component, a port fix, a packaging change) gets an entry in `angular/content/changelog/<YYYY-MM>.md`, the month it merged, with the port's PR number (or a 7-character commit SHA until the PR exists) as its ref. Leave `released` out. A port month joins upstream's release of that month (upstream title and intro, port entries after upstream's in each section) or stands alone with its own title; its entries show an "Angular" badge, their refs link to this repository, and their slugs are badged New/Updated until upstream ships a newer month.
 
 After a sync: `npx ng test fluid-functionalism --watch=false`, `npx ng build fluid-functionalism`, `npx ng build showcase`, then the browser checks against the running showcase.
 

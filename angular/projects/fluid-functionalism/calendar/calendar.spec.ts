@@ -38,6 +38,7 @@ const NOV = new Date(2026, 10, 1);
       [dayDetail]="dayDetail()"
       [startMonth]="startMonth()"
       [autoFocus]="autoFocus()"
+      [timeZone]="timeZone()"
       [(selected)]="selected"
       (select)="selects.push($event)"
       (monthChange)="months.push($event)"
@@ -60,6 +61,7 @@ class Host {
   readonly dayDetail = signal<((d: Date) => unknown) | undefined>(undefined);
   readonly startMonth = signal<Date | undefined>(undefined);
   readonly autoFocus = signal(false);
+  readonly timeZone = signal<string | undefined>(undefined);
   readonly selected = signal<CalendarValue>(undefined);
   readonly selects: CalendarValue[] = [];
   readonly months: (Date | undefined)[] = [];
@@ -773,5 +775,73 @@ describe('Calendar focus ring', () => {
       Object.defineProperty(HTMLElement.prototype, 'offsetWidth', width);
       Object.defineProperty(HTMLElement.prototype, 'offsetHeight', height);
     }
+  });
+});
+
+describe('Calendar time zone', () => {
+  // Kiritimati is UTC+14: its Nov 20 starts at Nov 19 10:00 UTC, a day the
+  // browser running the suite would otherwise read as Nov 19.
+  const KIRITIMATI = 'Pacific/Kiritimati';
+  const NOV_UTC = new Date('2026-11-01T00:00:00Z');
+
+  it('reads the selection, the month and today as days in the zone', () => {
+    const { dayButton } = render((h) => {
+      h.timeZone.set(KIRITIMATI);
+      h.month.set(new Date('2026-10-31T10:00:00Z'));
+      h.today.set(new Date('2026-11-04T10:00:00Z'));
+      h.selected.set(new Date('2026-11-19T10:00:00Z'));
+    });
+    expect(dayButton(/^Friday, November 20th, 2026, selected$/)).toBeTruthy();
+    expect(dayButton(/^Today, Thursday, November 5th, 2026$/)).toBeTruthy();
+  });
+
+  it('emits the instant each picked day starts in the zone, and keeps it selected', () => {
+    const { host, dayButton, click } = render((h) => {
+      h.timeZone.set('UTC');
+      h.month.set(NOV_UTC);
+    });
+    click(dayButton(/November 12th, 2026$/));
+    expect((host.selects.at(-1) as Date).toISOString()).toBe('2026-11-12T00:00:00.000Z');
+    expect((host.selected() as Date).toISOString()).toBe('2026-11-12T00:00:00.000Z');
+    expect(dayButton(/November 12th, 2026, selected$/)).toBeTruthy();
+  });
+
+  it('emits a range as the instants its days start in the zone', () => {
+    const { host, dayButton, click } = render((h) => {
+      h.timeZone.set(KIRITIMATI);
+      h.month.set(new Date('2026-10-31T10:00:00Z'));
+      h.mode.set('range');
+    });
+    click(dayButton(/November 12th, 2026$/));
+    click(dayButton(/November 14th, 2026$/));
+    const picked = host.selects.at(-1) as DateRange;
+    expect(picked.from?.toISOString()).toBe('2026-11-11T10:00:00.000Z');
+    expect(picked.to?.toISOString()).toBe('2026-11-13T10:00:00.000Z');
+  });
+
+  it('hands disabled predicates and dayDetail the instant each day starts in the zone', () => {
+    const seen = new Set<string>();
+    const { dayButton } = render((h) => {
+      h.timeZone.set('UTC');
+      h.month.set(NOV_UTC);
+      h.disabled.set((date: Date) => date.toISOString() === '2026-11-12T00:00:00.000Z');
+      h.dayDetail.set((date: Date) => {
+        seen.add(date.toISOString());
+        return null;
+      });
+    });
+    expect(dayButton(/November 12th, 2026$/).hasAttribute('disabled')).toBe(true);
+    expect(dayButton(/November 13th, 2026$/).hasAttribute('disabled')).toBe(false);
+    expect(seen.has('2026-11-13T00:00:00.000Z')).toBe(true);
+    expect([...seen].every((iso) => iso.endsWith('T00:00:00.000Z'))).toBe(true);
+  });
+
+  it('reports the month it pages to as the instant it starts in the zone', () => {
+    const { host, dayButton, click } = render((h) => {
+      h.timeZone.set('UTC');
+      h.month.set(NOV_UTC);
+    });
+    click(dayButton(/^Go to the Next Month$/));
+    expect(host.months.at(-1)?.toISOString()).toBe('2026-12-01T00:00:00.000Z');
   });
 });

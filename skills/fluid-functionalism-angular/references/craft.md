@@ -51,6 +51,7 @@ Systems first. Their craft applies across every component below.
 - [ThinkingIndicator](#thinking-indicator)
 - [ThinkingSteps](#thinking-steps)
 - [Tooltip](#tooltip)
+- [VirtualScroll](#virtual-scroll)
 - [Queued message stack (queued-stack)](#queued-stack)
 - [App Sidebar (sidebar-app)](#sidebar-app)
 - [Settings Dialog (dialog-sidebar)](#dialog-sidebar)
@@ -236,6 +237,7 @@ Systems first. Their craft applies across every component below.
 - A month change slides the month out while the next one comes in from the other side, on `spring.moderate`, panels stacked in one grid cell so the incoming days are measured where they land. One month travels a third of its width (plus the gap) and crossfades where the two meet, the title fading out before the chevron pair, and each panel carrying its weekday row as the grid's column headers. Side-by-side months travel a full month width plus the gap, each with its own weekday row in the sliding panel (labels move with their days) and at the taller month's height (nothing resizes mid-slide), inside a strip whose mask fades 8px at the outer edges.
 - 2 months hide outside days so no date renders twice. `orientation="auto"` compares the container's width with what 2 months need at the current `cellSize`. Stacked months share one sticky weekday row, page up and down (the chevrons turn to point up and down) and slide like the side-by-side strip, vertically: every grid travels the distance between the two month slots, measured on the layout the change starts from. A mask fades them out over 16px under the sticky weekday row (following it as the months scroll), and the chevrons float outside the strip over the first caption row, where the mask cuts a soft hole (16px fade on its left, 8px at its bottom), so a sliding month goes under both instead of showing through.
 - A hovered day's ring and the focus ring use the same geometry as the cell, so keyboard and pointer focus read identically; the focus ring springs (`spring.fast`) between days and never appears from a scripted focus that came from a click.
+- `timeZone` reads every date it is given (selection, month, today, start and end months, matchers) as the day it falls on in that IANA zone, and hands each day out as the instant it starts there: `select`, `[(month)]`, the nav outputs, predicates, `dayDetail`, labels and formatters. Inside, the grid still works on local-midnight days, so only the boundary converts; a day whose midnight the clocks skip starts at its first moment.
 
 <a id="card"></a>
 ## Card
@@ -336,6 +338,7 @@ Systems first. Their craft applies across every component below.
 - The start time leads with a clock icon and the end time with an arrow icon, both inside their field so they share its hover and click target, drawn with Button's icon gap (6px, 4px compact). The duration sits inside the end field after the time as a muted note.
 - The popup's inner layers paint the popup's colour, so their corners are concentric with it: the full-size wrapper inherits the 12px, the layers 4px inside take 8px. The clear button joins the trigger's fluid hover scope when it mounts, since it appears only once there is a value. Time lists open centred on the shown time (or the slot nearest now) every time, retrying each frame until the row is laid out in its viewport.
 - The popover keeps its content mounted until the exit spring ends and releases the unmount from the animation's `finished` callback, with an exit-length timeout as a fallback.
+- `timeZone` (an IANA name, as in DayPicker) makes the picker independent of the browser's zone: the value, today and the labels are read there, and a picked day is the instant it starts there (`2026-10-21T00:00:00.000Z` in `"UTC"`). The calendar converts only at its boundary, with `Intl` and no tz library; matcher predicates, `dayDetail`, labels and formatters receive those same instants, and the hidden input adds the zone's offset to each time. Without it, dates are local midnights as before.
 
 <a id="dialog"></a>
 ## Dialog
@@ -526,6 +529,17 @@ Systems first. Their craft applies across every component below.
 - The bubble is an inverted surface (`bg-foreground text-background`), 12px at regular weight (`fontVariationSettings`); `text-box: trim-both cap alphabetic` recentres the label, with the padding bump applied only where text-box is supported so overall height stays around 24px on untrimmed browsers.
 - `contentClass` styles the popup wrapper, which is where a z-index utility must go to lift the whole tooltip above other fixed layers (default z-50). `class` styles the bubble itself.
 - `forceOpen` pins the tooltip open (or closed) over the hover and focus behaviour; `openChange` still reports the internal state before `forceOpen` is applied.
+
+<a id="virtual-scroll"></a>
+## VirtualScroll
+
+- Angular-only: the original library has no virtualization. `<ff-virtual-scroll>` is the bounded scroll container (give it a height); every `*ffVirtualFor` inside renders the slice of its data in view plus `buffer` items (default 4) beyond each edge.
+- Fixed item sizes: `itemSize` px per row or column. Omitted, the size is the pitch measured between the first two rendered items (the ladder's control height stands in until then), so borders count: a `tr[ffTableRow]` is 37px, its 36px step plus the 1px bottom border. Variable heights are not supported.
+- `axis: 'x'` nested inside a row's `*ffVirtualFor` virtualizes both axes at once; rows need `w-max` so a `sticky left-0` label column stays pinned across the full width.
+- Spacers stand in for the rest: `<tr>` inside a table section, `<td>` inside a row, `<div>` elsewhere, so an `ff-table` keeps its semantics and its fluid hover (rows register by their data index). A column axis needs a flex row (or table row), not CSS grid.
+- Each window measures its own start offset once (a sticky header above the rows, a label column before the cells) through the `offsetParent` chain, and again on resize.
+- Views are recycled by slot: a row scrolling out is reused for the one scrolling in, so per-row state belongs in the data, and a focused row that scrolls out of the window loses focus.
+- Scrolling only writes signals from a passive listener, so it never marks the page for change detection; only windows whose range changes do work. A changed item re-runs the bindings of the declaring template (Angular's embedded views share its reactive consumer), and an OnPush cell component with unchanged inputs is skipped. For a single-cell write with no list work at all, give each cell its own signal and read it inside an OnPush cell component.
 
 # Blocks
 
