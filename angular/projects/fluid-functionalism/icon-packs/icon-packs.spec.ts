@@ -2,6 +2,12 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Icon } from '../core/icon';
 import { defaultIcons, type IconDefinition, type IconName } from '../core/icons';
+import * as root from '@angel-r/fluid-functionalism-angular';
+import * as packs from '@angel-r/fluid-functionalism-angular/icon-packs';
+import * as hugeicons from '@angel-r/fluid-functionalism-angular/icon-packs/hugeicons';
+import * as phosphor from '@angel-r/fluid-functionalism-angular/icon-packs/phosphor';
+import * as tabler from '@angel-r/fluid-functionalism-angular/icon-packs/tabler';
+import * as untitledui from '@angel-r/fluid-functionalism-angular/icon-packs/untitledui';
 import { hugeiconsIcons, phosphorIcons, tablerIcons, untitleduiIcons } from './index';
 
 const slots = Object.keys(defaultIcons) as IconName[];
@@ -22,6 +28,32 @@ describe('icon packs', () => {
   it('leaves play and pause to Lucide where the React pack does', () => {
     expect(hugeiconsIcons.play).toBeUndefined();
     expect(untitleduiIcons.pause).toBeUndefined();
+  });
+});
+
+const pascal = (slot: string) => slot.replace(/(^|-)([a-z0-9])/g, (_, __, c: string) => c.toUpperCase());
+
+describe('per-icon exports', () => {
+  it.each([
+    ['tabler', tabler, 'tablerIcons'],
+    ['phosphor', phosphor, 'phosphorIcons'],
+    ['hugeicons', hugeicons, 'hugeiconsIcons'],
+    ['untitledui', untitledui, 'untitleduiIcons'],
+  ] as const)('%s exports one prefixed constant per slot, shared with its map', (prefix, entry, mapName) => {
+    const exports = entry as Record<string, unknown>;
+    const map = exports[mapName] as Partial<Record<IconName, IconDefinition>>;
+    const icons = Object.keys(exports).filter((name) => name !== mapName);
+    expect(icons.sort()).toEqual(Object.keys(map).map((slot) => `${prefix}${pascal(slot)}`).sort());
+    for (const [slot, glyph] of Object.entries(map)) {
+      expect(exports[`${prefix}${pascal(slot)}`]).toBe(glyph);
+    }
+  });
+
+  it('re-exports every icon from /icon-packs and the package root', () => {
+    expect(packs.phosphorCheck).toBe(phosphorIcons.check);
+    expect(packs.tablerMoreHorizontal).toBe(tablerIcons['more-horizontal']);
+    expect(root.hugeiconsX).toBe(hugeiconsIcons.x);
+    expect(root.untitleduiRotateCcw).toBe(untitleduiIcons['rotate-ccw']);
   });
 });
 

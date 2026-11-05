@@ -38,14 +38,16 @@ bootstrapApplication(App, {
 });`;
 
 /** Swapping one icon library for another, as the Icons section shows it: pass
- *  the pack's glyphs to the same provider call, per slot. */
-const ICONS_SNIPPET = `import { provideFluid, phosphorIcons } from '${PACKAGE}';
+ *  the pack's glyphs to the same provider call, per slot. Single-icon imports,
+ *  so only the icons named here reach the bundle. */
+const ICONS_SNIPPET = `import { provideFluid } from '${PACKAGE}/core';
+import { phosphorChevronRight, phosphorSearch } from '${PACKAGE}/icon-packs/phosphor';
 
 bootstrapApplication(App, {
   providers: [
     // Slots you leave out keep their Lucide default.
     provideFluid({
-      icons: { search: phosphorIcons.search, 'chevron-right': phosphorIcons['chevron-right'] },
+      icons: { search: phosphorSearch, 'chevron-right': phosphorChevronRight },
     }),
   ],
 });`;
