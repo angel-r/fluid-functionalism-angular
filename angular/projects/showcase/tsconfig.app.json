@@ -3,7 +3,15 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": []
+    "types": [],
+    /* Build against the packaged library, as users get it: linked FESMs that
+       declare `sideEffects: false`, one per entry point. Run
+       `ng build fluid-functionalism` first. The root alias points at the
+       source, where a cross-entry import keeps the whole `index.ts` barrel. */
+    "paths": {
+      "@angel-r/fluid-functionalism-angular": ["../../dist/fluid-functionalism"],
+      "@angel-r/fluid-functionalism-angular/*": ["../../dist/fluid-functionalism/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts"]

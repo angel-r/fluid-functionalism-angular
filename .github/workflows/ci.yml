@@ -26,5 +26,7 @@ jobs:
         run: npx ng build fluid-functionalism
       - name: Probe the bundle
         run: node scripts/bundle-probe/probe.mjs
+      # The production showcase build resolves the package from dist/, so it
+      # needs the library build above.
       - name: Build the showcase
         run: npx ng build showcase

@@ -38,14 +38,14 @@ The per-component differences (and why) are recorded in `odd/tasks/angular-port.
 | Showcase dev server | `npx ng serve showcase` |
 | All tests (Vitest, jsdom) | `npx ng test fluid-functionalism --watch=false` |
 | The docs site (tests, then the site) | `npx ng test showcase --watch=false` · `npx ng serve showcase` |
-| Build the deployable site | `npm run build:showcase` (regenerates the changelog data first) |
+| Build the deployable site | `npm run build:showcase` (regenerates the changelog data and builds the library first) |
 | One component's tests | `npx ng test fluid-functionalism --watch=false --include='**/select/*.spec.ts'` |
 | Browser motion/layout checks | `node scripts/browser-checks/run.mjs --url http://localhost:4200` (needs the showcase running and a local Chrome; `--only <text>` filters) |
 | Build the library | `npx ng build fluid-functionalism` (output in `dist/fluid-functionalism`) |
 | Publish to npm | bump `version` in `projects/fluid-functionalism/package.json`, commit, then push a matching tag (`git tag v0.1.0 && git push origin v0.1.0`). The `Publish Angular library` workflow tests, builds and publishes with npm trusted publishing. |
 | Regenerate the icon packs | `node scripts/generate-icon-packs.mjs` |
 
-In the workspace, both the bare `@angel-r/fluid-functionalism-angular` import path and its `<entry>` sub-paths point at the library source (`projects/fluid-functionalism/*/index.ts`), so the showcase needs no library build. The build writes one FESM per entry plus the primary re-export file into `dist/fluid-functionalism/fesm2022`.
+In the workspace, both the bare `@angel-r/fluid-functionalism-angular` import path and its `<entry>` sub-paths point at the library source (`projects/fluid-functionalism/*/index.ts`) for the library tests and for the `development` showcase build (`npx ng serve showcase`, through `projects/showcase/tsconfig.source.json`), so library edits reload without a library build. The production showcase build (`npx ng build showcase`, the Pages deploy) resolves the package from `dist/fluid-functionalism` instead, as users get it, so run `npx ng build fluid-functionalism` first; `npm run build:showcase` does. The build writes one FESM per entry plus the primary re-export file into `dist/fluid-functionalism/fesm2022`.
 
 ## Agent and SEO files
 
