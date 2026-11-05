@@ -475,6 +475,9 @@ Systems first. Their craft applies across every component below.
 - Header rows render semibold and body rows normal through `font-variation-settings` (the variable-font axis, not a font-weight class).
 - Rows sit on the size ladder, 36px default and 28px compact, via cell padding (`px-3 py-2` vs `px-2.5 py-[5px]`): padding plus line box lands the row on the ladder.
 - A `size` input pins every cell to one ladder step by providing the size context around the table; omitted, cells follow the surrounding provider.
+- Server-driven listings (Angular-only): rows come from `[data]` and render with `*ffTableRows="let row of table; let i = index"`, which reuses row views by position so a new page updates rows in place. `th[ffTableHead] sortKey` turns the label into a button with `aria-sort`; `ff-table-pagination` (inside the table, or anywhere with `[for]`) shows the range and previous/next. `sortChange` and `pageChange` emit the whole query `{ column, direction: 'ASC' | 'DESC', offset, limit }`, sorting goes back to offset 0, and the table never sorts or slices rows itself: they change only when `data` does, with `aria-busy` on the table in between.
+- The sort arrow is one `arrow-up` that turns 180° for DESC on the same `duration-80`; an unsorted sortable column shows it at half opacity only on hover or focus.
+- `thead[ffTableHeader] sticky` pins the header with CSS `position: sticky` on the surface it sits on (`z-20`, above the rows' `z-10` and the highlight). A collapsed border belongs to the table and stays behind when the header sticks, so a sticky header row draws its rule as an `::after` inside the row, hidden when row 0 is lit like the border it replaces.
 
 <a id="tabs"></a>
 ## Tabs
