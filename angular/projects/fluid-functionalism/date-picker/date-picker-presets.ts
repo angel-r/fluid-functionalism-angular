@@ -62,6 +62,8 @@ export class DatePickerPresets {
   readonly presets = input<DatePickerPreset[]>([]);
   /** The committed range, to mark the matching preset pressed. */
   readonly value = input<DateRange | undefined>(undefined);
+  /** The zone the days are compared in (the picker's `timeZone`). */
+  readonly timeZone = input<string | undefined>(undefined);
   readonly pick = output<DatePickerPreset>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
@@ -83,7 +85,8 @@ export class DatePickerPresets {
 
   protected isSelected(preset: DatePickerPreset): boolean {
     const value = this.value();
-    return sameDay(value?.from, preset.range.from) && sameDay(value?.to, preset.range.to);
+    const zone = this.timeZone();
+    return sameDay(value?.from, preset.range.from, zone) && sameDay(value?.to, preset.range.to, zone);
   }
 
   protected rowClass(i: number, preset: DatePickerPreset) {

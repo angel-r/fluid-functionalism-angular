@@ -2,12 +2,13 @@
 /**
  * Bundle probe for @angel-r/fluid-functionalism-angular.
  *
- * Proves the three claims behind the secondary entry point split:
+ * Proves the claims behind the secondary entry point split:
  *   (a) tree shaking: importing one symbol keeps only that symbol's code;
  *   (b) splitting: a component imported only by a lazily loaded module is not
  *       in the static closure of the app's main chunk, and that closure stays
  *       within a byte budget;
- *   (c) shared pieces: an eager component that shares a primitive with a
+ *   (c) per-icon exports: importing one icon of a pack keeps no other glyph;
+ *   (d) shared pieces: an eager component that shares a primitive with a
  *       sibling entry does not pull that sibling's components into the main
  *       chunk when only a lazy module uses them.
  *
@@ -369,11 +370,13 @@ async function sizesFor(sub) {
  */
 const PACK_SOURCES = {
   lucide: 'core/lucide-icons.ts',
-  hugeicons: 'icon-packs/hugeicons.ts',
-  tabler: 'icon-packs/tabler.ts',
-  phosphor: 'icon-packs/phosphor.ts',
-  untitledui: 'icon-packs/untitledui.ts',
+  hugeicons: 'icon-packs/hugeicons/index.ts',
+  tabler: 'icon-packs/tabler/index.ts',
+  phosphor: 'icon-packs/phosphor/index.ts',
+  untitledui: 'icon-packs/untitledui/index.ts',
 };
+/** The packs with per-icon exports (`<pack><Slot>`), all but the default. */
+const ICON_PACKS = ['tabler', 'phosphor', 'hugeicons', 'untitledui'];
 const sourceRoot = path.join(angularRoot, 'projects/fluid-functionalism');
 const packMarkers = Object.entries(PACK_SOURCES)
   .map(([pack, relative]) => {
@@ -439,6 +442,83 @@ if (hasSecondaryEntryPoints) {
   controlCheck('sub-paths', subSizes.rows);
 }
 
+/**
+ * (c) Per-icon exports: a consumer that imports one icon ships that icon and
+ * no other glyph, through the pack's own sub-path, `/icon-packs` and the bare
+ * package name alike.
+ *
+ * Every generated icon is one `export const <pack><Slot>: IconDefinition = …;`
+ * line. Its markers are the path data that no other icon in any pack uses, so
+ * finding one in a bundle means that icon was kept. Icons without unique path
+ * data (a lone circle) cannot be told apart and are left out of the check.
+ */
+function iconMarkers() {
+  const icons = [];
+  for (const pack of ICON_PACKS) {
+    const file = path.join(sourceRoot, PACK_SOURCES[pack]);
+    if (!existsSync(file)) continue;
+    for (const [, name, value] of readFileSync(file, 'utf8').matchAll(
+      /^export const (\w+): IconDefinition = (.*);$/gm,
+    )) {
+      icons.push({ pack, name, paths: [...value.matchAll(/"d":"([^"]{12,})"/g)].map((m) => m[1]) });
+    }
+  }
+  const owners = new Map();
+  for (const icon of icons) {
+    for (const d of new Set(icon.paths)) owners.set(d, (owners.get(d) ?? 0) + 1);
+  }
+  return icons.map((icon) => ({ ...icon, marker: icon.paths.find((d) => owners.get(d) === 1) }));
+}
+
+const perIcon = iconMarkers();
+const detectable = perIcon.filter((icon) => icon.marker);
+if (ICON_PACKS.some((pack) => !perIcon.some((icon) => icon.pack === pack))) {
+  failures.push('per-icon: a pack has no `export const <pack><Slot>` icons (per-icon exports missing)');
+}
+for (const pack of ICON_PACKS) {
+  const name = `${pack}Check`;
+  const imported = detectable.find((icon) => icon.name === name);
+  if (!imported) {
+    failures.push(`per-icon: ${name} has no unique path data to detect`);
+    continue;
+  }
+  const specs = [
+    [`${pack} sub-path`, `${PKG_NAME}/icon-packs/${pack}`],
+    ['/icon-packs', `${PKG_NAME}/icon-packs`],
+    ['bare', PKG_NAME],
+  ];
+  const whole = await measure({
+    code: bareUse(`import { ${pack}Icons } from '${PKG_NAME}/icon-packs/${pack}';`, `${pack}Icons`),
+  });
+  // Positive control: the pack map keeps every icon, so absent markers below
+  // mean absent icons, not markers that stopped matching the build.
+  const unseen = detectable.filter((icon) => icon.pack === pack && !whole.text.includes(icon.marker));
+  if (unseen.length) {
+    failures.push(`per-icon: ${pack}Icons does not show ${unseen.length} icon marker(s) (detection broken)`);
+  }
+  for (const [via, spec] of specs) {
+    const result = await measure({ code: bareUse(`import { ${name} } from '${spec}';`, name) });
+    const kept = result.text.includes(imported.marker);
+    const others = detectable
+      .filter((icon) => icon !== imported && result.text.includes(icon.marker))
+      .map((icon) => icon.name);
+    scenarios.push({
+      kind: 'icon',
+      label: `${name} via ${via}`,
+      bytes: result.bytes,
+      wholePackBytes: whole.bytes,
+      kept,
+      others,
+    });
+    if (!kept) failures.push(`per-icon: ${name} via ${via} is missing its own glyph (detection broken)`);
+    if (others.length) {
+      failures.push(
+        `per-icon: ${name} via ${via} also keeps ${others.length} other icon(s) (${others.slice(0, 4).join(', ')}${others.length > 4 ? ', …' : ''})`,
+      );
+    }
+  }
+}
+
 // (b) splitting, through the bare import.
 const bareSplit = await splitting({
   label: 'bare',
@@ -463,7 +543,7 @@ if (subSizes && subSizes.lazyFrom) {
 }
 
 /**
- * (c) shared pieces. Each entry ships as ONE FESM file and esbuild assigns
+ * (d) shared pieces. Each entry ships as ONE FESM file and esbuild assigns
  * code to chunks per file, so a primitive that lives inside a component entry
  * drags that component into the main chunk as soon as an eager component uses
  * the primitive and a lazy module uses the component. These pairs are the
@@ -533,9 +613,20 @@ if (jsonOut) {
       `  ${purity.label.padEnd(28)} ${keeps.length ? keeps.join(', ') : 'no icon pack, no component'}`,
     );
   }
+  console.log(
+    `\n(c) one imported icon keeps no other glyph (${detectable.length} of ${perIcon.length} icons detectable)`,
+  );
+  for (const row of scenarios.filter((s) => s.kind === 'icon')) {
+    const verdict = row.kept && !row.others.length ? 'PASS' : 'FAIL';
+    console.log(
+      `  ${row.label.padEnd(40)} ${kb(row.bytes).padStart(9)} (whole pack ${kb(row.wholePackBytes)})  ${verdict}${
+        row.others.length ? `: also ${row.others.length} other icon(s)` : ''
+      }`,
+    );
+  }
   for (const split of scenarios.filter((s) => s.kind === 'split')) {
     console.log(
-      `\n(${split.shared ? 'c' : 'b'}) splitting, ${split.label}${split.shared ? '' : ' import'} — ${split.ok ? 'PASS' : 'FAIL'}: ${split.detail}`,
+      `\n(${split.shared ? 'd' : 'b'}) splitting, ${split.label}${split.shared ? '' : ' import'} — ${split.ok ? 'PASS' : 'FAIL'}: ${split.detail}`,
     );
     const byPackage = Object.entries(split.initialByPackage)
       .filter(([, bytes]) => bytes > 0)

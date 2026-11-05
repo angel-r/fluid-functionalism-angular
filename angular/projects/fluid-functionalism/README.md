@@ -42,7 +42,7 @@ You need Angular 22 and Tailwind CSS 4.
 |---|---|
 | Pill corners or the compact size everywhere | `provideFluid({ shape: 'pill', size: 'compact' })` |
 | Change shape or size for one region | `[ffShapeProvider]`, `[ffSizeProvider]` |
-| Another icon set | `provideFluid({ icons: tablerIcons })` (also `phosphorIcons`, `hugeiconsIcons`, `untitleduiIcons`) |
+| Another icon set | single icons per slot, `provideFluid({ icons: { check: phosphorCheck } })`, or a whole pack, `provideFluid({ icons: tablerIcons })` ([Icon packs](#icon-packs)) |
 | Light/dark switching | `ThemeService` (`setTheme`, `cycle`); `provideFluidTheme({ shortcut: true })` adds the T key |
 | PDF thumbnails | provide a `FILE_THUMBNAIL_PDF_RENDERER` ([below](#pdf-thumbnails)) |
 
@@ -58,7 +58,20 @@ import { Button } from '@angel-r/fluid-functionalism-angular/button';
 import { Calendar } from '@angel-r/fluid-functionalism-angular/calendar';
 ```
 
-Use the sub-paths. With them, a component you only load inside `@defer` or a lazy route stays out of the initial bundle. Angular compiles a `@defer` dependency to a dynamic `import()` of the path you wrote, so a deferred component imported from `@angel-r/fluid-functionalism-angular` would keep the whole root, which re-exports every entry. The bare `@angel-r/fluid-functionalism-angular` import still works and still re-exports everything, so code written for 0.0.x keeps compiling. Its static imports tree-shake, but move to sub-paths before you defer anything. Each symbol's entry is the component folder it belongs to; the foundations (`provideFluid`, `cn`, `Icon`, `spring`, `injectAnimateFluid`, `ThemeService`, …) live in `/core`, and the icon packs in `/icon-packs`. The primitives several components share have their own small entries, so borrowing one does not load a whole component: `/layer` (`Layer`, `isFocusVisible`, `provideSizeOverride`, `writeInitialStyles`), `/group-focus` (`createGroupFocus`, `GroupFocusRing`, `focusRowOnPress`, `groupRows`) and `/popup` (`createPopupOverlay`, `PopupCheckedBackground`, `createPinnedSize`, `createRaisedSurface`). `/tabs`, `/radio-group` and `/dropdown` still re-export them.
+Use the sub-paths. With them, a component you only load inside `@defer` or a lazy route stays out of the initial bundle. Angular compiles a `@defer` dependency to a dynamic `import()` of the path you wrote, so a deferred component imported from `@angel-r/fluid-functionalism-angular` would keep the whole root, which re-exports every entry. The bare `@angel-r/fluid-functionalism-angular` import still works and still re-exports everything, so code written for 0.0.x keeps compiling. Its static imports tree-shake, but move to sub-paths before you defer anything. Each symbol's entry is the component folder it belongs to; the foundations (`provideFluid`, `cn`, `Icon`, `spring`, `injectAnimateFluid`, `ThemeService`, …) live in `/core`, and the icon packs in `/icon-packs/<pack>` ([below](#icon-packs)). The primitives several components share have their own small entries, so borrowing one does not load a whole component: `/layer` (`Layer`, `isFocusVisible`, `provideSizeOverride`, `writeInitialStyles`), `/group-focus` (`createGroupFocus`, `GroupFocusRing`, `focusRowOnPress`, `groupRows`) and `/popup` (`createPopupOverlay`, `PopupCheckedBackground`, `createPinnedSize`, `createRaisedSurface`). `/tabs`, `/radio-group` and `/dropdown` still re-export them.
+
+### Icon packs
+
+Each pack is its own entry point (`/icon-packs/tabler`, `/icon-packs/phosphor`, `/icon-packs/hugeicons`, `/icon-packs/untitledui`) and exports one constant per slot, named `<pack><Slot>`: `phosphorCheck`, `tablerChevronDown`, `hugeiconsMoreHorizontal`. The name follows the slot the components look up, not the library's own glyph name. Import the icons you swap and pass them per slot. Slots you leave out keep their Lucide default, and icons you do not import never reach the bundle:
+
+```ts
+import { provideFluid } from '@angel-r/fluid-functionalism-angular/core';
+import { phosphorCheck, phosphorChevronDown } from '@angel-r/fluid-functionalism-angular/icon-packs/phosphor';
+
+provideFluid({ icons: { check: phosphorCheck, 'chevron-down': phosphorChevronDown } });
+```
+
+The whole-pack maps (`tablerIcons`, `phosphorIcons`, `hugeiconsIcons`, `untitleduiIcons`) stay for apps that swap every slot, such as a pack switcher. Reading a map keeps every glyph of that pack, about 9 to 46 KB minified, where one icon is well under 1 KB. `/icon-packs` and the bare package name re-export every icon and map too, and their static imports tree-shake the same way. Prefer the pack's sub-path anyway, for the `@defer` reason above. `npm run probe:bundle` checks that one imported icon keeps no other glyph.
 
 ## PDF thumbnails
 

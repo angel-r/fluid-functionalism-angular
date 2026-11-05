@@ -30,3 +30,10 @@ export {
   type DayLabelModifiers,
 } from './calendar-locale';
 export type { CalendarDayView, CalendarWeekView } from './calendar-view';
+export {
+  dayInTimeZone,
+  mapDateValue,
+  minutesInTimeZone,
+  startOfDayInTimeZone,
+  timeZoneOffset,
+} from './calendar-zone';

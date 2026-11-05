@@ -79,6 +79,7 @@ import {
 } from './calendar-locale';
 import { CALENDAR_CONTEXT, INDEX_ATTR, INERT_ATTR, isDisabledDay, type CalendarContext, type CalendarNavDirection } from './calendar-context';
 import { CalendarNav } from './calendar-nav';
+import { dayInTimeZone, mapDateValue, matchersInTimeZone, startOfDayInTimeZone } from './calendar-zone';
 import { CalendarGhost, CalendarSlide, CalendarWeeksBox, type SlideConfig } from './calendar-slide';
 import { buildWeekViews, type CalendarDayView, type CalendarWeekView, type DayViewState } from './calendar-view';
 
@@ -271,6 +272,13 @@ export class Calendar implements CalendarContext {
   readonly ISOWeek = input<boolean | undefined>(undefined);
   /** A BCP 47 locale for names and labels (React: a date-fns locale). */
   readonly locale = input<string>('en-US');
+  /** An IANA time zone (`'UTC'`, `'Europe/Madrid'`) the days are read in,
+   *  ignoring the browser's. Every date in is read as the day it falls on
+   *  there; every date out (the selection, the month, the dates handed to
+   *  matchers, `dayDetail`, labels and formatters) is the instant that day
+   *  starts there, so `toISOString()` gives `2026-10-21T00:00:00.000Z` in
+   *  `'UTC'`. Default: the browser's zone, with local-midnight dates. */
+  readonly timeZone = input<string | undefined>(undefined);
   readonly labels = input<Partial<CalendarLabels> | undefined>(undefined);
   readonly formatters = input<Partial<CalendarFormatters> | undefined>(undefined);
   /** Always 6 week rows. */
@@ -319,29 +327,71 @@ export class Calendar implements CalendarContext {
   readonly rtl = computed(() => this.dir() === 'rtl');
   protected readonly navHidden = computed(() => this.hideNavigation() || this.disableNavigation());
 
+  // ── Time zone ───────────────────────────────────────────────
+  // Inside, every date is a calendar day (local midnight). These read the
+  // inputs as days in `timeZone`; `toInstant` turns a day back into the
+  // instant it starts there for everything handed out.
+  private readonly toDay = (date: Date) => dayInTimeZone(date, this.timeZone());
+  protected readonly toInstant = (day: Date) => startOfDayInTimeZone(day, this.timeZone());
+  private readonly selectedDays = computed(() =>
+    this.timeZone() ? mapDateValue(this.selected(), this.toDay) : this.selected(),
+  );
+  private readonly startMonthDay = computed(() => {
+    const start = this.startMonth();
+    return start && this.toDay(start);
+  });
+  private readonly endMonthDay = computed(() => {
+    const end = this.endMonth();
+    return end && this.toDay(end);
+  });
+  /** User callbacks with every Date argument turned into an instant. */
+  private zonedCallbacks<T extends object>(callbacks: T | undefined): T | undefined {
+    if (!callbacks || !this.timeZone()) return callbacks;
+    const toInstant = this.toInstant;
+    return Object.fromEntries(
+      Object.entries(callbacks).map(([key, fn]) => [
+        key,
+        typeof fn === 'function'
+          ? (...args: unknown[]) => fn(...args.map((arg) => (arg instanceof Date ? toInstant(arg) : arg)))
+          : fn,
+      ]),
+    ) as T;
+  }
+
   // ── Value ───────────────────────────────────────────────────
   protected readonly range = computed(() =>
-    this.mode() === 'range' ? (this.selected() as DateRange | undefined) : undefined,
+    this.mode() === 'range' ? (this.selectedDays() as DateRange | undefined) : undefined,
   );
   protected readonly picking = computed(() => {
     const range = this.range();
     return this.mode() === 'range' && !!range?.from && !range.to;
   });
   private readonly selectedDay = computed(() => {
-    const value = this.selected();
+    const value = this.selectedDays();
     return this.mode() === 'single' && value instanceof Date ? dayNumber(value) : null;
   });
   /** The range in place before a pick started, for Escape to restore. */
   private beforePick: DateRange | undefined = undefined;
 
   protected readonly matchers = computed(() =>
-    resolveDayMatchers({ booked: this.booked(), available: this.available(), disabled: this.disabled() }),
+    resolveDayMatchers({
+      booked: matchersInTimeZone(this.booked(), this.timeZone()),
+      available: matchersInTimeZone(this.available(), this.timeZone()),
+      disabled: matchersInTimeZone(this.disabled(), this.timeZone()),
+    }),
   );
-  protected readonly resolvedLabels = computed<CalendarLabels>(() => ({ ...defaultLabels, ...this.labels() }));
+  protected readonly resolvedLabels = computed<CalendarLabels>(() => ({
+    ...defaultLabels,
+    ...this.zonedCallbacks(this.labels()),
+  }));
   protected readonly resolvedFormatters = computed<CalendarFormatters>(() => ({
     ...defaultFormatters,
-    ...this.formatters(),
+    ...this.zonedCallbacks(this.formatters()),
   }));
+  private readonly resolvedDayDetail = computed(() => {
+    const detail = this.dayDetail();
+    return detail && this.timeZone() ? (day: Date) => detail(this.toInstant(day)) : detail;
+  });
   private readonly isoWeek = computed(() =>
     resolveWeekNumbering(this.showWeekNumber(), this.weekStartsOn(), this.ISOWeek()),
   );
@@ -351,13 +401,14 @@ export class Calendar implements CalendarContext {
     fixedWeeks: this.fixedWeeks(),
     firstWeekContainsDate: localeFirstWeekContainsDate(this.locale()),
   }));
-  private readonly todayN = computed(() => dayNumber(this.today() ?? this.now));
+  private readonly todayDay = computed(() => this.toDay(this.today() ?? this.now));
+  private readonly todayN = computed(() => dayNumber(this.todayDay()));
 
   // ── Months ──────────────────────────────────────────────────
   private clampMonth(date: Date): Date {
     let month = startOfMonth(date);
-    const start = this.startMonth();
-    const end = this.endMonth();
+    const start = this.startMonthDay();
+    const end = this.endMonthDay();
     if (end) {
       const lastFirst = addMonths(startOfMonth(end), -(this.numberOfMonths() - 1));
       if (month > lastFirst) month = lastFirst;
@@ -365,23 +416,24 @@ export class Calendar implements CalendarContext {
     if (start && month < startOfMonth(start)) month = startOfMonth(start);
     return month;
   }
-  protected readonly firstMonth = computed(() =>
-    this.clampMonth(this.month() ?? this.defaultMonth() ?? this.today() ?? this.now),
-  );
+  protected readonly firstMonth = computed(() => {
+    const month = this.month() ?? this.defaultMonth();
+    return this.clampMonth(month ? this.toDay(month) : this.todayDay());
+  });
   protected readonly months = computed(() =>
     buildMonths(this.firstMonth(), this.numberOfMonths(), this.gridOptions()),
   );
   readonly previousMonth = computed<Date | undefined>(() => {
     if (this.disableNavigation()) return undefined;
     const first = this.firstMonth();
-    const start = this.startMonth();
+    const start = this.startMonthDay();
     if (start && monthsBetween(startOfMonth(start), first) <= 0) return undefined;
     return addMonths(first, -1);
   });
   readonly nextMonth = computed<Date | undefined>(() => {
     if (this.disableNavigation()) return undefined;
     const first = this.firstMonth();
-    const end = this.endMonth();
+    const end = this.endMonthDay();
     const last = addMonths(first, this.numberOfMonths() - 1);
     if (end && monthsBetween(last, startOfMonth(end)) <= 0) return undefined;
     return addMonths(first, 1);
@@ -708,7 +760,7 @@ export class Calendar implements CalendarContext {
   // Optional content under the number. Cached per day until `dayDetail`
   // changes: the grid recomputes on each pointer move while picking.
   private readonly detailCache = computed(() => {
-    this.dayDetail();
+    this.resolvedDayDetail();
     return new Map<number, unknown>();
   });
 
@@ -768,7 +820,7 @@ export class Calendar implements CalendarContext {
       focusTarget: this.focusTarget(),
       focusedDay: this.focusedDay(),
       gridStart: this.gridStart(),
-      dayDetail: this.dayDetail(),
+      dayDetail: this.resolvedDayDetail(),
       detailCache: this.detailCache(),
     };
   });
@@ -955,8 +1007,8 @@ export class Calendar implements CalendarContext {
   // ── View building ───────────────────────────────────────────
 
   private isHiddenDate(date: Date): boolean {
-    const start = this.startMonth();
-    const end = this.endMonth();
+    const start = this.startMonthDay();
+    const end = this.endMonthDay();
     const n = dayNumber(date);
     return (!!start && n < dayNumber(startOfMonth(start))) || (!!end && n > dayNumber(endOfMonth(end)));
   }
@@ -1046,17 +1098,21 @@ export class Calendar implements CalendarContext {
   navigate(direction: CalendarNavDirection): void {
     const target = direction === 'previous' ? this.previousMonth() : this.nextMonth();
     if (!target) return;
-    this.goToMonth(target);
-    if (direction === 'previous') this.prevClick.emit(target);
-    else this.nextClick.emit(target);
+    this.showMonth(target);
+    if (direction === 'previous') this.prevClick.emit(this.toInstant(target));
+    else this.nextClick.emit(this.toInstant(target));
   }
 
   /** Shows `date`'s month first (clamped to the start and end months). */
   goToMonth(date: Date): void {
+    this.showMonth(this.toDay(date));
+  }
+
+  private showMonth(day: Date): void {
     if (this.disableNavigation()) return;
-    const next = this.clampMonth(date);
+    const next = this.clampMonth(day);
     if (next.getTime() === this.firstMonth().getTime()) return;
-    this.month.set(next);
+    this.month.set(this.toInstant(next));
   }
 
   /** Brings a day on screen: earlier months become the first slot, later
@@ -1066,7 +1122,7 @@ export class Calendar implements CalendarContext {
     const offset = monthsBetween(first, date);
     const count = this.numberOfMonths();
     if (offset >= 0 && offset < count) return;
-    this.goToMonth(offset < 0 ? date : addMonths(startOfMonth(date), -(count - 1)));
+    this.showMonth(offset < 0 ? date : addMonths(startOfMonth(date), -(count - 1)));
   }
 
   // ── Events ──────────────────────────────────────────────────
@@ -1166,8 +1222,8 @@ export class Calendar implements CalendarContext {
       weekStartsOn: options.weekStartsOn,
       ISOWeek: options.ISOWeek,
       isUnfocusable: (date) => this.isHiddenDate(date) || dateMatchModifiers(date, disabled),
-      startMonth: this.startMonth(),
-      endMonth: this.endMonth(),
+      startMonth: this.startMonthDay(),
+      endMonth: this.endMonthDay(),
     });
     if (!target) return;
     this.goToDay(target);
@@ -1181,7 +1237,7 @@ export class Calendar implements CalendarContext {
 
   private pick(date: Date) {
     if (this.mode() === 'single') {
-      const current = this.selected();
+      const current = this.selectedDays();
       const next =
         !this.required() && current instanceof Date && isSameDay(current, date) ? undefined : date;
       this.commit(next);
@@ -1199,8 +1255,9 @@ export class Calendar implements CalendarContext {
   }
 
   private commit(next: CalendarValue) {
-    this.selected.set(next);
-    this.select.emit(next);
+    const value = this.timeZone() ? mapDateValue(next, this.toInstant) : next;
+    this.selected.set(value);
+    this.select.emit(value);
   }
 
   // ── Focus ───────────────────────────────────────────────────

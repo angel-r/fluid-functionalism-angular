@@ -111,6 +111,11 @@ export const calendarAppearanceProps: PropDef[] = [
     description: "Pins one step of the size ladder.",
   },
   {
+    name: "timeZone",
+    type: "string",
+    description: "An IANA zone (`\"UTC\"`, `\"Europe/Madrid\"`) the days are read in, ignoring the browser's. Every date in is read as the day it falls on there; every date out (the selection, the month, the dates handed to matchers, `dayDetail`, labels and formatters) is the instant that day starts there.",
+  },
+  {
     name: "Other inputs",
     type: "WeekStartsOn | string | Date | boolean",
     description: "The rest are plain inputs: `weekStartsOn`, `locale` (a BCP 47 tag), `month` (two-way), `today`, `startMonth`, `fixedWeeks`, `ISOWeek`, `autoFocus`, `labels` and `formatters`.",

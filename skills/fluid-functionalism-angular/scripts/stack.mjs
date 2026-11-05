@@ -405,10 +405,16 @@ export function readStack(startDir) {
     });
   }
 
-  const iconPacks = ICON_PACKS.filter((pack) =>
-    css.files.some((f) => f.text.includes(pack)) ||
-    configText.includes(pack),
-  );
+  // A pack shows up as its map (`tablerIcons`) or its per-icon entry
+  // (`icon-packs/tabler`, imported one icon at a time).
+  const iconPacks = ICON_PACKS.filter((pack) => {
+    const entry = `icon-packs/${pack.replace(/Icons$/, "")}`;
+    return (
+      css.files.some((f) => f.text.includes(pack)) ||
+      configText.includes(pack) ||
+      configText.includes(entry)
+    );
+  });
 
   const durations = [];
   if (project) {

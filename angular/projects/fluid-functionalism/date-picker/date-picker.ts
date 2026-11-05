@@ -46,6 +46,9 @@ import {
   type WeekStartsOn,
   type CalendarFormatters,
   type CalendarLabels,
+  dayInTimeZone,
+  mapDateValue,
+  minutesInTimeZone,
 } from '@angel-r/fluid-functionalism-angular/calendar';
 import { LAST_MINUTE, buildSlots, formatDuration, minutesToTime, resolveHourCycle, shiftEnd, timeToMinutes } from './date-picker-time';
 import {
@@ -228,6 +231,7 @@ let nextPickerId = 0;
                     [orientation]="calendarOrientation()"
                     [month]="month()"
                     [locale]="calendarLocale()"
+                    [timeZone]="timeZone()"
                     [booked]="cal().booked"
                     [available]="cal().available"
                     [disabled]="cal().disabled"
@@ -267,7 +271,7 @@ let nextPickerId = 0;
 
     <ng-template #presetTpl>
       <div [class]="presetWrapClass()">
-        <ff-date-picker-presets [presets]="presets() ?? []" [value]="range()" (pick)="onPresetPick($event)" />
+        <ff-date-picker-presets [presets]="presets() ?? []" [value]="range()" [timeZone]="timeZone()" (pick)="onPresetPick($event)" />
       </div>
     </ng-template>
 
@@ -378,6 +382,12 @@ export class DatePicker {
   readonly calendarProps = input<DatePickerCalendarProps | undefined>(undefined);
   /** BCP 47 locale for dates and times. Defaults to the browser's. */
   readonly locale = input<string | undefined>(undefined);
+  /** An IANA time zone (`'UTC'`, `'Europe/Madrid'`) the picker works in,
+   *  ignoring the browser's: the days, today and the labels are read there,
+   *  and a picked day is the instant it starts there, so in `'UTC'` its
+   *  `toISOString()` is `2026-10-21T00:00:00.000Z`. Times get the zone's
+   *  offset in the hidden input. Default: the browser's zone. */
+  readonly timeZone = input<string | undefined>(undefined);
 
   // ── Trigger ─────────────────────────────────────────────────
   /** "outline" matches Select; "ghost" is inline text with a hover fill. */
@@ -494,11 +504,23 @@ export class DatePicker {
   protected readonly labelPlaceholder = computed(
     () => this.placeholder() ?? (this.mode() === 'range' ? 'Pick dates' : 'Pick a date'),
   );
+  // The labels read the days in the zone: as local dates, Intl formats them
+  // on the right day whatever the browser's zone.
+  private readonly toDay = (date: Date) => dayInTimeZone(date, this.timeZone());
+  private readonly rangeDays = computed(() => mapDateValue(this.range(), this.toDay));
+  private readonly singleDay = computed(() => mapDateValue(this.single(), this.toDay));
+  private thisYear() {
+    return this.toDay(new Date()).getFullYear();
+  }
+
   protected readonly dateLabel = computed(() => {
-    const range = this.range();
-    const single = this.single();
-    if (this.mode() === 'range') return range?.from ? formatRangeLabel(range, this.locale()) : this.labelPlaceholder();
-    return single ? formatDateLabel(single, this.locale()) : this.labelPlaceholder();
+    const range = this.rangeDays();
+    const single = this.singleDay();
+    const now = this.toDay(new Date());
+    if (this.mode() === 'range') {
+      return range?.from ? formatRangeLabel(range, this.locale(), now) : this.labelPlaceholder();
+    }
+    return single ? formatDateLabel(single, this.locale(), now) : this.labelPlaceholder();
   });
   protected readonly triggerLabel = computed(() => {
     const label = this.ariaLabel();
@@ -508,10 +530,10 @@ export class DatePicker {
   // The date keeps the width of its widest possible label (and of the
   // placeholder), so picking Oct 1 or Oct 31 never moves what follows.
   protected readonly labelSizer = computed(() => {
-    const year = new Date().getFullYear();
+    const year = this.thisYear();
     const locale = this.locale();
     if (this.mode() === 'range') {
-      const range = this.range();
+      const range = this.rangeDays();
       const from = range?.from ?? new Date(year, 0, 1);
       const to = range?.to ?? from;
       const options = rangeLabelOptions(
@@ -524,7 +546,7 @@ export class DatePicker {
       ];
       return widestLabelParts(sample, locale, options);
     }
-    const date = this.single() ?? new Date(year, 0, 1);
+    const date = this.singleDay() ?? new Date(year, 0, 1);
     const options = singleLabelOptions(date.getFullYear() !== year);
     return widestLabelParts(labelParts(date, locale, options), locale, options);
   });
@@ -534,6 +556,7 @@ export class DatePicker {
       this.mode() === 'range' ? this.range() : this.single(),
       this.hasTime() ? this.time() : null,
       this.hasTimeRange() ? this.timeRange() : null,
+      this.timeZone(),
     ),
   );
 
@@ -766,8 +789,7 @@ export class DatePicker {
   // ── Open ────────────────────────────────────────────────────
 
   private nowMinutes() {
-    const now = new Date();
-    return now.getHours() * 60 + now.getMinutes();
+    return minutesInTimeZone(new Date(), this.timeZone());
   }
 
   private cancelAck() {
@@ -835,7 +857,7 @@ export class DatePicker {
     }
     // A pick that lands the end commits and closes. Escape restoring the
     // previous range lands here too, sharing no endpoint with the draft.
-    const completes = !!r?.from && !!r.to && (sameDay(r.from, draft.from) || sameDay(r.to, draft.from));
+    const completes = !!r?.from && !!r.to && (sameDay(r.from, draft.from, this.timeZone()) || sameDay(r.to, draft.from, this.timeZone()));
     if (completes) {
       this.setValue(r);
       this.closeAfterAck();

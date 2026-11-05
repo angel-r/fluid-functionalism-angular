@@ -119,6 +119,22 @@ describe('form value', () => {
     expect(formValue({ from: day, to: undefined })).toBe('');
     expect(formValue(undefined)).toBe('');
   });
+
+  it('reads the days in a time zone and gives each time its offset there', () => {
+    // Oct 21 starts at Oct 20 22:00 UTC in Madrid; Oct 26 is past the DST end.
+    const oct21 = new Date('2026-10-20T22:00:00Z');
+    expect(formValue(oct21, null, null, 'Europe/Madrid')).toBe('2026-10-21');
+    expect(formValue(oct21, '11:00', null, 'Europe/Madrid')).toBe('2026-10-21T11:00:00+02:00');
+    expect(formValue(new Date('2026-10-25T23:00:00Z'), '11:00', null, 'Europe/Madrid')).toBe(
+      '2026-10-26T11:00:00+01:00',
+    );
+    expect(formValue(new Date('2026-10-21T00:00:00Z'), null, { start: '11:00', end: '12:45' }, 'UTC')).toBe(
+      '2026-10-21T11:00:00Z/2026-10-21T12:45:00Z',
+    );
+    expect(
+      formValue({ from: new Date('2026-10-20T10:00:00Z'), to: new Date('2026-10-23T10:00:00Z') }, null, null, 'Pacific/Kiritimati'),
+    ).toBe('2026-10-21/2026-10-24');
+  });
 });
 
 describe('date label width', () => {
