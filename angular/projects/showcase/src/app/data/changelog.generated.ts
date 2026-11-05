@@ -206,6 +206,58 @@ export const RELEASES: Release[] = [
           },
           {
             "kind": "updated",
+            "name": "Table",
+            "href": "/docs/table",
+            "text": [
+              {
+                "type": "text",
+                "value": "Sorting and paging can run on the server. Rows come in through "
+              },
+              {
+                "type": "code",
+                "value": "data"
+              },
+              {
+                "type": "text",
+                "value": ", a sortable header and the new pagination emit "
+              },
+              {
+                "type": "code",
+                "value": "sortChange"
+              },
+              {
+                "type": "text",
+                "value": " and "
+              },
+              {
+                "type": "code",
+                "value": "pageChange"
+              },
+              {
+                "type": "text",
+                "value": " with the column, the direction (ASC or DESC) and the offset, and the rows change only when new data arrives. A "
+              },
+              {
+                "type": "code",
+                "value": "sticky"
+              },
+              {
+                "type": "text",
+                "value": " header stays at the top of its scroll container."
+              }
+            ],
+            "refs": [
+              {
+                "type": "pr",
+                "number": 11
+              }
+            ],
+            "diff": null,
+            "diffLang": null,
+            "source": "angular"
+          },
+          {
+            "kind": "updated",
             "name": "Icon packs",
             "href": null,
             "text": [
@@ -2067,7 +2119,8 @@ export const MARKS: ReleaseMarks = {
     "dropdown",
     "select",
     "sidebar",
-    "input-group"
+    "input-group",
+    "table"
   ],
   "ahead": [
     "banner",
