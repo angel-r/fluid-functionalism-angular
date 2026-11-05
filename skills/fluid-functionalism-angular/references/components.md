@@ -87,7 +87,7 @@ Wiring for a whole app rather than one component.
 | `[ffSizeProvider]` | Pins one ladder step for a region (`size` or `defaultSize` input) |
 | `[ffElevated]` | Raises a floating surface `offset` steps above its substrate; `shadowLevel` pins the shadow |
 | `<ff-icon>` | Every icon slot, by Lucide name or a component from an icon pack |
-| Icon packs | `tablerIcons`, `phosphorIcons`, `hugeiconsIcons`, `untitleduiIcons`, passed to `provideFluid({ icons })` or a directive-level `provideIcons()` |
+| Icon packs | One constant per slot from the pack's entry (`phosphorCheck` from `/icon-packs/phosphor`, `tablerChevronDown` from `/icon-packs/tabler`), so unused icons tree-shake; or the whole map (`tablerIcons`, `phosphorIcons`, `hugeiconsIcons`, `untitleduiIcons`). Either goes to `provideFluid({ icons })` or a directive-level `provideIcons()` |
 
 ## Blocks
 
