@@ -11,7 +11,7 @@
 import type { ChangeEntry, ChangeKind, Inline, Release } from '../../data/changelog.generated';
 import { RELEASES } from '../../data/changelog.generated';
 
-export type { ChangeEntry, ChangeKind, ChangeRef, Inline } from '../../data/changelog.generated';
+export type { ChangeEntry, ChangeKind, ChangeRef, ChangeSource, Inline } from '../../data/changelog.generated';
 
 /** One entry with the id the page keys it by. */
 export interface EntryView extends ChangeEntry {

@@ -26,6 +26,7 @@ const SKILL_COMMAND = 'npx skills add angel-r/fluid-functionalism-angular --skil
 /** Where the changelog's refs link: the upstream repository whose commits and
  *  pull requests those refs name (the same target as the changelog page). */
 const UPSTREAM_REPO = 'https://github.com/mickadesign/fluid-functionalism';
+const PORT_REPO = 'https://github.com/angel-r/fluid-functionalism-angular';
 
 export const PACKAGE = '@angel-r/fluid-functionalism-angular';
 export const INSTALL_COMMAND = `npm i ${PACKAGE} @angular/cdk @angular/aria`;
@@ -243,6 +244,7 @@ export function changelogMarkdown(releases) {
     '- New: a component or system that just landed.',
     '- Breaking: an API change that needs a migration. Each one carries a diff of the call site, before and after.',
     '- Updated: a change to something already here.',
+    '- (Angular only): a change only this port has; the original library does not ship it.',
     `- Install or update the package: \`${UPDATE_COMMAND}\`. Every component ships in the package, so an update replaces the library; local changes belong in the app, not in the package.`,
     `- Upgrade a whole project: the Angular agent skill (\`${SKILL_COMMAND}\`) reads the package version the project has, compares the components in use with this changelog, and applies it. Ask it to update Fluid Functionalism.`,
   ];
@@ -268,10 +270,11 @@ function inline(parts) {
   return parts.map((part) => (part.type === 'code' ? '`' + part.value + '`' : part.value)).join('');
 }
 
-function ref(reference) {
+function ref(reference, source) {
+  const repo = source === 'angular' ? PORT_REPO : UPSTREAM_REPO;
   return reference.type === 'pr'
-    ? `[#${reference.number}](${UPSTREAM_REPO}/pull/${reference.number})`
-    : `[${reference.sha}](${UPSTREAM_REPO}/commit/${reference.sha})`;
+    ? `[#${reference.number}](${repo}/pull/${reference.number})`
+    : `[${reference.sha}](${repo}/commit/${reference.sha})`;
 }
 
 /** The docs slug an entry points at, when it has one. */
@@ -298,8 +301,10 @@ function migrateStep(e) {
 }
 
 function entry(e) {
-  const label = e.href ? `[${e.name}](${SITE}${e.href})` : `**${e.name}**`;
-  const lines = [`- ${label}: ${inline(e.text)} (${e.refs.map(ref).join(', ')})`, '', `  ${updateLine(e)}`];
+  const name = e.href ? `[${e.name}](${SITE}${e.href})` : `**${e.name}**`;
+  const label = e.source === 'angular' ? `${name} (Angular only)` : name;
+  const refs = e.refs.map((reference) => ref(reference, e.source)).join(', ');
+  const lines = [`- ${label}: ${inline(e.text)} (${refs})`, '', `  ${updateLine(e)}`];
   if (e.diff) {
     lines.push(
       '',
