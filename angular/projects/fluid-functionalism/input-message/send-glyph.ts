@@ -20,7 +20,7 @@ import {
   exitTransition,
   injectAnimateFluid,
 } from '@angel-r/fluid-functionalism-angular/core';
-import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/tabs';
+import { writeInitialStyles } from '@angel-r/fluid-functionalism-angular/layer';
 
 export type SendGlyphMode = 'stop' | 'arrow';
 

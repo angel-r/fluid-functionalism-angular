@@ -42,7 +42,7 @@ import {
   type ItemRect,
   FluidHoverHighlight,
 } from '@angel-r/fluid-functionalism-angular/fluid-hover';
-import { Layer, isFocusVisible } from '@angel-r/fluid-functionalism-angular/tabs';
+import { Layer, isFocusVisible } from '@angel-r/fluid-functionalism-angular/layer';
 import {
   addDays,
   addMonths,

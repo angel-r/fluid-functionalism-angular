@@ -44,7 +44,7 @@ import {
   popupViewportClass,
 } from '@angel-r/fluid-functionalism-angular/core';
 import { createFluidHover, type ItemRect, FluidHoverHighlight } from '@angel-r/fluid-functionalism-angular/fluid-hover';
-import { GroupFocusRing } from '@angel-r/fluid-functionalism-angular/radio-group';
+import { GroupFocusRing } from '@angel-r/fluid-functionalism-angular/group-focus';
 import { ScrollArea } from '@angel-r/fluid-functionalism-angular/scroll-area';
 import {
   createPopupOverlay,
@@ -52,7 +52,7 @@ import {
   PopupCheckedBackground,
   createPinnedSize,
   createRaisedSurface,
-} from '@angel-r/fluid-functionalism-angular/dropdown';
+} from '@angel-r/fluid-functionalism-angular/popup';
 
 // ---------------------------------------------------------------------------
 // Select

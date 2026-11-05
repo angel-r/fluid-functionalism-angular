@@ -35,7 +35,7 @@ import {
   FluidHoverHighlight,
 } from '@angel-r/fluid-functionalism-angular/fluid-hover';
 import { SelectionBackgrounds, createMergeSplitBlocks, createSelectionRuns } from '@angel-r/fluid-functionalism-angular/merge-split';
-import { createGroupFocus } from '@angel-r/fluid-functionalism-angular/radio-group';
+import { createGroupFocus } from '@angel-r/fluid-functionalism-angular/group-focus';
 import { AskUserQuestionRow } from './row';
 import { AuqPresence, fastWithFade, type PresencePose } from './presence';
 import { AuqArrowLeftKey, AuqArrowRightKey } from './arrow-key-icon';

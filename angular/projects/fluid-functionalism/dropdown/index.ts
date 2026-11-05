@@ -15,12 +15,12 @@ export {
   type PopupSide as DropdownSide,
   type PopupAlign as DropdownAlign,
   type PopupPlacement as DropdownPlacement,
-} from './popup-overlay';
+} from '@angel-r/fluid-functionalism-angular/popup';
 export {
   createPopupOverlay,
   type PopupAlign,
   type PopupPlacement,
   type PopupOverlay,
   type PopupOverlayOptions,
-} from './popup-overlay';
-export { PopupCheckedBackground, createPinnedSize, createRaisedSurface } from './popup-parts';
+} from '@angel-r/fluid-functionalism-angular/popup';
+export { PopupCheckedBackground, createPinnedSize, createRaisedSurface } from '@angel-r/fluid-functionalism-angular/popup';

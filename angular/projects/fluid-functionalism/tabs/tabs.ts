@@ -40,7 +40,7 @@ import {
   type IconName,
 } from '@angel-r/fluid-functionalism-angular/core';
 import { createFluidHover, type ItemRect } from '@angel-r/fluid-functionalism-angular/fluid-hover';
-import { Layer, isFocusVisible, provideSizeOverride, type Keyframes } from './layer';
+import { Layer, isFocusVisible, provideSizeOverride, type Keyframes } from '@angel-r/fluid-functionalism-angular/layer';
 
 // ---------------------------------------------------------------------------
 // Tabs is a segmented control: a muted track (TabsList) holding one raised

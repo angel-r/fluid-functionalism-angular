@@ -29,7 +29,7 @@ import {
   enterTransition,
   injectAnimateFluid,
 } from '@angel-r/fluid-functionalism-angular/core';
-import { provideSizeOverride } from '@angel-r/fluid-functionalism-angular/tabs';
+import { provideSizeOverride } from '@angel-r/fluid-functionalism-angular/layer';
 import { Badge, type BadgeColor } from '@angel-r/fluid-functionalism-angular/badge';
 import { ThinkingStepsPanel, ThinkingStepsTrigger } from './collapsible';
 

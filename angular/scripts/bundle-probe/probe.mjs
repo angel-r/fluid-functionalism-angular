@@ -2,11 +2,14 @@
 /**
  * Bundle probe for @angel-r/fluid-functionalism-angular.
  *
- * Proves the two claims behind the secondary entry point split:
+ * Proves the three claims behind the secondary entry point split:
  *   (a) tree shaking: importing one symbol keeps only that symbol's code;
  *   (b) splitting: a component imported only by a lazily loaded module is not
  *       in the static closure of the app's main chunk, and that closure stays
- *       within a byte budget.
+ *       within a byte budget;
+ *   (c) shared pieces: an eager component that shares a primitive with a
+ *       sibling entry does not pull that sibling's components into the main
+ *       chunk when only a lazy module uses them.
  *
  * It uses the real Angular pipeline. Plain esbuild without the linker
  * overstates the cost of `cn` alone by ~20x, so every FESM file goes through
@@ -237,7 +240,7 @@ async function measure({ code }) {
 }
 
 /** (b) Chunk layout of a main chunk plus one lazily loaded module. */
-async function splitting({ main, lazy, label }) {
+async function splitting({ main, lazy, label, symbol = LAZY.symbol, marker = LAZY.marker }) {
   virtualModules.clear();
   virtualModules.set('main', main);
   virtualModules.set('lazy', lazy);
@@ -278,7 +281,7 @@ async function splitting({ main, lazy, label }) {
       name: path.relative(angularRoot, abs(key)),
       bytes: contents.get(abs(key))?.length ?? 0,
       staticFromMain: staticClosure.has(key),
-      hasLazy: (contents.get(abs(key)) ?? '').includes(LAZY.marker),
+      hasLazy: (contents.get(abs(key)) ?? '').includes(marker),
       imports: (outputs[key].imports ?? [])
         .filter((imp) => imp.kind !== 'dynamic-import')
         .map((imp) => path.relative(angularRoot, abs(imp.path))),
@@ -302,6 +305,7 @@ async function splitting({ main, lazy, label }) {
 
   return {
     label,
+    marker,
     chunks,
     lazyHasSymbol,
     staticHasSymbol,
@@ -310,10 +314,10 @@ async function splitting({ main, lazy, label }) {
     initialOk: initialBytes <= INITIAL_BUDGET_KB * 1024,
     ok: staticHasSymbol === false && lazyHasSymbol === true,
     detail: staticHasSymbol
-      ? `${LAZY.symbol} is in a chunk the main chunk imports statically`
+      ? `${symbol} is in a chunk the main chunk imports statically`
       : lazyHasSymbol
-        ? `${LAZY.symbol} lives only in the lazy chunk`
-        : `${LAZY.symbol} was not emitted at all (the dynamic import kept nothing)`,
+        ? `${symbol} lives only in the lazy chunk`
+        : `${symbol} was not emitted at all (the dynamic import kept nothing)`,
   };
 }
 
@@ -458,6 +462,39 @@ if (subSizes && subSizes.lazyFrom) {
   budgetCheck('sub-path import', subSplit);
 }
 
+/**
+ * (c) shared pieces. Each entry ships as ONE FESM file and esbuild assigns
+ * code to chunks per file, so a primitive that lives inside a component entry
+ * drags that component into the main chunk as soon as an eager component uses
+ * the primitive and a lazy module uses the component. These pairs are the
+ * ones the showcase shell hit: an eager Select or CommandMenu must leave
+ * Tabs, RadioGroup and DropdownMenu to the lazy chunk.
+ */
+const SHARED_CASES = [
+  { eager: ['CommandMenu', 'command-menu'], lazy: ['Tabs', 'tabs'], marker: 'ff-tabs' },
+  { eager: ['Select', 'select'], lazy: ['RadioGroup', 'radio-group'], marker: 'ff-radio-group' },
+  { eager: ['Select', 'select'], lazy: ['DropdownMenu', 'dropdown'], marker: 'ff-dropdown-menu' },
+];
+if (subSplit) {
+  for (const { eager, lazy, marker } of SHARED_CASES) {
+    const label = `shared, eager ${eager[0]} + lazy ${lazy[0]}`;
+    const split = await splitting({
+      label,
+      symbol: lazy[0],
+      marker,
+      main: `import { ${eager[0]} } from '${PKG_NAME}/${eager[1]}';
+globalThis.__main = ${eager[0]};
+import('probe:lazy');
+`,
+      lazy: `import { ${lazy[0]} } from '${PKG_NAME}/${lazy[1]}';
+globalThis.__lazy = ${lazy[0]};
+`,
+    });
+    scenarios.push({ kind: 'split', shared: true, ...split });
+    if (!split.ok) failures.push(`${label}: ${split.detail}`);
+  }
+}
+
 function budgetCheck(mode, split) {
   if (split.initialOk) return;
   failures.push(
@@ -498,7 +535,7 @@ if (jsonOut) {
   }
   for (const split of scenarios.filter((s) => s.kind === 'split')) {
     console.log(
-      `\n(b) splitting, ${split.label} import — ${split.ok ? 'PASS' : 'FAIL'}: ${split.detail}`,
+      `\n(${split.shared ? 'c' : 'b'}) splitting, ${split.label}${split.shared ? '' : ' import'} — ${split.ok ? 'PASS' : 'FAIL'}: ${split.detail}`,
     );
     const byPackage = Object.entries(split.initialByPackage)
       .filter(([, bytes]) => bytes > 0)
@@ -506,14 +543,16 @@ if (jsonOut) {
       .map(([pkg, bytes]) => `${pkg} ${kb(bytes)}`)
       .join(', ');
     console.log(
-      `  initial ${kb(split.initialBytes)} (budget ${INITIAL_BUDGET_KB} KB, ${
-        split.initialOk ? 'PASS' : 'FAIL'
-      }): ${byPackage}`,
+      split.shared
+        ? `  initial ${kb(split.initialBytes)} (no budget): ${byPackage}`
+        : `  initial ${kb(split.initialBytes)} (budget ${INITIAL_BUDGET_KB} KB, ${
+            split.initialOk ? 'PASS' : 'FAIL'
+          }): ${byPackage}`,
     );
     for (const chunk of split.chunks) {
       console.log(
         `  ${chunk.staticFromMain ? 'static' : 'lazy  '} ${kb(chunk.bytes).padStart(9)}  ${
-          chunk.hasLazy ? `has ${LAZY.marker}` : ''
+          chunk.hasLazy ? `has ${split.marker}` : ''
         }  ${chunk.name}`,
       );
       if (chunk.imports.length) console.log(`         imports: ${chunk.imports.join(', ')}`);
